@@ -88,6 +88,7 @@ public final class Safety {
             case "lava" -> "Eruption";
             case "shark" -> "Fin";
             case "ghost" -> "Wisp";
+            case "nucleus" -> "The Vault";
             case "ledger" -> "The Ledger's pop-up";
             default -> "SBCS (" + key + ")";
         };

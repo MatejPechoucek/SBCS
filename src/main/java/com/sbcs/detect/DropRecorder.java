@@ -95,6 +95,10 @@ public final class DropRecorder {
     /** The Ghosts' drops (2026-10-12, for "Wisp"): GhostDrops was written before a real Sorrow or Plasma line was seen. */
     private static final Pattern GHOST = Pattern.compile("(?i)sorrow|plasma|volta|ghostly boots|materialized|the mist|ghost");
 
+    /** The Crystal Nucleus (2026-10-22, for "The Vault"): its crystals, the bundle, the vault. */
+    private static final Pattern NUCLEUS = Pattern.compile(
+            "(?i)nucleus|crystal found|you placed the|loot bundle|jade dye|divan's alloy|quick claw|flawless");
+
     private static boolean enabled() {
         return SbcsClient.config == null || SbcsClient.config.recordDrops;
     }
@@ -120,6 +124,11 @@ public final class DropRecorder {
             JsonObject o = new JsonObject();
             o.addProperty("line", text);
             record("ghost_line", o);
+        }
+        if (enabled() && NUCLEUS.matcher(text).find()) {
+            JsonObject o = new JsonObject();
+            o.addProperty("line", text);
+            record("nucleus_line", o);
         }
         // The Fishing Festival's lines, for the same reason: SharkDrops was written before a real
         // Megalodon or tooth line had been seen.

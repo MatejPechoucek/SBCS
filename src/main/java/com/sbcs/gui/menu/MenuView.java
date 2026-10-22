@@ -85,7 +85,8 @@ public final class MenuView {
 
     /** Each animation's own colour: its card, its bar, its switches and sliders. */
     static final int SCATHA = 0xFFB27BE6, VANGUARD = 0xFF72C6F2, DIANA = 0xFFE4573F, FIN = 0xFF3FB0D0,
-            WISP = 0xFFA9E4EE, LAVA = 0xFFFF8C2E, SLAYERS = 0xFFD04848, BLAZE = 0xFFFFA238, SERAPH = 0xFFA36BF5;
+            WISP = 0xFFA9E4EE, LAVA = 0xFFFF8C2E, SLAYERS = 0xFFD04848, BLAZE = 0xFFFFA238, SERAPH = 0xFFA36BF5,
+            NUCLEUS = 0xFF55D8FF;
 
     // ------------------------------------------------------------------ state (kept while the game runs)
 
@@ -476,6 +477,7 @@ public final class MenuView {
                 fishingRows(rows, cfg);
                 ghostRows(rows, cfg);
                 lavaRows(rows, cfg);
+                nucleusRows(rows, cfg);
                 slayerRows(rows, cfg);
             }
         }
@@ -633,6 +635,26 @@ public final class MenuView {
                 n -> com.sbcs.anim.EruptionTimeline.Drop.valueOf(n).title);
     }
 
+    /** The Vault's Try it outcomes: a bust, a rare roll, a Flawless gem, Divan's Alloy, the Jade Dye. */
+    private static final List<String> VAULT_TRY = List.of("BUST", "CLAW", "JASPER", "RUBY", "ALLOY", "DYE");
+
+    private void nucleusRows(List<Row> rows, PatternConfig cfg) {
+        if (!group(rows, "nucleus", "Crystal Nucleus - The Vault", "Every loot bundle, the moment it is read", "amethyst_shard", NUCLEUS,
+                cfg.nucleusAnimation, () -> { cfg.nucleusAnimation = !cfg.nucleusAnimation; cfg.save(); })) return;
+        rows.add(new NoticeRow("Your five crystals unlock a safe; the colour the dial lands on is the bundle's best roll. "
+                + "The loot message waits in chat until the safe is open."));
+        rows.add(new SectionRow("Hiding the drop"));
+        rows.add(toggle("Cover the bundle", cfg.nucleusCover, () -> cfg.nucleusCover = !cfg.nucleusCover, cfg));
+        rows.add(new NoticeRow("A black box over the loot bundle by the Nucleus until you pick it up, so the floor does not give it away."));
+        rows.add(new SectionRow("The endings"));
+        rows.add(toggle("RARE DROP! banner", cfg.nucleusBanner, () -> cfg.nucleusBanner = !cfg.nucleusBanner, cfg));
+        rows.add(toggle("Show the price", cfg.nucleusPrice, () -> cfg.nucleusPrice = !cfg.nucleusPrice, cfg));
+        rows.add(new SliderRow("nucleus_volume", "Volume", cfg.nucleusVolume, 0, 150, 5, v -> cfg.nucleusVolume = v, v -> v + "%"));
+        speedRow(rows, "nucleus_speed", cfg.nucleusSpeed, v -> cfg.nucleusSpeed = v);
+        bustsRow(rows, cfg.nucleusBusts, v -> cfg.nucleusBusts = v, cfg);
+        tryRows(rows, "nucleus", VAULT_TRY, n -> com.sbcs.anim.VaultTimeline.Prize.test(n).title());
+    }
+
     /** The slayers: one card, each boss its own card inside it. */
     private void slayerRows(List<Row> rows, PatternConfig cfg) {
         if (!group(rows, "slayers", "Slayers", com.sbcs.Maintenance.SERAPH ? "Hellion (the Seraph's Glyph is on its way)" : "Hellion and the Seraph's Glyph", "diamond_sword", SLAYERS, null, null)) return;
@@ -776,6 +798,7 @@ public final class MenuView {
         soundSlider(rows, "snd_vanguard", "Vanguard Thaw (its endings)", VANGUARD, cfg.vanguardFinaleVolume, v -> cfg.vanguardFinaleVolume = v);
         soundSlider(rows, "snd_diana", "Diana - The Chopping Block", DIANA, cfg.dianaVolume, v -> cfg.dianaVolume = v);
         soundSlider(rows, "snd_lava", "Lava fishing - Eruption", LAVA, cfg.lavaVolume, v -> cfg.lavaVolume = v);
+        soundSlider(rows, "snd_nucleus", "Crystal Nucleus - The Vault", NUCLEUS, cfg.nucleusVolume, v -> cfg.nucleusVolume = v);
         soundSlider(rows, "snd_blaze", "Inferno Demonlord - Hellion", BLAZE, cfg.blazeVolume, v -> cfg.blazeVolume = v);
         if (!com.sbcs.Maintenance.SERAPH) {
             soundSlider(rows, "snd_seraph", "Voidgloom Seraph", SERAPH, cfg.seraphVolume, v -> cfg.seraphVolume = v);
@@ -923,6 +946,10 @@ public final class MenuView {
         }
         sourceGroup(rows, st, "lava", "Eruption - lava fishing", "magma_cream", LAVA, "kill", "Rare creatures killed",
                 titles(com.sbcs.anim.EruptionTimeline.Drop.values()));
+        sourceGroup(rows, st, "nucleus", "The Vault - Crystal Nucleus", "amethyst_shard", NUCLEUS, "bundle", "Bundles opened",
+                new String[]{"Quick Claw", "Fine Jasper Gemstone", "Flawless Ruby Gemstone", "Flawless Amethyst Gemstone",
+                        "Flawless Jade Gemstone", "Flawless Amber Gemstone", "Flawless Sapphire Gemstone", "Flawless Topaz Gemstone",
+                        "Flawless Jasper Gemstone", "Divan's Alloy", "Jade Dye"});
         sourceGroup(rows, st, "shark", "Fin - Great White Sharks", "tropical_fish", FIN, "shark", "Sharks killed",
                 titles(com.sbcs.detect.SharkDrops.Drop.values()));
         if (group(rows, "stats-ghost", "Wisp - Dwarven Mines Ghosts", ghostTotal(st) + (ghostTotal(st) == 1 ? " drop" : " drops") + " so far", "ghast_tear", WISP, null, null)) {

@@ -1472,6 +1472,61 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
 - **Next:** the designer's lava session with records on - check the nametag format and the catch lines, and write
   `LavaDetectTest` / a replay against them as Hellion's were.
 
+## The Vault (the Crystal Nucleus loot bundle, 2026-10-22) - unverified in game
+
+The designer asked for more loot pools, the Nucleus first, with a **black box over the drops where they land** - only an
+in-world cover so the floor does not give the haul away, not part of the cutscene - and the cutscene "cracking open a safe
+or vault". Never call anything "Butcher": the mod is SBCS.
+
+- **Detection** is `detect/nucleus/` (pure but `BundleSpotter`). The real message (the designer's logs, in
+  `tools/fixtures/nucleus_hauls.txt`) is printed whole at the fifth crystal: a rule, `CRYSTAL NUCLEUS LOOT BUNDLE`,
+  `REWARDS`, item lines with counts folded (`Flawed Topaz Gemstone x86`), SkyHanni's profit line *inside* it, a rule,
+  `Pick it up near the Nucleus Vault!`. Every bundle carries one Fine gem of each of seven colours (Jasper too), so a Fine
+  Jasper is a win only as a second one (`NucleusHaul.tierOf`). Weights sum to 307,212 (the wiki prints 311,212 - a typo);
+  the Jade Dye is a separate 1 in 500,000. `tools/NucleusTest` (33).
+- **The cover**: `BundleSpotter` arms at the header, records every new entity near the vault as `nucleus_bundle` (the
+  bundle's entity type is **not known yet - check the first records**), follows the best candidate, and disarms on
+  pickup / leaving / 5 min. `render/BundleCover` draws a black box over it on `LevelRenderEvents.COLLECT_SUBMITS`
+  (`RenderTypes.debugQuads()`, camera-relative). Config `nucleusCover`.
+- **Chat**: the loot lines are hidden while `nucleusAnimation` is on; `chatHeld()` includes `nucleusWatcher.parsing()`, so
+  SkyHanni's profit line is held with everything else; `announceNucleus` puts one summary line back once the Vault closes
+  (held until then), or at once when nothing plays.
+- **The cutscene** (`anim/VaultTimeline` pure, `render/VaultScene`, `audio/VaultSound` + `Voices.vault*`,
+  `gui/VaultScreen`), the Hellion architecture: a steel safe (the game's `iron_block`, `vault_bottom` door face, `vault_top`
+  dial, `polished_blackstone` recess, adopted at runtime), five sockets round the dial, five brass bolts. The five crystals
+  fly in and click (`SOCKETS`), each pulling a bolt; the dial spins through their colours (`STEPS`, ratio 0.82) while the
+  door strains; at `REVEAL` 4800 it lands on the tell: grey bust (creaks open a crack, dust, "No rare roll" + the dry
+  streak), sapphire rare (`OPEN`, the door swings wide), amethyst Flawless gem (`BLOWN`, blown off its hinges), **gold
+  Divan's Alloy (`ALLOY`, "the Meltdown")** and jade the Dye (`DYE`, the world stops and greys, three heartbeats, jade floods
+  out). **The designer (2026-10-22): the Alloy and the Dye are the best drops and get the most climactic endings** - so the
+  Alloy is its own tier of ending and outranks a Flawless gem in the same haul (`Prize.of`). The Meltdown: each crystal
+  pours a beam into the dial (`POURS`), the door heats dull red -> orange -> white gold (a `TEX_WHITE` overlay at partial
+  alpha - a tint only darkens, and the door face is dark), slumps into a molten pool (`MELT`, `POOLED`), the alloy rises
+  out of it. The safe darkens (`shade`), never fades, behind the showcase - faded, its faces showed through each other.
+- Drop art: the Dye and the Quick Claw are NEU heads (`HeadSkins.NUCLEUS`, `nucleus_heads.json`); gems and the alloy are
+  Hypixel's pack icons when loaded (paths confirmed in Hypixel's pack, 2026-10-22), else quartz tinted / a gold ingot.
+  **The alloy's icon is an animated strip** (16 x 64, four frames, its .mcmeta has frametime 6, interpolate and a frame
+  list): `VaultScreen.strip` reads the PNG's size and the .mcmeta and draws one frame at a time, the next fading in.
+  Blitted whole as 16 x 16 it showed all four frames squeezed together.
+- `tools/VaultTest` (164: frame and sound honesty for every prize on five seeds, the tells, the clocks, the Meltdown's
+  order), `tools/VaultPreview` (ChopPreview's canvas; `-Dvanilla` a folder of the block textures plus quartz and
+  gold_ingot). Menu card "Crystal Nucleus - The Vault", stats key "nucleus", `/sbcs test nucleus <word>`.
+- **The bundle is a dropped item** ("Player Head", Matej's first run, 2026-10-22): it lands about 515 106 534 and is
+  only seen once the player walks up to it. `BundleSpotter.DROP` is that spot, searched 20 blocks round, closest
+  candidate first; an armour stand's cover is where its held head would be drawn, not its empty box.
+- **Polish (2026-10-22, Matej: the amethyst crystal was clipped by the locks; "more pause for the good drops")**: the
+  sockets are on a ring of 5 (`SOCKET_R`; at 6 the upper-left one sat under the bolts), the bolts are slimmer and sit
+  across the door's edge (`BOLT_X`, `BOLT_HX`, `BOLT_TRAVEL`), the crystals fly in from the front (`flightPos`) with a
+  trail and are drawn after everything on the door, and each socket has a brass rim and takes its crystal's colour.
+  Every win holds `HOLD` 450 ms after the reveal before anything moves: a rare roll unlatches a crack with light round
+  the edge (`seam`) and swings at `SWING`; a Flawless gem knocks three times from inside (`KNOCKS`, `knock`,
+  `Voices.vaultKnock`) and blows at `BLOW`; the Alloy pours every 420 ms, holds white hot for over a second, trembling
+  harder, and melts at `MELT`; the Dye's frozen world has four heartbeats, the last followed by silence (`THAW`).
+- Next: whether the cover sits right on the next run.
+- **Compiling offline without Gradle**: the cloud cannot reach Mojang or Fabric, but the designer's Modrinth install has
+  the **unobfuscated** 26.2 client jar (`ModrinthApp/meta/versions/26.2-0.19.5/26.2-0.19.5.jar`) and fabric-api's nested
+  jars; staged with their libraries (class versions rewritten to 65) the whole mod compiles with `javac`.
+
 ## Fin (Fishing Festival, 0.2.42)
 
 The designer's brief (2026-10-02): very fast, very simple, no dim, no kill animation - an announcement

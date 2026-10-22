@@ -449,6 +449,14 @@ public class SbcsClient implements ClientModInitializer {
         }
     });
 
+    /**
+     * The Crystal Nucleus's loot bundle, printed whole the moment the fifth crystal goes in. Detection
+     * and records only for now; the Vault cutscene and the black box come next.
+     */
+    public static final com.sbcs.detect.nucleus.NucleusWatcher nucleusWatcher =
+            new com.sbcs.detect.nucleus.NucleusWatcher(decisions, SbcsClient::onNucleusHaul,
+                    () -> com.sbcs.detect.nucleus.BundleSpotter.arm(Minecraft.getInstance().player));
+
     private static final ScathaWormTracker wormTracker = new ScathaWormTracker(decisions);
     private static final HotbarDropWatcher dropWatcher = new HotbarDropWatcher(decisions);
 
@@ -525,6 +533,8 @@ public class SbcsClient implements ClientModInitializer {
         SbcsStats.get().ledger();
         SbcsStats.dianaShareAt = dianaWatcher::lastShareAt;
         SbcsStats.stamped = com.sbcs.render.StampPopup::queue;
+        // The black box over the Crystal Nucleus's loot bundle, in the world until it is picked up.
+        com.sbcs.render.BundleCover.register();
         skipKey = net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper.registerKeyMapping(new net.minecraft.client.KeyMapping(
                 "key.sbcs.skip", com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_BACKSPACE,
                 net.minecraft.client.KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD_ID, "main"))));
@@ -675,6 +685,8 @@ public class SbcsClient implements ClientModInitializer {
             // Outside the player check: a half-read loot message has to be able to time
             // out even if the player went away mid-message.
             Safety.run("vanguard", vanguardWatcher::tick);
+            Safety.run("nucleus", nucleusWatcher::tick);
+            if (live) Safety.run("nucleus", () -> com.sbcs.detect.nucleus.BundleSpotter.tick(client.player, decisions));
 
             if (live && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.tick(client.player, config.dianaHidePct));
             if (live && config.fishingAnnounce) Safety.run("shark", () -> sharkWatcher.tick(client.player));
@@ -969,6 +981,21 @@ public class SbcsClient implements ClientModInitializer {
                 lavaNode.then(dropNode);
             }
 
+            LiteralArgumentBuilder<FabricClientCommandSource> nucleusNode = ClientCommands.literal("nucleus")
+                    .executes(ctx -> options(ctx, "test nucleus",
+                            "bust", "no rare roll - the door creaks open on nothing",
+                            "claw", "Quick Claw (rare - the door swings open)",
+                            "jasper", "a second Fine Jasper (rare)",
+                            "ruby", "a Flawless gemstone (jackpot - the door is blown off; any colour)",
+                            "alloy", "Divan's Alloy (the Meltdown)",
+                            "dye", "the Jade Dye"));
+            for (String word : com.sbcs.anim.VaultTimeline.Prize.testWords()) {
+                nucleusNode.then(ClientCommands.literal(word).executes(ctx -> {
+                    Minecraft.getInstance().execute(() -> openVault(com.sbcs.anim.VaultTimeline.Prize.test(word), true));
+                    return 1;
+                }));
+            }
+
             // The developer commands (test, debug) exist only for the accounts in Dev - for everyone else
             // they are not there at all, not even in tab completion. Players use the menu's "Try it".
             LiteralArgumentBuilder<FabricClientCommandSource> testNode = ClientCommands.literal("test")
@@ -981,6 +1008,7 @@ public class SbcsClient implements ClientModInitializer {
                             "ghost", "Wisp, a Ghost's Sorrow or Plasma",
                             "slayer", "the slayer bosses",
                             "lava", "Eruption, lava fishing",
+                            "nucleus", "the Vault, a Crystal Nucleus bundle",
                             "ledger", "the Ledger: pop-ups, stamps, the book"))
                     .then(scathaNode)
                     .then(vanguardNode)
@@ -989,6 +1017,7 @@ public class SbcsClient implements ClientModInitializer {
                     .then(ghostNode)
                     .then(slayerNode)
                     .then(lavaNode)
+                    .then(nucleusNode)
                     .then(ledgerTestNode());
 
             dispatcher.register(ClientCommands.literal("sbcs")
@@ -1200,6 +1229,7 @@ public class SbcsClient implements ClientModInitializer {
             case "blaze" -> config.blazeBusts;
             case "seraph" -> config.seraphBusts;
             case "lava" -> config.lavaBusts;
+            case "nucleus" -> config.nucleusBusts;
             default -> 0;
         };
     }
@@ -1288,6 +1318,7 @@ public class SbcsClient implements ClientModInitializer {
                 case "blaze" -> com.sbcs.anim.HellionTimeline.Drop.valueOf(name).win();
                 case "seraph" -> com.sbcs.anim.SeraphTimeline.Drop.valueOf(name).win();
                 case "lava" -> com.sbcs.anim.EruptionTimeline.Drop.valueOf(name).win();
+                case "nucleus" -> com.sbcs.anim.VaultTimeline.Prize.test(name).win();
                 default -> true;
             };
         } catch (IllegalArgumentException e) {
@@ -1299,6 +1330,7 @@ public class SbcsClient implements ClientModInitializer {
         switch (group) {
             case "diana" -> openChop(com.sbcs.anim.ChopTimeline.Verdict.valueOf(name), null, true);
             case "blaze" -> openHellion(com.sbcs.anim.HellionTimeline.Drop.valueOf(name), true);
+            case "nucleus" -> openVault(com.sbcs.anim.VaultTimeline.Prize.test(name), true);
             case "seraph" -> {
                 // Under maintenance: only the developers may see it, from the menu or the commands.
                 if (!Maintenance.SERAPH || Dev.allowed()) openSeraph(com.sbcs.anim.SeraphTimeline.Drop.valueOf(name), true);
@@ -1351,6 +1383,7 @@ public class SbcsClient implements ClientModInitializer {
         if (hellionActive()) return currentHellion;
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
+        if (vaultActive()) return currentVault;
         return null;
     }
 
@@ -1423,6 +1456,10 @@ public class SbcsClient implements ClientModInitializer {
         if (currentHellion != null && !currentHellion.isActive()) currentHellion = null;
         if (currentSeraph != null && !currentSeraph.isActive()) currentSeraph = null;
         if (currentEruption != null && !currentEruption.isActive()) currentEruption = null;
+        if (currentVault != null && !currentVault.isActive()) {
+            currentVault = null;
+            announceNucleus();
+        }
     }
 
     /** The skip key (default Backspace): held this long, so a stray press cannot eat a reveal. */
@@ -1480,7 +1517,7 @@ public class SbcsClient implements ClientModInitializer {
 
     private static boolean isAnimationPlaying() {
         return animationManager.isPlaying() || (currentScope != null && currentScope.isActive()) || thawActive()
-                || chopActive() || hellionActive() || seraphActive() || eruptionActive();
+                || chopActive() || hellionActive() || seraphActive() || eruptionActive() || vaultActive();
     }
 
     /** "Eruption", lava fishing's animation, while it plays. */
@@ -1558,6 +1595,7 @@ public class SbcsClient implements ClientModInitializer {
         if (hellionActive()) return currentHellion;
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
+        if (vaultActive()) return currentVault;
         return thawActive() ? currentThaw : null;
     }
 
@@ -1571,7 +1609,7 @@ public class SbcsClient implements ClientModInitializer {
      * still running.
      */
     public static boolean cutsceneOwnsScreen() {
-        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || seraphActive() || eruptionActive();
+        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || seraphActive() || eruptionActive() || vaultActive();
     }
 
     /**
@@ -1738,6 +1776,19 @@ public class SbcsClient implements ClientModInitializer {
                 com.sbcs.render.GhostPopup.show(ghost);
             }
         }
+        // The Nucleus loot message: read, and hidden while the Vault is on - the Vault shows it, and a summary line
+        // follows once it has (announceNucleus). Lines other mods add inside it (SkyHanni's profit) are held by
+        // chatHeld() while it is being read, so they cannot give the haul away either.
+        if (game && Safety.on("nucleus")) {
+            boolean nucleus;
+            try {
+                nucleus = nucleusWatcher.onChatLine(text);
+            } catch (Throwable t) {
+                Safety.failed("nucleus", t);
+                nucleus = false;
+            }
+            if (nucleus && config != null && config.nucleusAnimation) return false;
+        }
         if (config != null && config.vanguardAnimation && Safety.onHypixel() && Safety.on("vanguard")) {
             boolean corpse;
             try {
@@ -1762,7 +1813,89 @@ public class SbcsClient implements ClientModInitializer {
      * pre-kill hide, or the profit window.
      */
     public static boolean chatHeld() {
-        return isAnimationPlaying() || shouldHidePreKill() || profitShowing();
+        return isAnimationPlaying() || shouldHidePreKill() || profitShowing() || nucleusWatcher.parsing();
+    }
+
+    /** A Nucleus bundle has been read: recorded for now, so the Vault can be built against real hauls. */
+    private static void onNucleusHaul(com.sbcs.detect.nucleus.NucleusHaul haul) {
+        com.google.gson.JsonObject rec = new com.google.gson.JsonObject();
+        com.google.gson.JsonArray drops = new com.google.gson.JsonArray();
+        for (com.sbcs.detect.nucleus.NucleusHaul.Drop drop : haul.drops()) {
+            com.google.gson.JsonObject d = new com.google.gson.JsonObject();
+            d.addProperty("name", drop.name());
+            d.addProperty("amount", drop.amount());
+            d.addProperty("tier", haul.tierOf(drop).name());
+            if (drop.unknown()) d.addProperty("unknown", true);
+            drops.add(d);
+        }
+        rec.add("drops", drops);
+        rec.addProperty("best", haul.best().name());
+        rec.add("chat", com.sbcs.detect.DropRecorder.chatSince(10_000));
+        rec.add("decisions", com.sbcs.detect.DropRecorder.decisions(10));
+        com.sbcs.detect.DropRecorder.record("nucleus_haul", rec);
+
+        if (config == null || !config.nucleusAnimation) return;
+        com.sbcs.anim.VaultTimeline.Prize prize = com.sbcs.anim.VaultTimeline.Prize.of(haul);
+        decisions.note("§aThe Vault: " + (prize.win() ? prize.title() + " §8(" + prize.ending().name().toLowerCase(java.util.Locale.ROOT) + ")" : "§7no rare roll"));
+        pendingNucleus = haul;
+        if (!prize.win() && bustStyle("nucleus") == 2) {
+            countUnplayed("nucleus", null, "Nucleus: the bust (busts are off)");
+            announceNucleus();
+            return;
+        }
+        Runnable open = () -> openVault(prize, false);
+        String what = "Nucleus: " + (prize.win() ? prize.title() : "the bust");
+        if (isAnimationPlaying()) {
+            if (!makeRoom(prize.win(), what)) waitForTurn(open, prize.win(), what, () -> {
+                countUnplayed("nucleus", null, what);
+                announceNucleus();
+            });
+            else open.run();
+        } else {
+            open.run();
+        }
+    }
+
+    /** The last bundle read, until its summary line has gone to chat. */
+    private static com.sbcs.detect.nucleus.NucleusHaul pendingNucleus;
+
+    /**
+     * The bundle's whole haul as one line in chat, since its own message was hidden - once the Vault has shown it (it
+     * is held with the rest of chat until then), or at once when nothing will.
+     */
+    public static void announceNucleus() {
+        com.sbcs.detect.nucleus.NucleusHaul haul = pendingNucleus;
+        pendingNucleus = null;
+        Minecraft client = Minecraft.getInstance();
+        if (haul == null || client.player == null) return;
+        StringBuilder line = new StringBuilder("§6[SBCS] §7Crystal Nucleus bundle:");
+        for (com.sbcs.detect.nucleus.NucleusHaul.Drop drop : haul.revealOrder()) {
+            line.append("\n  ").append(switch (haul.tierOf(drop)) {
+                case DYE -> "§2";
+                case JACKPOT -> "§6";
+                case RARE -> "§b";
+                default -> "§f";
+            }).append(drop.name()).append(drop.amount() > 1 ? " §8x" + drop.amount() : "");
+        }
+        client.player.sendSystemMessage(Component.literal(line.toString()));
+    }
+
+    /** "The Vault", the Crystal Nucleus bundle's animation, while it plays. */
+    private static com.sbcs.gui.VaultScreen currentVault;
+
+    private static boolean vaultActive() {
+        return currentVault != null && currentVault.isActive();
+    }
+
+    /** Opens the Vault in the HUD (CutsceneHud). */
+    public static void openVault(com.sbcs.anim.VaultTimeline.Prize prize, boolean test) {
+        if (!mayOpen("nucleus", test)) {
+            if (!test) announceNucleus();
+            return;
+        }
+        com.sbcs.gui.VaultScreen screen = new com.sbcs.gui.VaultScreen(prize, test);
+        currentVault = screen;
+        com.sbcs.render.CutsceneHud.show(screen);
     }
 
     /** The Shattered Locket's item ID on the auction house - it is still called a pendant there. */
@@ -2198,6 +2331,7 @@ public class SbcsClient implements ClientModInitializer {
         if (s instanceof com.sbcs.gui.HellionScreen) return "blaze";
         if (s instanceof com.sbcs.gui.SeraphScreen) return "seraph";
         if (s instanceof com.sbcs.gui.EruptionScreen) return "lava";
+        if (s instanceof com.sbcs.gui.VaultScreen) return "nucleus";
         if (s instanceof com.sbcs.gui.ThawScreen) return "vanguard";
         return "scatha";
     }
@@ -2263,6 +2397,8 @@ public class SbcsClient implements ClientModInitializer {
         currentHellion = null;
         currentSeraph = null;
         currentEruption = null;
+        currentVault = null;
+        quietly(SbcsClient::announceNucleus);
         currentScope = null;
         currentThaw = null;
         hellionKillScreen = seraphKillScreen = lavaKillScreen = null;

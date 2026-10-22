@@ -2237,6 +2237,147 @@ public final class Voices {
     }
 
     /** The guaranteed drop's line coming in under a bust: one small coin of a sound. */
+    // =====================================================================
+    // The Vault (the Crystal Nucleus) - A minor pentatonic, A major for a win
+    // =====================================================================
+
+    /** The five sockets' notes: A minor pentatonic up from A4. */
+    private static final float[] VAULT_NOTES = {440f, 523.25f, 587.33f, 659.25f, 783.99f};
+
+    /** The safe door sliding into place: a heavy scrape and a low thud. */
+    public static Voice[] vaultDoor(long seed) {
+        return new Voice[]{
+                noise(900f, 0.8f, 0.4f, 0.12f, 0.05f, 0.4f, seed),
+                after(0.36f, tone(64f, 40f, 0.5f, 0.38f, 0.002f, new float[]{1f, 0.5f, 0.2f}, 0.5f)),
+                after(0.36f, noise(400f, 1.1f, 0.12f, 0.2f, 0.001f, 0.4f, seed + 1)),
+        };
+    }
+
+    /** A crystal flying in: a short rising glassy whoosh. */
+    public static Voice[] vaultFly(int k, long seed) {
+        float hz = VAULT_NOTES[Math.max(0, Math.min(4, k))];
+        return new Voice[]{
+                noise(1800f, 1.2f, 0.36f, 0.06f, 0.3f, 0.5f, seed),
+                tone(hz * 2f, hz * 4f, 0.36f, 0.025f, 0.3f, new float[]{1f}, 0.6f),
+        };
+    }
+
+    /** A crystal seating in its socket: a click and its own glass note. */
+    public static Voice[] vaultSocket(int k, long seed) {
+        float hz = VAULT_NOTES[Math.max(0, Math.min(4, k))];
+        return new Voice[]{
+                noise(3200f, 2.4f, 0.03f, 0.22f, 0.0005f, 0.3f, seed),
+                tone(hz, hz, 1.1f, 0.16f, 0.002f, new float[]{1f, 0.35f, 0.12f}, 0.85f),
+                tone(hz * 2.76f, hz * 2.76f, 0.5f, 0.04f, 0.002f, new float[]{1f}, 0.85f),
+        };
+    }
+
+    /** A bolt sliding back: a slide and a heavy clack. */
+    public static Voice[] vaultBolt(long seed) {
+        return new Voice[]{
+                noise(1500f, 1.5f, 0.14f, 0.06f, 0.08f, 0.3f, seed),
+                after(0.15f, noise(1100f, 2.2f, 0.05f, 0.24f, 0.0005f, 0.35f, seed + 1)),
+                after(0.15f, tone(150f, 120f, 0.18f, 0.2f, 0.001f, new float[]{1f, 0.5f}, 0.4f)),
+        };
+    }
+
+    /** The dial clicking onto a colour: a tick, a little higher each time round. */
+    public static Voice[] vaultTick(int i) {
+        float hz = VAULT_NOTES[i % 5] * 2f;
+        return new Voice[]{
+                noise(4200f, 2.6f, 0.025f, 0.12f, 0.0005f, 0.3f, 7400L + i),
+                tone(hz, hz, 0.09f, 0.05f, 0.001f, new float[]{1f, 0.3f}, 0.5f),
+        };
+    }
+
+    /** The door straining against its frame as the dial spins: a groan rising to the reveal. Cut there. */
+    public static Voice[] vaultStrain(float seconds) {
+        return new Voice[]{
+                new Shaped(110f, 220f, seconds, 0.2f, Shaped.RISE, new float[]{1f, 0.5f, 0.3f, 0.15f}, 0.6f, 0f),
+                new Shaped(110f * 1.5f, 330f, seconds, 0.12f, Shaped.RISE, new float[]{1f, 0.4f}, 0.6f, 0f),
+                new Shaped(116.54f, 233.08f, seconds, 0.06f, Shaped.RISE, new float[]{1f, 0.4f}, 0.6f, 0f),
+                noise(300f, 0.8f, seconds, 0.12f, seconds * 0.9f, 0.5f, 7420L),
+        };
+    }
+
+    /**
+     * Something inside knocking the door (a Flawless gem), {@code i} 0..2: a body thud and the steel ringing back,
+     * heavier and lower each time.
+     */
+    public static Voice[] vaultKnock(int i, long seed) {
+        float amp = 0.26f + 0.08f * i, low = 70f - 8f * i;
+        return new Voice[]{
+                tone(low, low * 0.7f, 0.35f, amp, 0.002f, new float[]{1f, 0.5f, 0.2f}, 0.5f),
+                noise(260f, 0.9f, 0.18f, amp * 0.6f, 0.001f, 0.4f, seed),
+                after(0.01f, tone(311f - 20f * i, 305f - 20f * i, 0.7f, 0.05f + 0.015f * i, 0.002f,
+                        new float[]{1f, 0f, 0.4f, 0f, 0.2f}, 0.9f)),
+        };
+    }
+
+    /** A hinge creaking: a squeal sliding down, rough. */
+    public static Voice[] vaultCreak(float seconds, float fromHz, float toHz, long seed) {
+        java.util.List<Voice> out = new java.util.ArrayList<>();
+        out.add(tone(fromHz, toHz, seconds, 0.08f, 0.05f, new float[]{1f, 0.6f, 0.4f, 0.3f, 0.2f}, 0.5f));
+        java.util.Random rng = new java.util.Random(seed);
+        int n = Math.max(3, Math.round(seconds * 22f));
+        for (int i = 0; i < n; i++) {
+            float at = i * seconds / n + rng.nextFloat() * 0.01f;
+            out.add(after(at, noise(fromHz + (toHz - fromHz) * i / n, 3f, 0.03f, 0.05f, 0.002f, 0.3f, seed + i)));
+        }
+        return out.toArray(new Voice[0]);
+    }
+
+    /** A bust: the vault is empty - one hollow knock and a breath of dust. */
+    public static Voice[] vaultEmpty(long seed) {
+        return new Voice[]{
+                tone(98f, 82f, 0.9f, 0.18f, 0.002f, new float[]{1f, 0.4f}, 0.8f),
+                after(0.3f, noise(2600f, 0.7f, 1.0f, 0.05f, 0.2f, 0.6f, seed)),
+        };
+    }
+
+    /** The door swinging wide on a rare roll: the bolts' last clack and a bright A major chord. */
+    public static Voice[] vaultOpen(long seed) {
+        java.util.List<Voice> out = new java.util.ArrayList<>();
+        out.add(noise(900f, 1.8f, 0.06f, 0.2f, 0.0005f, 0.3f, seed));
+        float[] chord = {440f, 554.37f, 659.25f, 880f};
+        for (int i = 0; i < chord.length; i++) {
+            out.add(after(0.05f + i * 0.05f, tone(chord[i], chord[i], 1.6f, 0.09f, 0.004f, new float[]{1f, 0.35f, 0.12f}, 0.9f)));
+        }
+        return out.toArray(new Voice[0]);
+    }
+
+    /** A crystal's light pouring into the dial (Divan's Alloy): a rising glassy tone into a ring. */
+    public static Voice[] vaultPour(int k) {
+        float hz = VAULT_NOTES[Math.max(0, Math.min(4, k))];
+        return new Voice[]{
+                tone(hz, hz * 2f, 0.24f, 0.08f, 0.2f, new float[]{1f, 0.3f}, 0.7f),
+                after(0.24f, tone(hz * 2f, hz * 2f, 0.9f, 0.08f, 0.002f, new float[]{1f, 0.4f, 0.15f}, 0.9f)),
+        };
+    }
+
+    /** The door glowing hotter (Divan's Alloy): a furnace roar swelling and a high sizzle. Cut at the melt. */
+    public static Voice[] vaultHeat(float seconds, long seed) {
+        return new Voice[]{
+                noise(220f, 0.6f, seconds, 0.2f, seconds * 0.85f, 0.6f, seed),
+                noise(5200f, 1f, seconds, 0.05f, seconds * 0.9f, 0.6f, seed + 1),
+                new Shaped(55f, 110f, seconds, 0.2f, Shaped.RISE, new float[]{1f, 0.5f, 0.2f}, 0.6f, 0f),
+        };
+    }
+
+    /** The door melting down into gold: a heavy slump, a gush and a long sizzle. */
+    public static Voice[] vaultMelt(long seed) {
+        java.util.List<Voice> out = new java.util.ArrayList<>();
+        out.add(tone(70f, 36f, 0.9f, 0.4f, 0.004f, new float[]{1f, 0.5f, 0.2f}, 0.7f));
+        out.add(noise(420f, 0.8f, 0.8f, 0.2f, 0.01f, 0.6f, seed));
+        out.add(after(0.1f, noise(4800f, 0.9f, 1.6f, 0.07f, 0.05f, 0.6f, seed + 1)));
+        java.util.Random rng = new java.util.Random(seed);
+        for (int i = 0; i < 10; i++) {
+            float hz = 180f + rng.nextFloat() * 260f;
+            out.add(after(0.15f + i * 0.11f + rng.nextFloat() * 0.05f, tone(hz, hz * 1.6f, 0.08f, 0.06f, 0.002f, new float[]{1f, 0.3f}, 0.5f)));
+        }
+        return out.toArray(new Voice[0]);
+    }
+
     public static Voice[] eruptionConsolation() {
         return new Voice[]{tone(587.33f, 587.33f, 0.5f, 0.07f, 0.002f, new float[]{1f, 0.3f, 0.1f}, 0.8f),
                 after(0.09f, tone(880f, 880f, 0.6f, 0.06f, 0.002f, new float[]{1f, 0.3f}, 0.8f))};
