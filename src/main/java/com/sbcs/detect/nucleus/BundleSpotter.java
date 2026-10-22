@@ -34,15 +34,16 @@ public final class BundleSpotter {
     /** Skyblocker's "Nucleus" waypoint (NucleusWaypoints, 2026-10-22): the middle of the Nucleus. */
     public static final Vec3 VAULT = new Vec3(513.5, 106, 524.5);
     /**
-     * Where the bundle really lands (Matej's first run, 2026-10-22: "approximately 513, 106, 551"), 26
-     * blocks south of the waypoint. The first version searched 16 blocks round the waypoint and never saw it.
+     * Where the bundle lands. Matej's first run (2026-10-22) recorded it: a dropped item, "Player Head", at
+     * 515.2 108.5 533.3, falling to 513.8 106.0 534.1 - first seen 114 s after the message, when Matej
+     * walked up to it (Matej remembered "around 513, 106, 551").
      */
-    public static final Vec3 DROP = new Vec3(513.5, 106, 551.5);
+    public static final Vec3 DROP = new Vec3(514, 106, 534);
     /** The Crystal Nucleus zone, from Skyblocker's WishingCompassSolver. */
     public static final AABB NUCLEUS = new AABB(462, 63, 461, 564, 181, 565);
 
     private static final long ARMED_MS = 5 * 60_000;
-    /** Matej's spot is approximate ("around that"), so the search is wide; the closest candidate wins. */
+    /** Wide on purpose (Matej: "make a bigger box if necessary"); the closest candidate wins. */
     private static final double SEARCH = 20;
 
     private static long armedAt;
