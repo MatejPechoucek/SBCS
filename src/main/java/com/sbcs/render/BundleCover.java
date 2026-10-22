@@ -36,6 +36,7 @@ public final class BundleCover {
     }
 
     private static void draw(LevelRenderContext ctx) {
+        if (com.sbcs.SbcsClient.config != null && !com.sbcs.SbcsClient.config.nucleusCover) return;
         AABB target = BundleSpotter.cover();
         if (target == null) return;
         AABB b = grow(target);

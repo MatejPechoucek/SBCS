@@ -517,6 +517,11 @@ public final class SbcsAudio {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.lavaVolume);
     }
 
+    /** The Vault's cues (the Crystal Nucleus), on its own volume. */
+    public static void playNucleus(Voice[] voices) {
+        playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.nucleusVolume);
+    }
+
     private static void playSlayer(Voice[] voices, int pct) {
         float gain = Math.max(0f, Math.min(1.5f, pct / 100f));
         if (gain <= 0.001f) return;

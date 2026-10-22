@@ -1472,6 +1472,47 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
 - **Next:** the designer's lava session with records on - check the nametag format and the catch lines, and write
   `LavaDetectTest` / a replay against them as Hellion's were.
 
+## The Vault (the Crystal Nucleus loot bundle, 2026-10-22) - unverified in game
+
+The designer asked for more loot pools, the Nucleus first, with a **black box over the drops where they land** - only an
+in-world cover so the floor does not give the haul away, not part of the cutscene - and the cutscene "cracking open a safe
+or vault". Never call anything "Butcher": the mod is SBCS.
+
+- **Detection** is `detect/nucleus/` (pure but `BundleSpotter`). The real message (the designer's logs, in
+  `tools/fixtures/nucleus_hauls.txt`) is printed whole at the fifth crystal: a rule, `CRYSTAL NUCLEUS LOOT BUNDLE`,
+  `REWARDS`, item lines with counts folded (`Flawed Topaz Gemstone x86`), SkyHanni's profit line *inside* it, a rule,
+  `Pick it up near the Nucleus Vault!`. Every bundle carries one Fine gem of each of seven colours (Jasper too), so a Fine
+  Jasper is a win only as a second one (`NucleusHaul.tierOf`). Weights sum to 307,212 (the wiki prints 311,212 - a typo);
+  the Jade Dye is a separate 1 in 500,000. `tools/NucleusTest` (33).
+- **The cover**: `BundleSpotter` arms at the header, records every new entity near the vault as `nucleus_bundle` (the
+  bundle's entity type is **not known yet - check the first records**), follows the best candidate, and disarms on
+  pickup / leaving / 5 min. `render/BundleCover` draws a black box over it on `LevelRenderEvents.COLLECT_SUBMITS`
+  (`RenderTypes.debugQuads()`, camera-relative). Config `nucleusCover`.
+- **Chat**: the loot lines are hidden while `nucleusAnimation` is on; `chatHeld()` includes `nucleusWatcher.parsing()`, so
+  SkyHanni's profit line is held with everything else; `announceNucleus` puts one summary line back once the Vault closes
+  (held until then), or at once when nothing plays.
+- **The cutscene** (`anim/VaultTimeline` pure, `render/VaultScene`, `audio/VaultSound` + `Voices.vault*`,
+  `gui/VaultScreen`), the Hellion architecture: a steel safe (the game's `iron_block`, `vault_bottom` door face, `vault_top`
+  dial, `polished_blackstone` recess, adopted at runtime), five sockets round the dial, five brass bolts. The five crystals
+  fly in and click (`SOCKETS`), each pulling a bolt; the dial spins through their colours (`STEPS`, ratio 0.82) while the
+  door strains; at `REVEAL` 4800 it lands on the tell: grey bust (creaks open a crack, dust, "No rare roll" + the dry
+  streak), sapphire rare (`OPEN`, the door swings wide), amethyst Flawless gem (`BLOWN`, blown off its hinges), **gold
+  Divan's Alloy (`ALLOY`, "the Meltdown")** and jade the Dye (`DYE`, the world stops and greys, three heartbeats, jade floods
+  out). **The designer (2026-10-22): the Alloy and the Dye are the best drops and get the most climactic endings** - so the
+  Alloy is its own tier of ending and outranks a Flawless gem in the same haul (`Prize.of`). The Meltdown: each crystal
+  pours a beam into the dial (`POURS`), the door heats dull red -> orange -> white gold (a `TEX_WHITE` overlay at partial
+  alpha - a tint only darkens, and the door face is dark), slumps into a molten pool (`MELT`, `POOLED`), the alloy rises
+  out of it. The safe darkens (`shade`), never fades, behind the showcase - faded, its faces showed through each other.
+- Drop art: the Dye and the Quick Claw are NEU heads (`HeadSkins.NUCLEUS`, `nucleus_heads.json`); gems and the alloy are
+  Hypixel's pack icons when loaded (paths guessed from NEU's model ids - **unconfirmed**), else quartz tinted / a gold ingot.
+- `tools/VaultTest` (164: frame and sound honesty for every prize on five seeds, the tells, the clocks, the Meltdown's
+  order), `tools/VaultPreview` (ChopPreview's canvas; `-Dvanilla` a folder of the block textures plus quartz and
+  gold_ingot). Menu card "Crystal Nucleus - The Vault", stats key "nucleus", `/sbcs test nucleus <word>`.
+- Next: the first real records (`nucleus_bundle`, `nucleus_haul`) - the bundle entity, and whether the cover sits right.
+- **Compiling offline without Gradle**: the cloud cannot reach Mojang or Fabric, but the designer's Modrinth install has
+  the **unobfuscated** 26.2 client jar (`ModrinthApp/meta/versions/26.2-0.19.5/26.2-0.19.5.jar`) and fabric-api's nested
+  jars; staged with their libraries (class versions rewritten to 65) the whole mod compiles with `javac`.
+
 ## Fin (Fishing Festival, 0.2.42)
 
 The designer's brief (2026-10-02): very fast, very simple, no dim, no kill animation - an announcement

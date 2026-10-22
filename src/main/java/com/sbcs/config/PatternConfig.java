@@ -202,7 +202,7 @@ public class PatternConfig {
     public boolean dianaSizeRaised = false;
 
     /** Busts, per source: 0 the whole cutscene, 1 short (straight to the bust's own ending), 2 none (wins only). */
-    public int dianaBusts = 0, blazeBusts = 0, seraphBusts = 0, lavaBusts = 0;
+    public int dianaBusts = 0, blazeBusts = 0, seraphBusts = 0, lavaBusts = 0, nucleusBusts = 0;
     /** Only play drops worth at least this ({@link #MIN_WORTH} index; 0 any): one under it plays as a bust. */
     public int minWorth = 0;
     public static final long[] MIN_WORTH = {0, 500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000};
@@ -260,6 +260,17 @@ public class PatternConfig {
     public int lavaVolume = 100;
     /** How fast Eruption plays, in percent (50-200): the whole of it, picture and cues together. */
     public int lavaSpeed = 100;
+
+    /** "The Vault": the Crystal Nucleus loot bundle's cutscene, and the black box over the bundle until it is picked up. */
+    public boolean nucleusAnimation = true;
+    /** The black box over the bundle in the world, so the floor does not give the haul away. */
+    public boolean nucleusCover = true;
+    public boolean nucleusBanner = true;
+    public boolean nucleusPrice = true;
+    /** The Vault's sounds, 0-150%. */
+    public int nucleusVolume = 100;
+    /** How fast the Vault plays, in percent (50-200). */
+    public int nucleusSpeed = 100;
 
     /** "Fin": the short pop-up when a Great White Shark drops a Megalodon pet or its tooth. */
     public boolean fishingAnnounce = true;
@@ -408,6 +419,8 @@ public class PatternConfig {
         seraphSpeed = clamp(seraphSpeed, 50, 200);
         lavaVolume = clamp(lavaVolume, 0, 150);
         lavaSpeed = clamp(lavaSpeed, 50, 200);
+        nucleusVolume = clamp(nucleusVolume, 0, 150);
+        nucleusSpeed = clamp(nucleusSpeed, 50, 200);
         fishingVolume = clamp(fishingVolume, 0, 150);
         fishingSpeed = clamp(fishingSpeed, 50, 200);
         ghostVolume = clamp(ghostVolume, 0, 150);
@@ -421,6 +434,7 @@ public class PatternConfig {
         blazeBusts = clamp(blazeBusts, 0, 2);
         seraphBusts = clamp(seraphBusts, 0, 2);
         lavaBusts = clamp(lavaBusts, 0, 2);
+        nucleusBusts = clamp(nucleusBusts, 0, 2);
         minWorth = clamp(minWorth, 0, MIN_WORTH.length - 1);
         gameplayCorner = clamp(gameplayCorner, 0, 4);
     }
