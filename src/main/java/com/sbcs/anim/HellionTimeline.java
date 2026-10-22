@@ -1,7 +1,7 @@
 package com.sbcs.anim;
 
 /**
- * "Hellion" - the Inferno Demonlord's animation, tier IV only (the user, 2026-10-02). Pure: everything
+ * "Hellion" - the Inferno Demonlord's animation, tier IV only. Pure: everything
  * here is a function of time, the drop and a seed, so it can be checked offline.
  *
  * A blaze - the vanilla model, head and twelve rods - is the Demonlord's core. Its Hellion Shield, the
@@ -12,7 +12,7 @@ package com.sbcs.anim;
  * head crumbles into ash. Any other colour shatters the shield and the drop comes out of the core.
  * Two fire pillars at the sides burn in the shield's colour the whole way.
  *
- * Only drops worth 500k or more play it (the user's floor); the rest are a bust.
+ * Only drops worth 500k or more play it; the rest are a bust.
  */
 public final class HellionTimeline {
 
@@ -76,7 +76,7 @@ public final class HellionTimeline {
     public static final long APPEAR = 700;
     /**
      * The shield's cycle: each step a clang. Four full rounds, the first step 420 ms and each 9% shorter
-     * than the one before - slow, then faster and faster. The user, after the first version: "way too
+     * than the one before - slow, then faster and faster. The designer, after the first version: "way too
      * fast", and the rods can take 4.5-5 s, this one is not rushed.
      */
     public static final long[] STEPS = steps(16, APPEAR, 420f, 0.91f);
@@ -287,8 +287,8 @@ public final class HellionTimeline {
 
     /**
      * How fast the rods spin, as a multiple of vanilla: faster and faster through the whole build-up,
-     * hardest at the end (1 + 5x^2, so 6x vanilla at the top - the user found 10x too fast), stopped
-     * dead at the reveal. They keep their rings - the user: they should not close in, just spin faster.
+     * hardest at the end (1 + 5x^2, so 6x vanilla at the top - the designer found 10x too fast), stopped
+     * dead at the reveal. They keep their rings - the designer: they should not close in, just spin faster.
      */
     public static float spin(long t) {
         if (t >= REVEAL) return 0f;

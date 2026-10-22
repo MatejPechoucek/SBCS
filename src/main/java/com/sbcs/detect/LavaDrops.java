@@ -8,7 +8,7 @@ import java.util.Locale;
 /**
  * Lava fishing's chat lines, read. Pure (tools/LavaDetectTest).
  *
- * From the user's own game logs (2026-10-05): drops arrive as {@code RARE DROP! Enchanted Book (Flash I) (+157 ✯
+ * From real game logs (2026-10-05): drops arrive as {@code RARE DROP! Enchanted Book (Flash I) (+157 ✯
  * Magic Find)} - the item <i>not</i> in brackets, unlike a slayer's - charms as {@code CHARM! You charmed the Thunder
  * and received 2 Thunder Shards!}, loot share as {@code LOOT SHARE You received 2 Thunder Shards for assisting X!}
  * or {@code LOOT SHARE You received loot for assisting X!}. The catch lines are Hypixel's own (Feesh's constants)

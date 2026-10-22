@@ -7,7 +7,7 @@ import java.util.Locale;
 /**
  * Reads the Inferno Demonlord's drop lines (pure, tested offline by tools/HellionDetectTest).
  *
- * Written against a friend's real tier IV session (2026-10-03, 13 kills - the user does not do slayers).
+ * Written against a friend's real tier IV session (2026-10-03, 13 kills - the designer does not do slayers).
  * The format, settled from those lines and not from guesses:
  * <pre>
  *   VERY RARE DROP! (Scorched Power Crystal) (+236% ✯ Magic Find)

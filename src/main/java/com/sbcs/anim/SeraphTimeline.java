@@ -1,7 +1,7 @@
 package com.sbcs.anim;
 
 /**
- * "The Seraph's Glyph" - the Voidgloom Seraph's animation (Enderman slayer, tier IV only, the user's
+ * "The Seraph's Glyph" - the Voidgloom Seraph's animation (Enderman slayer, tier IV only, the designer's
  * call, as for Hellion). Pure: everything is a function of time, the drop and a seed, so it can be
  * checked offline.
  *
@@ -14,7 +14,7 @@ package com.sbcs.anim;
  * before {@link #REVEAL} is the same for every drop</b> (SeraphTest hashes frames and audio). Black is
  * a bust; any other colour is a win, and the colour is the value tier.
  *
- * Only drops worth 500k or more play it (the user's floor, judged on live prices by detection).
+ * Only drops worth 500k or more play it (the designer's floor, judged on live prices by detection).
  */
 public final class SeraphTimeline {
 
@@ -98,7 +98,7 @@ public final class SeraphTimeline {
     /** The last hit's end: 0 hits, and Broken Heart Radiation. */
     public static final long HANG = STEPS[STEPS.length - 1] + Math.round(300f * Math.pow(0.92f, STEPS.length - 1));
     /**
-     * The Yang Glyph thrown, slow enough to follow (the user, 0.2.64: it was too fast to make out): the
+     * The Yang Glyph thrown, slow enough to follow (0.2.64: it was too fast to make out): the
      * lasers run 600 ms, then it holds the glyph in the vanilla carry, charging and shaking (it never
      * lifts its arms - vanilla endermen do not), and from {@link #RELEASE} it flies in an arc and lands at
      * the reveal.
@@ -121,11 +121,11 @@ public final class SeraphTimeline {
     public static final long STUTTER = REVEAL + 400, VANISH = REVEAL + 500, AFTER_FROM = REVEAL + 600, AFTER_STEP = 140,
             IMPLODE = REVEAL + 1800, SHOCK = REVEAL + 2100;
     public static final int AFTERIMAGES = 8;
-    // The Judgement Core: "The Eye Opens" (the user, 0.2.66).
+    // The Judgement Core: "The Eye Opens" (0.2.66).
     public static final long E_FREEZE = REVEAL + 200, E_CRACK = REVEAL + 500, E_BURST = REVEAL + 950, E_FORMED = REVEAL + 1350,
             E_OPEN = REVEAL + 1550, E_OPENED = REVEAL + 1850, E_LEFT = REVEAL + 2050, E_RIGHT = REVEAL + 2400, E_STARE = REVEAL + 2750,
             E_PULSE = REVEAL + 2950, E_PULL = REVEAL + 3150, E_PULLED = REVEAL + 4150, E_RISE = REVEAL + 4250;
-    // The Byzantium Dye: "The Dragon's Tribute" (the user, 0.2.66). The flight is the baked Blender track,
+    // The Byzantium Dye: "The Dragon's Tribute" (0.2.66). The flight is the baked Blender track,
     // 93 game ticks from D_IN.
     public static final long D_DEEPEN = REVEAL + 200, D_FREEZE = REVEAL + 600, D_IN = REVEAL + 1200, D_LAND = D_IN + 92 * 50,
             D_HEAD = D_LAND + 300, D_BREATH = D_LAND + 800, D_BREATH_END = D_BREATH + 2000, D_POOL = D_BREATH + 300,

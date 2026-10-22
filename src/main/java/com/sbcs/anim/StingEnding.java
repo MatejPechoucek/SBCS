@@ -5,7 +5,7 @@ import static com.sbcs.anim.ChopTimeline.*;
 /**
  * The Fateful Stinger's ending, "The Sting" - pure, like the rest of {@link ChopTimeline}.
  *
- * A cheap drop (about 3M), so one short idea (the user: the cheap ones do not need that much
+ * A cheap drop (about 3M), so one short idea (the cheap ones do not need that much
  * animation, and the first version - a whole tail, a strike at the camera, cracked glass - was
  * too grand). Everything liquid is pixel art: squares, like the game's own particles.
  *

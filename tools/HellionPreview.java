@@ -18,7 +18,7 @@ import java.util.Map;
  *   java -Dvanilla=<dir with blaze.png, enchanted_book.png, paper.png> -Dskins=<dir with *_skin.png>
  *        -Dbg=<screenshot> -Dat=0,700,1400 -cp out HellionPreview <outdir> <seed> DROP...
  *
- * Mojang's blaze texture is read from the user's own game files for this preview only - the mod adopts
+ * Mojang's blaze texture is read from the designer's own game files for this preview only - the mod adopts
  * it from the game at runtime and never bundles it.
  */
 public final class HellionPreview {

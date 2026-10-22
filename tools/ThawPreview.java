@@ -19,7 +19,7 @@ import java.util.List;
  * Renders frames of the Thaw offline, through the real meshes, the real projection and the
  * real textures - so the look can be judged without launching the game.
  *
- * The same idea as IconGen: nothing here is a picture of the scene, it IS the scene, drawn
+ * Nothing here is a picture of the scene, it IS the scene, drawn
  * through Java2D instead of the GUI blit. Faces are drawn with nearest-neighbour sampling
  * because that is what the game does with these textures.
  *

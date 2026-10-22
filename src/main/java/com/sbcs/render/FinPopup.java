@@ -14,7 +14,7 @@ import org.joml.Matrix3x2fStack;
 /**
  * "Fin" - the Fishing Festival announcement: a Megalodon pet or a Great White Shark Tooth dropped.
  *
- * Deliberately small and quick, the user's brief: no dim, no HUD hiding, no kill animation, about
+ * Deliberately small and quick, the designer's brief: no dim, no HUD hiding, no kill animation, about
  * 2.5 s, in the lower middle of the screen. A fin rises out of a strip of water, a fishing hook on its line
  * drops in beside it, the fin goes for it and dives - and the hook is yanked up out of a splash, the drop
  * coming up under it with its name and price. (Until 0.3.0 the Scatha's cleaver chopped the fin; the cleaver is
@@ -28,7 +28,7 @@ import org.joml.Matrix3x2fStack;
  * (SharkWatcher). The fin rises, the hook goes in - and the fin turns away and ducks under, the hook is
  * yanked up empty and dangles, a few bubbles come up. About 1.6 s; no text.
  *
- * <b>The pets' price is George's</b> (the user, 0.2.59): what the pet sells to George for, fixed -
+ * <b>The pets' price is George's</b> (0.2.59): what the pet sells to George for, fixed -
  * {@link #GEORGE_LEGENDARY} and {@link #GEORGE_EPIC} - not the auction house.
  *
  * Not a cutscene: it does not count as one, so the HUD, chat and game sounds are left alone.
@@ -42,7 +42,7 @@ public final class FinPopup {
     /** The bust: the fin ducks from here, and it is all over sooner. */
     static final long DUCK = CHOP - 150, BUST_FADE = 1350, BUST_END = 1650;
 
-    /** What George pays for the Megalodon pet (the user, 2026-10-02). */
+    /** What George pays for the Megalodon pet. */
     public static final long GEORGE_LEGENDARY = 2_500_000, GEORGE_EPIC = 500_000;
 
     /** GUI pixels per art pixel. */

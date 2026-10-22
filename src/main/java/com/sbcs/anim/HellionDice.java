@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * The die's roll in the Archfiend Dice endings - simulated in Blender (5.2, rigid body: a 2 m cube tossed
  * from the core with a spin, onto a floor, 60 fps, settling after ~2 s), baked frame by frame and played
- * back here. The user asked for Blender only where code is weak; a tumble that reads as real is that.
+ * back here. The designer asked for Blender only where code is weak; a tumble that reads as real is that.
  *
  * {@code assets/sbcs/hellion_dice.json}: per frame x, y, z then the 3x3 rotation (row-major), in mod
  * coordinates (y up, camera at +z, 1 m = 4 units, so the die is the 8-unit head size). Each die has its

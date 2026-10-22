@@ -4,7 +4,7 @@ import static com.sbcs.anim.ChopTimeline.*;
 
 /**
  * The Crown of Greed's ending, "Midas" - pure, like the rest of {@link ChopTimeline}. A cheap
- * drop (about 1.8M), so a short one: the user asked for less animation on the cheap drops.
+ * drop (about 1.8M), so a short one: the designer asked for less animation on the cheap drops.
  *
  * <pre>
  *  SPLIT        King Minos's head falls open

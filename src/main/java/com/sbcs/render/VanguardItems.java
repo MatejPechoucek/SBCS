@@ -107,7 +107,7 @@ public final class VanguardItems {
 
     /**
      * Glacite Powder's icon: the old light blue dye, the heap of powder the game used before
-     * 1.14, which is what the user wanted it to look like.
+     * 1.14, which is what the designer wanted it to look like.
      *
      * Mojang's own sprite is not shipped in the jar - handing out a mod with the game's art in
      * it is not ours to do. What ships is a heap of powder painted by

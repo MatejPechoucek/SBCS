@@ -10,6 +10,6 @@ package com.sbcs;
 public final class Maintenance {
     private Maintenance() {}
 
-    /** The Seraph's Glyph (the Voidgloom Seraph): being reworked before players see it (the user, 2026-10-15). */
+    /** The Seraph's Glyph (the Voidgloom Seraph): being reworked before players see it. */
     public static final boolean SERAPH = true;
 }

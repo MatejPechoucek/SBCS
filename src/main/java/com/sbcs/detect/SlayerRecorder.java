@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * Records slayer bosses' nametags as {@code slayer_mob}, for detection to be written against - capture
- * only, like DropRecorder's {@code slayer_line}. The user does not do slayers; a friend will run the mod
+ * only, like DropRecorder's {@code slayer_line}. The designer does not do slayers; a friend will run the mod
  * with records on, and these lines are what is needed: the boss's own nametag (its HP, and how the
  * hitshield's "Hits" shows), the "Spawned by" line under it (whose boss it is), and the moment it goes.
  *
@@ -67,7 +67,7 @@ public final class SlayerRecorder {
             String name = custom.getString();
             String kind = kindOf(name);
             // Once seen, an entity is followed whatever its name becomes: Jawbus's nametag drops its health while it
-            // floats up immune (the user, 2026-10-11), and that is exactly what has to be on record.
+            // floats up immune, and that is exactly what has to be on record.
             if (kind == null && SEEN.containsKey(stand.getId())) kind = SEEN.get(stand.getId()).kind;
             if (kind == null) continue;
             here.add(stand.getId());

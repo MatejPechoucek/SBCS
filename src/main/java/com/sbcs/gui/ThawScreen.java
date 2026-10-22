@@ -308,7 +308,7 @@ public class ThawScreen extends Screen {
     private static final com.sbcs.render.PixelLayer FROST_LAYER = new com.sbcs.render.PixelLayer("thaw_frost");
 
     /**
-     * The screen freezing (the user, 2026-10-02). It grows a little through the intro, then a step at
+     * The screen freezing. It grows a little through the intro, then a step at
      * every strike - the strikes land at the same moments whatever the haul, so it gives nothing away -
      * and the newest frost catches that strike's flare. At the landing it melts on a crash, cracks on a
      * reveal, and shatters on a legendary, the Locket (in its slow motion) or the Dye (when the paint

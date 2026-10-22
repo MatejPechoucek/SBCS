@@ -31,14 +31,14 @@ import java.util.Set;
  *       "has spawned!" rewrite). Anyone else's creature - a party member's, loot-shared - plays <b>only when a win
  *       of its own comes to us</b> (a loot share line within {@link #SHARE_MS} of its death, and its drop): 0.2.74-0.2.80
  *       also claimed them by loot share alone, or by having armed the hide, and in a lava party nearly every Jawbus
- *       and Thunder that opened was someone else's (the user, 2026-10-06). Only our own arm the hide.</li>
+ *       and Thunder that opened was someone else's. Only our own arm the hide.</li>
  *   <li><b>The kill</b>: its HP reads 0 (Diana's and the Demonlord's both did), or its nametag goes at
  *       {@link #GONE_FRACTION} of its health or less, close by, with no teleport. A charm ("CHARM! You charmed the
  *       Thunder") is a kill too - elusive creatures are charmed, not killed, on current Hypixel.</li>
- *   <li><b>The drop</b>: the user's logs put the drop line in the same second as the kill. A win within
+ *   <li><b>The drop</b>: real logs put the drop line in the same second as the kill. A win within
  *       {@link #DROP_WAIT_MS} resolves it; none, and it is a bust. A win that came first (up to
  *       {@link #EARLY_MS} before) is the outcome already.</li>
- *   <li><b>Plhlegblast only plays for the Carmine Dye</b> (the user's call): its kills open nothing, but a
+ *   <li><b>Plhlegblast only plays for the Carmine Dye</b>: its kills open nothing, but a
  *       Carmine Dye line opens Eruption with the outcome known.</li>
  * </ul>
  *
@@ -123,7 +123,7 @@ public final class LavaWatcher {
 
         Creature charmed = LavaDrops.ofCharm(s);
         if (charmed != null) {
-            // A charm is not ownership: the user's 23:19 charm (2026-10-05) was on a party member's Thunder.
+            // A charm is not ownership: the designer's 23:19 charm (2026-10-05) was on a party member's Thunder.
             Mob m = nearest(charmed, true);
             if (m != null && m.owned) {
                 m.dead = true;
@@ -142,7 +142,7 @@ public final class LavaWatcher {
             lastShareAt = now;
             lastShareWhat = share;
             // Our own creature's nametag just went short of the 5%: a share for its kind says someone else landed the
-            // last hit (the user's Thunder, 2026-10-05 23:38: gone at 2.6M, "2 Thunder Shards for assisting ..." with it).
+            // last hit (gone at 2.6M, "2 Thunder Shards for assisting ..." with it).
             if (ownGone != null && now - ownGoneAt <= SHARE_MS && (share == ownGone || share == LavaDrops.SHARE_UNNAMED)) {
                 Creature c = ownGone;
                 ownGone = null;
@@ -195,7 +195,7 @@ public final class LavaWatcher {
                 return;
             }
             // A loot share that named its creature just before: the drop is that kill's, even if its nametag was never
-            // seen (out of range). Seen in the user's records: "2 Thunder Shards for assisting ..." 36 ms before Flash I.
+            // seen (out of range). Seen in real records: "2 Thunder Shards for assisting ..." 36 ms before Flash I.
             if (d != Drop.CARMINE && sharedCreature != null && now - sharedAt <= SHARE_MS && d.from(sharedCreature)) {
                 log.note("§aLava: " + d.title + " right after a loot share for a " + sharedCreature.title + " - opening");
                 listener.killKnown(sharedCreature, d, s);
@@ -335,7 +335,7 @@ public final class LavaWatcher {
 
     /**
      * A nametag died. Ours (claimed by our catch line) opens the cutscene. Anyone else's - in a lava party that is
-     * most of them, all loot-shared (the user's session, 2026-10-05: every Jawbus and Thunder that opened was a
+     * most of them, all loot-shared (every Jawbus and Thunder that opened was a
      * party member's) - opens nothing by itself: only a win of its own coming to us by loot share plays it.
      */
     private void death(Mob m, String how, long now) {

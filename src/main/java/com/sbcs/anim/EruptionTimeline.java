@@ -11,8 +11,8 @@ package com.sbcs.anim;
  * player already knows, so it may change everything before the reveal; the drop may change nothing
  * (tools/EruptionTest hashes every frame and sample, per creature).
  *
- * Researched 2026-10-05 (hypixelskyblock.minecraft.wiki, the NEU repo, the user's own game logs; prices from
- * the bazaar and Coflnet that day). Decided with the user: the guaranteed drops (Jawbus's Magma Lord
+ * Researched 2026-10-05 (hypixelskyblock.minecraft.wiki, the NEU repo, real game logs; prices from
+ * the bazaar and Coflnet that day). Decided with the designer: the guaranteed drops (Jawbus's Magma Lord
  * Fragment, the Scuttler's crab stick) are not the reveal - a bust shows them under the cooled vent;
  * loot-shared kills play like any other; the Carmine Dye gets the grandest ending (Kuudra).
  */
@@ -109,7 +109,7 @@ public final class EruptionTimeline {
         }
     }
 
-    /** What every kill of a creature drops anyway, shown under a bust (not the reveal - the user's call). */
+    /** What every kill of a creature drops anyway, shown under a bust (not the reveal - a design choice). */
     public static String guaranteed(Creature c) {
         return switch (c) {
             case JAWBUS -> "Magma Lord Fragment";

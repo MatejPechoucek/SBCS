@@ -240,7 +240,7 @@ public final class EruptionScene {
                     maxZ = Math.max(maxZ, z);
                 }
                 // The whole plane in view: the lake runs out into a cooling lava field to every edge, fading into the
-                // dark as it goes back - no shore, no wall, nothing of the game showing over it (the user, 0.2.78).
+                // dark as it goes back - no shore, no wall, nothing of the game showing over it (0.2.78).
                 int x0 = (int) Math.floor(Math.max(minX - 1, -700f)), x1 = (int) Math.ceil(Math.min(maxX + 1, 700f));
                 int z0 = (int) Math.floor(Math.max(minZ - 1, -900f)), z1 = (int) Math.ceil(Math.min(maxZ + 1, 400f));
                 int iw = x1 - x0, ih = z1 - z0;
@@ -304,7 +304,7 @@ public final class EruptionScene {
     /**
      * The shore: blackstone round the lake's rim (the tiles just outside it next to one inside). Low at the sides and
      * in front; behind the lake it climbs into a cliff that runs off the top of the screen and fades into the dark
-     * as it rises - a low wall there left the dimmed game showing above it (the user, 0.2.75).
+     * as it rises - a low wall there left the dimmed game showing above it (0.2.75).
      */
     /**
      * Where the crust's front is. It spreads out from where the creature sank, a glowing front running out over
@@ -761,7 +761,7 @@ public final class EruptionScene {
         // The cracks glow the heat; a bust's go dark as it cools.
         int add = Math.round(255 * (0.25f + 0.5f * hv) * (1f - cool)) << 24 | heat;
         // A cone: half-sunk boulders of cooled blackstone round its foot, a ring of blackstone and magma, a shoulder
-        // of magma, the crater block on top. (A flat skirt of magma round it read as a platform - the user.)
+        // of magma, the crater block on top. (A flat skirt of magma round it read as a platform.)
         java.util.List<float[]> blocks = new java.util.ArrayList<>();
         int[][] rocks = {{-2, 0}, {2, 0}, {0, 2}, {0, -2}, {-2, 1}, {2, -1}};
         // {x, y, z, magma?, half height}. The ring's corners are half blocks, so the foot is rounder than a stepped
@@ -838,7 +838,7 @@ public final class EruptionScene {
                 // The game's lava, moving, in the heat's colour.
                 int lf = lavaFrame(pt);
                 float[][] crater = {null, null, {0, lf / 20f, 1, (lf + 1) / 20f}, null, null, null};
-                // A narrow opening, a quarter of the block's top (the user: smaller).
+                // A narrow opening, a quarter of the block's top (smaller).
                 box(x, y + 0.6f, z, 3.5f, hs, 3.5f, X, Y, Z, crater, SLOT_LAVA_GREY, heat, Math.round(200 * (1f - cool)) << 24 | heat, false);
             }
             onGpu(from);
@@ -847,7 +847,7 @@ public final class EruptionScene {
 
     /**
      * Basalt columns standing out of the lava either side of the vent, as on the Crimson Isle's Basalt Deltas
-     * (the user's pick for the empty sides, 0.2.79): stacks of whole blocks, half sunk, at stepped heights. Placed by
+     * (the designer's pick for the empty sides, 0.2.79): stacks of whole blocks, half sunk, at stepped heights. Placed by
      * where they stand on the screen (screen x ~ 0.93 x + 0.37 z at yaw 22). They go down into Kuudra's swelling sea.
      * {screen x, depth, blocks high}.
      */
@@ -2062,7 +2062,7 @@ public final class EruptionScene {
     }
 
     /**
-     * Smoke and ash over the sides (the user's pick, 0.2.79): dark plumes rising off the field by the pillars and
+     * Smoke and ash over the sides (the designer's pick, 0.2.79): dark plumes rising off the field by the pillars and
      * drifting up off the screen, ash drifting down across it. Thicker through the build-up - the same on every run -
      * then a win clears it; a bust leaves it hanging.
      */

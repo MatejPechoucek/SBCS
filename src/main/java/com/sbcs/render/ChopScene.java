@@ -198,7 +198,7 @@ public final class ChopScene {
         ChopFill.dust(tl, ts, c);
         ChopFill.ash(tl, ts, w, h, c);
 
-        // The motes rise behind the drop and its words: over them they crossed the text (the user, 0.3.0).
+        // The motes rise behind the drop and its words: over them they crossed the text (0.3.0).
         ChopFill.motes(tl, t, w, h, c);
         if (tl.unmade()) relic(tl, t, c);
         else if (tl.thinks()) brain(tl, t, c);
@@ -206,7 +206,7 @@ public final class ChopScene {
         else drop(tl, t, c);
 
         // A flash is a burst of light where it happens - never a white fill over the whole screen,
-        // which over the dimmed game reads as grey fog (the user's screenshots, twice).
+        // which over the dimmed game reads as grey fog (the designer's screenshots, twice).
         float flash = tl.flash(t);
         if (flash > 0.004f) {
             float[] at = tl.flashAt(t);
@@ -810,7 +810,7 @@ public final class ChopScene {
             float[] stamp = tl.bannerStamp(t);
             if (stamp != null) {
                 float jolt = (stamp[0] - 1f) * 3f;
-                // Clear of the drop above and of the name below (the user: a little higher).
+                // Clear of the drop above and of the name below (a little higher).
                 c.text("\u00a7l" + banner, cx + jolt * (float) Math.sin(t * 0.9), top - 17f * scale, scale * 1.2f * stamp[0],
                         alpha(stamp[1] * sceneAlpha) | tl.bannerColour());
             }

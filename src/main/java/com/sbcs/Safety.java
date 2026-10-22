@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The fail-safes (the user, 2026-10-16): nothing an animation does may take the game down or leave it broken.
+ * The fail-safes: nothing an animation does may take the game down or leave it broken.
  *
  * <ul>
  *   <li><b>Errors</b> ({@link #failed}): an animation, pop-up or detector that throws is stopped there, the screen

@@ -408,7 +408,7 @@ final class LedgerView {
     private void cover(Draw d, LedgerData data, int x, int w, float mx, float my, boolean full) {
         if (w <= 0) return;
         // The cover keeps its face while it swings: drawn whole, squeezed towards the spine it is hinged on, and
-        // darker the further it has turned from the light - it never goes blank mid-turn (the user, 2026-10-16).
+        // darker the further it has turned from the light - it never goes blank mid-turn.
         int fullW = BOOK_R - SPINE_X;
         d.push();
         d.translate(x, 0);

@@ -13,7 +13,7 @@ import java.util.Map;
  * An ink stamp, the way a sbcs stamps a carcass "Inspected and Passed": an outer ring (the grade's colour on a
  * tiered stamp), a thin paper ring inside it, the ink with the stamp's own item in the middle, and the grade as pips
  * under it. Each stamp has its own item ({@link #ITEMS}) and one of six shapes ({@link Shape}), taken in turn along its
- * chapter so no two neighbours on a page match (the user: "so it doesnt get repetitive"). Real ink is never even, so a few pixels of each stamp are missing - the same ones every time, picked
+ * chapter so no two neighbours on a page match ("so it doesnt get repetitive"). Real ink is never even, so a few pixels of each stamp are missing - the same ones every time, picked
  * by the stamp's id. Every stamp sits a little crooked, again by its id.
  */
 public final class StampArt {

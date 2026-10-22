@@ -15,7 +15,7 @@ import org.joml.Matrix3x2fStack;
  * scaled up with no smoothing, so every cell is still a crisp square.
  *
  * Why: they used to send every cell to the GUI as its own filled rectangle, twice with the outline.
- * At full growth that was thousands of rectangles a frame, more with every cut - the user's frame
+ * At full growth that was thousands of rectangles a frame, more with every cut - the designer's frame
  * rate fell with each slice of the Scatha (2026-10-02). Now it is one blit, whatever the growth.
  *
  * Both ThawFrost.Fill and CrystalVeins.Fill, so the pure classes - and their offline previews - are

@@ -3,7 +3,7 @@ package com.sbcs.anim;
 import static com.sbcs.anim.ChopTimeline.*;
 
 /**
- * Chimera I's ending, "The Glint" - pure, like the rest of {@link ChopTimeline}. The user's pick
+ * Chimera I's ending, "The Glint" - pure, like the rest of {@link ChopTimeline}. The designer's pick
  * (option B) after the three beasts were let go: the enchantment itself, with nothing but the
  * game's own visual language - its item glint and its enchanting table's glyphs.
  *

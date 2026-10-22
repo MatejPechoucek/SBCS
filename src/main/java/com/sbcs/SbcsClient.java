@@ -334,7 +334,7 @@ public class SbcsClient implements ClientModInitializer {
         }
     });
 
-    /** The 500k floor (the user's call): a floored drop worth less, or of unknown worth, plays as a bust. */
+    /** The 500k floor: a floored drop worth less, or of unknown worth, plays as a bust. */
     private static com.sbcs.anim.SeraphTimeline.Drop seraphFloor(com.sbcs.anim.SeraphTimeline.Drop d) {
         if (d != null && d.win() && underFloor(d.priceId)) return com.sbcs.anim.SeraphTimeline.Drop.BUST;
         if (d == null || !com.sbcs.detect.SeraphDrops.floored(d)) return d;
@@ -1262,7 +1262,7 @@ public class SbcsClient implements ClientModInitializer {
         com.sbcs.gui.Cutscene c = currentCutscene();
         if (c != null) c.interrupt();
         clearFinished();
-        // "Try it" shows what the player will get, so it follows the bust setting (the user, 2026-10-16): short busts
+        // "Try it" shows what the player will get, so it follows the bust setting: short busts
         // play short, and with busts off a bust plays nothing - said in chat, so the button does not look broken.
         // /sbcs test still plays everything in full.
         if (bustStyle(group) == 2 && !testWins(group, name)) {
@@ -1586,7 +1586,7 @@ public class SbcsClient implements ClientModInitializer {
      *
      * Before a Scatha's kill it is yes the moment the pre-kill hide is up - the HUD just goes,
      * as it does for Diana. There used to be a dark veil growing over the screen first
-     * ({@code PreKillHider}); the user asked for it gone.
+     * ({@code PreKillHider}); the designer asked for it gone.
      */
     public static boolean shouldHideHud() {
         PatternConfig c = config;

@@ -64,7 +64,7 @@ public class ScopeMinigameScreen extends Screen {
     private static final long INTRO_MS      = 1100;
     private static final long READY_MS      = 420;
     private static final long RAISE_MS      = 300;
-    // Down fast, stay down a little, back up fast (the user, 2026-10-02 - the old hang-then-whip
+    // Down fast, stay down a little, back up fast (the old hang-then-whip
     // over 170 ms and a 420 ms rest read as robotic).
     private static final long FALL_MS       = 95;
     private static final long IMPACT_MS     = 300;
@@ -498,7 +498,7 @@ public class ScopeMinigameScreen extends Screen {
 
     private long revealLengthMs() { return reachesHead ? petRevealMs : dropRevealMs; }
 
-    /** The screen's edges: crystals in the Crystal Hollows' colours (the user's "variant A", 2026-10-02). */
+    /** The screen's edges: crystals in the Crystal Hollows' colours. */
     private final com.sbcs.render.CrystalVeins veins = new com.sbcs.render.CrystalVeins(openedAt);
     /** Drawn as one image, not a rectangle per cell - the frame rate fell with every cut (PixelLayer). */
     private static final com.sbcs.render.PixelLayer VEIN_LAYER = new com.sbcs.render.PixelLayer("scatha_veins");
@@ -605,7 +605,7 @@ public class ScopeMinigameScreen extends Screen {
 
         // ---- the dim ----
         // Only a dim over the game, brought up and taken away with the run. The painted cavern
-        // and the gemstone outcrops were removed (the user, 2026-10-02); CaveArt stays, since
+        // and the gemstone outcrops were removed; CaveArt stays, since
         // the Thaw's sparkle and the vignette still come from it.
         float veil = phase == Phase.INTRO ? ease(Math.min(1f, since / (float) introMs))
                 : phase == Phase.FADE_OUT ? 1f - ease(Math.min(1f, since / (float) fadeOutMs))
@@ -692,7 +692,7 @@ public class ScopeMinigameScreen extends Screen {
 
     /**
      * How far above a segment's bottom the blade's edge stops: all the way through it, just short
-     * of the ground (the user, 2026-10-02 - it used to stop a quarter-head above the centre).
+     * of the ground (it used to stop a quarter-head above the centre).
      */
     private static final float BLADE_DEPTH = 0.6f;
 

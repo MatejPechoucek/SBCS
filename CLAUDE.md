@@ -7,7 +7,7 @@ Build: `.\gradlew.bat build` — Java 25 toolchain, Fabric Loom.
 
 ---
 
-## Design direction (the user, 2026-10-02)
+## Design direction
 
 **The cleaver is the Scatha's, not the mod's signature.** It fits Diana's Chopping Block by
 coincidence. New animations do not need a cleaver, a kill or a "sbcs" theme - each source gets
@@ -135,7 +135,7 @@ Skipping a tick hides whatever changed across the gap.
 inventory at all, so the only signal is the window closing with nothing claimed.
 Gemstones are the common case, so this used to delay the cutscene by the full window.
 
-**The crystal veins (0.2.49)** - the user's "variant A" for the Scatha's empty sides, after its cave
+**The crystal veins (0.2.49)** - "variant A" for the Scatha's empty sides, after its cave
 was removed. `render/CrystalVeins`: pure, like ThawFrost. ~45 crystals (corner clusters, singles up
 the sides and along the top) in the Hollows' six gem colours, each a prism **rasterised** onto a grid
 (every cell whose centre is inside, then an outline of the cells round it - walking the shape cell by
@@ -257,8 +257,7 @@ or the next regeneration wipes the change:
 | `gen_sparks.py` | `sbcs/spark_0..5.png` | yes, the impact sparks |
 | `gen_veil.py` | `prekill_veil.png` | no - the pre-kill veil was removed (0.2.31) |
 | `gen_misc.py` | `spark.png` (+ dormant placeholder art) | yes |
-| `gen_icon.py` | `icon.png` | yes - the mod icon (since 2026-10-15) |
-| `IconGen.java` | `icon.png` | no - the old rendered cleaver; running it overwrites the current icon |
+| `gen_icon.py` | `icon.png` | yes - the mod icon |
 | `gen_cave.py` | `cave/cave_wide.png` | no — `CaveArt.backdrop()` replaced it |
 | `gen_gems.py` | `cave/gem_*`, `rock_*`, `rock_glow_*`, `sparkle.png` | no — `CaveArt` replaced them |
 | `gen_cleaver.py` | `sbcs/cleaver_00..13.png` | no — the cleaver is a real mesh now |
@@ -267,18 +266,9 @@ The three superseded scripts are kept because they are the only copy of that art
 source; their outputs have been removed from `src/main/resources/`, so re-running one
 puts files back that nothing loads.
 
-**The icon (2026-10-15)** is `gen_icon.py`: 32 x 32 pixel art written 8x up - a gold B on a dark badge, its
-top-left corner chopped off along x + y = const (the cut keeps clear of the counters, so the B always reads), the
-piece pushed a pixel up-left, both cut faces white-hot, sparks along the line. The user picked it from a sheet; a cut
-through the middle split both counters and read as "F3". The menu draws it at its native 32 GUI pixels
-(`MenuView.ICON_SIZE`; `MenuIcon` halves 256 -> 32 exactly), beside "SBCS" with the subtitle under the name.
-
-`IconGen.java` is the odd one out: it is Java, not Python, because it renders the icon
-from the **real** `CleaverMesh` through the **real** `ModelProjection` with the **real**
-`PropArt.cleaver()` sheet. The icon therefore cannot drift from what the mod actually
-draws, and changing the blade and re-running it updates the icon to match. Its header
-has the two commands. `gen_misc.py` still contains the old hand-drawn `icon()` but no
-longer calls it - running it would overwrite the rendered one.
+**The icon** is `gen_icon.py`: 32 x 32 pixel art written 8x up - a gold S on a band of film (sprocket holes
+along both edges) on a dark badge, lit from the top left with a pixel of depth. The menu draws it at its native 32
+GUI pixels (`MenuView.ICON_SIZE`; `MenuIcon` halves 256 -> 32 exactly), beside "SBCS" with the subtitle under the name.
 
 `guillotine_frame.png`, `blade.png`, `cave/cave_bg.png` and the `walk/frame_*` set have
 **no generator** — they are hand-made or ported art, and every one of them is still
@@ -295,7 +285,7 @@ Values that are duplicated between a script and Java, and must move together:
 
 - **Torch positions and sparkle anchors** (`CaveArt.TORCHES`, `CaveArt.SPARKLES`) only matter if
   the cave ever comes back: the Scatha's cavern, torches, bats, embers and gem outcrops were removed
-  in 0.2.46 (the user: keep only the dim), along with the "Plain backdrop" option.
+  in 0.2.46 (keep only the dim), along with the "Plain backdrop" option.
 - **Cleaver edge anchor** — `CLEAVER_EDGE_FX/FY` still positions the blade by its
   cutting edge, and `CLEAVER_FRAMES` (14) is still the swing's timeline even though the
   frames themselves are gone: each phase works out an index 0..13 and that index maps
@@ -353,7 +343,7 @@ case that matters.
 While chat is covered - a cutscene, the Scatha pre-kill hide, or the profit window
 (`SbcsClient.chatHeld()`) - new chat lines are **held** by `ChatHold` and put back, oldest
 first, on the first tick nothing covers the chat. Three versions were needed, each fixing
-what the user saw in game:
+what the designer saw in game:
 
 1. Dropped them. A Thaw with its ending is 10-20 seconds; whole conversations vanished.
 2. Held them at Fabric's `ALLOW_GAME`/`ALLOW_CHAT` and put them back when the animation ended.
@@ -370,7 +360,7 @@ what the user saw in game:
 The corpse loot message itself is still hidden for good at `ALLOW_GAME`; the summary replaces
 it. The action bar never reaches `addMessage`, so it is simply suppressed during a cutscene.
 When debugging this, the game log's `[CHAT]` lines are written by `addMessage` - a line in the
-log reached the chat box; the user's live profile is `SkyBlock Enhanced Modern Edition (1)`.
+log reached the chat box.
 
 ## Drop records
 
@@ -385,7 +375,7 @@ recorded. Written on its own thread. `recordDrops` (menu: Drop records), `/sbcs 
 
 ## Diana - decisions made against docs/diana.md (2026-09-27)
 
-`docs/diana.md` is the spec. Where it conflicts with this project, the user decided:
+`docs/diana.md` is the spec. Where it conflicts with this project, the designer decided:
 
 - **The tell is honest**, like the Thaw's flare - it does not lie on a share of losses (§5).
   Tension comes from the fixed, outcome-identical sway and the verdict blackout.
@@ -393,7 +383,7 @@ recorded. Written on its own thread. `recordDrops` (menu: Drop records), `/sbcs 
   real meshes (the ThawPreview way), not `tools/gen_*.py` and a Python previewer (§6, §9).
 - **Factor across Scatha, Vanguard and Diana** (§11). (An old note here said lava fishing
   does not exist - wrong: it is on the Crimson Isle, Thunder and Lord Jawbus among its creatures, and
-  the user proposed it as a source on 2026-10-02.)
+  the designer proposed it as a source on 2026-10-02.)
 - **"Never infer by elimination" is Diana-only** (§10.1). The Scatha keeps inferring a
   gemstone from an empty kill window - with a gemstone sack there is no other signal.
 - **These creatures never start the cutscene, whatever they drop** (overrides §2's "any rare
@@ -406,32 +396,32 @@ recorded. Written on its own thread. `recordDrops` (menu: Drop records), `/sbcs 
   when the Relic actually drops** - not on its kills. The **Mythological Dye from any
   creature**, the seven excluded ones included. Both drop-triggered cases open on the drop,
   so the outcome is known when they start; they still play the same sway.
-- The tell colours still need the user's sign-off before they are built (§5). Proposed
+- The tell colours still need the designer's sign-off before they are built (§5). Proposed
   2026-09-27: sway ember #7A3410 -> amber #F2A12A -> Diana red #E0301E -> black at the
   verdict, identical on every outcome. After it, one colour per creature, in niche shades the
-  user asked for ("so they don't look like every other mod"): bust cold ash #3C4250, Minos
-  Relic moonstone #BFC8DD (the user asked for silver), Brain Food wisteria #9F7BEA (purple),
+  designer asked for ("so they don't look like every other mod"): bust cold ash #3C4250, Minos
+  Relic moonstone #BFC8DD (the designer asked for silver), Brain Food wisteria #9F7BEA (purple),
   Chimera I thulian pink #DE6FA1 (pink), Manticore's Fateful Stinger / Manti-core viridian
   #3A8C6E (dark green), King Minos's Crown of Greed / Shimmering Wool carmine #C8003C (red;
   climbs into the judge), Mythological Dye its real in-game olive #6F6F0C (a turning hue
-  until 2026-09-28, when the user chose the real colour). No gold any more - every drop that
+  until 2026-09-28, when the designer chose the real colour). No gold any more - every drop that
   plays has its own. (The swatch renders were a throwaway script; the real previewer is to
-  be Java.) Accepted 2026-09-27 - the user asked for no changes after seeing them.
+  be Java.) Accepted 2026-09-27 - the designer asked for no changes after seeing them.
 - Diana was not mayor on 2026-09-27 but was leading the election by far; her detection waits
   on real strings from `diana_line` records.
 
-**The Thread replaced The Judgement** (2026-09-27). The user did not like the Judgement (a
+**The Thread replaced The Judgement** (2026-09-27). The designer did not like the Judgement (a
 bronze scales chamber) and rewrote `docs/diana.md` as "The Thread": Ariadne's thread, one
 locked-off shot, the whole animation two numbers. `diana_storyboard.png` beside it is the
 staging. The same four decisions were re-confirmed against the new spec: honest tell, Minos
 Champion only on a Relic, the Dye from any creature, Java art and a Java previewer.
 
-**The Labyrinth replaced The Thread** (2026-09-28). The user found the Thread "boring and simple"
+**The Labyrinth replaced The Thread** (2026-09-28). The designer found the Thread "boring and simple"
 next to the Thaw and asked for ideas from Diana's ritual itself; of three pitched (the
 Labyrinth, a dig cross-section, Diana's arrow at the moon) they picked the Labyrinth and, seeing
 the preview, said it was what they had wanted in the first place. The Thread's files are gone.
 
-**The Chopping Block replaced The Labyrinth** (0.2.25, 2026-09-28). The user liked the drop
+**The Chopping Block replaced The Labyrinth** (0.2.25, 2026-09-28). The designer liked the drop
 endings (the Relic most, then Brain Food) but found the maze did not match Diana's vibe and needed a
 whole black-screen cutscene; they asked for something simpler and exciting, on the SBCS theme -
 killing the mob - over the **dimmed** game, not black. Of the options pitched they took this one, and
@@ -457,7 +447,7 @@ detection exists):
 - **The heads are real skins** from the NEU repo's `constants/bestiary.json` (keyed by the mob's
   display name, field `texture`), bundled in `assets/sbcs/creature_heads.json` and loaded by
   `HeadSkins.CREATURES`. Only the Chimera's lion, goat and serpent have no skin anywhere and are
-  painted (`ChopArt.head`). **For any head texture, check the NEU repo first** - the user's rule.
+  painted (`ChopArt.head`). **For any head texture, check the NEU repo first** - the rule.
 - `render/ChopScene` - one drawing routine for game (`gui/ChopScreen`) and preview
   (`tools/ChopPreview`), over a Canvas whose `quad` takes a **texture name** (sheet, skins, cleaver,
   beasts). `box()` draws any rotated textured box, front faces only, with an ink pass for the black
@@ -469,14 +459,14 @@ detection exists):
   the plane of the cut** (x = `strikeX`), edge running front to back along the slot, handle behind,
   swung about its pommel (`cleaverVec`); `cleaver(t)` gives {x, edge y, angle, alpha}, angle 0 level
   in the head, -1.35 raised. 0.2.25 had it facing the camera while the head split left/right, so
-  the chips flew out at the viewer - the user saw it at once. While level and in, each face is
+  the chips flew out at the viewer - the designer saw it at once. While level and in, each face is
   clipped to the part above the head's top (`clipAbove`; every face of a level box has one flat
   edge, so the cut stays a parallelogram) - the old trick of redrawing the head's front over it
   only works for a face-on blade. Camera yaw 44 -> 36 through the chops so the blade reads.
 - Chips burst from the slot off both faces of the blade (along X), skim the head's top, land on the
   board or fall off its edge; drawn in two passes, behind the head and after the blade.
-- The board is thin (`BLOCK_H` 4) - the user's call. **No letterbox bars** on Diana's endings -
-  the user asked for them gone (the Thaw keeps its own).
+- The board is thin (`BLOCK_H` 4) - a design choice. **No letterbox bars** on Diana's endings -
+  the designer asked for them gone (the Thaw keeps its own).
 - `render/art/ChopArt` - the 128 sheet (oak end-grain top, bark side, plum flesh, a brain in
   section, the moon's six faces and hat, runes), glow, ring, rays, the three beasts.
 - Sounds (`Voices.chop*`): the head's thud on the wood, a swish before each blow, each chop a wet
@@ -497,7 +487,7 @@ detection exists):
 - **Chimera I, "The Beast Fused"** (13.1 s): the Inquisitor's head falls open; lion, goat and serpent
   rise and circle facing outwards, each lunging to the camera to roar in turn (`roarTime`, a ring),
   spiral in and crash (`CHI_CRASH`); the **vanilla enchanted book icon** is what is left, not a 3D
-  book (the user asked), named in #FF55FF.
+  book, named in #FF55FF.
 - Carried over from the Labyrinth and still true: drops drawn as their real items (`DianaItems`,
   NEU skins for heads, vanilla icons for the book and helmet, a 3D yellow wool block), every drop
   outlined, every win's price counting up (bazaar instant sell, else lowest BIN, else NPC -
@@ -516,15 +506,15 @@ detection exists):
   the block and dark before the burst, the Chimera's roars and crash. `tools/ChopPreview` renders
   stills (`-Dat=`) or every frame, `-Dskins=` a folder of `<ID>_skin.png` (creatures and drops),
   `-Dvanilla=` the book, helmet and wool, `-Dbg=` a screenshot to dim behind.
-- The user's standard for every ending (2026-09-28): the most rendering, animation, sound and
+- The designer's standard for every ending (2026-09-28): the most rendering, animation, sound and
   effects possible - and neat: nothing unnecessary on screen. Busts short, so the player keeps
   playing; a real drop exciting.
-- **The quality rebuild (0.2.29)** - the user tested 0.2.27 in game and sent screenshots: the Dye
+- **The quality rebuild (0.2.29)** - the designer tested 0.2.27 in game and sent screenshots: the Dye
   "horrible", the Stinger's venom and Brain Food's veins "weird", the Manti-core good. Asked why these
   could not be as good as the Thaw, the honest answers, which are now **rules**:
   - **The preview must render like the game** (`tools/ChopPreview`): laid out at 640 x 360 GUI pixels
     but rasterised at 1920 x 1080 (`-Dscale`, default 3), lines as hard-edged filled rectangles (what
-    `ChopScreen.line` draws), small textures nearest-neighbour, a dark stand-in of the user's world
+    `ChopScreen.line` draws), small textures nearest-neighbour, a dark stand-in of the designer's world
     behind (`-Dbg`). The old preview drew smooth anti-aliased strokes at 640 x 360 on a flat sky, and
     effects that passed there looked cheap in game.
   - **Pixel art only for effects.** Smooth, shaded spheres (the old `ChopArt.drop`) read as olives or
@@ -537,15 +527,15 @@ detection exists):
     texel of every face, its alpha byte how strongly the face's own texture shows through as relief).
     The Crown's gold, the Dye's stone and paint all use it; a screen wash with a hole did not work.
 - **Cheap drops are short** (`ChopTimeline.cheap()`: Brain Food ~1M, Crown ~1.8M, Stinger ~2.9M, prices
-  2026-09-29; the user: cheap drops do not need that much animation). Their lines and price come in
+  2026-09-29; the designer: cheap drops do not need that much animation). Their lines and price come in
   sooner. Expensive: Wool ~38M, Manti-core ~35M, Relic ~29M, Chimera ~26M, Dye ~15M.
   - **Stinger** (`StingEnding`, 9.6 s): the barb (bulb, spike, two plates of tail, chitin in the Fateful
     Stinger's maroon) rises out of the split, hangs with a pixel bead, stabs the board (`IMPACT`):
     pixel splash, a crack and a stain in the wood (`stingDecal`); turns into the drop at the top. The
-    first version (tail, strike at the camera, glass) was "too grand" for the user.
+    first version (tail, strike at the camera, glass) was "too grand" for the designer.
   - **Crown** (`MidasEnding`, 9.9 s): gold spreads (60 ms/texel), a shine, the halves burst into coins
     and the 3D golden helmet pops out of the split; the vanilla icon at the reveal.
-  - **Brain Food** (9.1 s): pixel veins, one flood, burst, pi ring (the user likes it).
+  - **Brain Food** (9.1 s): pixel veins, one flood, burst, pi ring (the designer likes it).
 - **Dye, "The Whole Hunt"** (`HuntEnding`, 0.2.75; replaced `PaintEnding`'s "Wet Paint", the third dye to stop time).
   Pitched and approved 2026-10-05. The split goes wrong (halves shut on an olive cut, board cracks - `huntCracks`,
   cleaver wrenched out - `HuntEnding.cleaver`), `HUSH` (a cut cue, half a second of nothing), `GEYSER` (a column of
@@ -584,7 +574,7 @@ detection exists):
   music, the win volume. `SbcsStats.onDiana(creature, drop)` counts a real run before its screen
   is made, so the screen's second line reads "Your Nth X" from `dianaDropCount`; a test says so.
   The Stats tab has a Diana group with its own reset.
-- **Detection (0.2.32)** - `detect/DianaWatcher`, written against the user's 500+ captured lines
+- **Detection (0.2.32)** - `detect/DianaWatcher`, written against the designer's 500+ captured lines
   (2026-09-30). **No chat line marks a kill**: an Inquisitor dug and killed left only "Good Grief! You
   dug out a Minos Inquisitor!". So the kill is SBO's: the creature's nametag armour stand, HP read
   from it (`HP`, the number before "/" or the heart), dead the tick it reads 0; fallback, the nametag
@@ -594,7 +584,7 @@ detection exists):
   away gave no loot share line at all, so the HUD went and nothing played; now a creature that armed
   the hide (`Mob.armedAt`, within `ARM_MS`) is ours when it dies, and "CHARM! You charmed the X and
   received" is read like a loot share naming X (it came 60 ms before the nametag read 0).
-  **Or loot share (0.2.33)** - the user expected a loot-shared King Minos to play: a "LOOT SHARE
+  **Or loot share (0.2.33)** - the designer expected a loot-shared King Minos to play: a "LOOT SHARE
   You received ... for assisting" line within 2 s of a death, either side (it came 40 ms *before* the
   nametag read 0), claims it; the new wording names the creature ("2 King Minos Shards"), the older
   ("loot for assisting X") does not. Death first: kept 2 s in `unclaimedDeaths` - a RARE DROP line in
@@ -610,10 +600,10 @@ detection exists):
   is a bust. A drop with no kill pending (Relic, Dye, loot share, or a line that beat the nametag)
   opens a known-outcome chop. Nametags first seen and at death are recorded as `diana_mob`, so the
   real nametag format can be checked - **not yet seen by us; confirm from the first records**.
-- **First real win, confirmed in game (2026-09-30, 0.2.35):** the user's own Inquisitor dropped Chimera I
+- **First real win, confirmed in game (2026-09-30, 0.2.35):** the designer's own Inquisitor dropped Chimera I
   (26.7M); the RARE DROP line came 28 ms before the nametag read 0, the drop path opened a known-outcome
-  chop, the kill was then skipped as already playing, and the Glint ending played - the user saw it.
-- **The pre-kill hide (0.2.35)** - the user asked for the HUD, GUI and chat to go "a little before the
+  chop, the kill was then skipped as already playing, and the Glint ending played - the designer saw it.
+- **The pre-kill hide (0.2.35)** - the designer asked for the HUD, GUI and chat to go "a little before the
   mob is killed, like when he has 3m hp left ... like skymaxx does it". SkyMaxx's rule, read from its
   classes (`SeaCreatureDetector.aboutToDie`, `AnimationDirector.arm`): a creature that is ours, **or
   any while we have had loot share in the last 5 min**, seen >= 6 ticks, close (16 blocks), HP at or
@@ -629,7 +619,7 @@ detection exists):
   private fields. It is begun only inside `hideVanillaHud`'s wrapper, per vanilla element, so our own
   cutscene is never touched. `hudAlpha()` eases 1 -> 0 over 0.35 s and snaps back to 1 when the
   hide ends. **Unverified in game** - the targets and constructors were checked with javap.
-- **Filling the screen (0.2.47)** - the user found the sides empty, rejected info panels (nothing to
+- **Filling the screen (0.2.47)** - the designer found the sides empty, rejected info panels (nothing to
   read), and chose screen-filling motion for Diana (no walls - it plays over the real game).
   `render/ChopFill`: `debris` (each blow throws oak splinters and sparks out toward the edges, more
   each blow, 44 at the split; seeded, on the scene clock, so ChopTest's honesty still holds and the
@@ -637,10 +627,10 @@ detection exists):
   over 7 bands, from the split to past the edges, behind the block), `motes` (40 squares of that
   colour rising across the width), `ash` (a bust's, short). No rays or motes for the Relic or the
   Dye. Everything on a one-head-texel grid. The rays come in at the drop's showcase (`arrive() - 150`),
-  not at the split - the user's call in 0.2.51.
+  not at the split - a design choice in 0.2.51.
 - Next: UNKNOWN from detection, replay/simulate, fixtures, `/sbcs dump`.
 
-**What SBO knows about Diana's messages** (SBO 0.5.2 for 26.2, a Diana mod the user supplied,
+**What SBO knows about Diana's messages** (SBO 0.5.2 for 26.2, a Diana mod the designer supplied,
 read from its class files 2026-09-28 - use as the starting point for detection, then confirm
 against our own `diana_line` records; `§` codes as SBO matches them):
 
@@ -652,7 +642,7 @@ against our own `diana_line` records; `§` codes as SBO matches them):
 - The Dye: `^§d§lWOW! (.*?) §6found a §2Mythological Dye.*$` - group 1 is a player name, so check
   it is ours.
 - Loot share: `^§e§lLOOT SHARE §fYou received loot for assisting (.*?)$`; a drop soon after it is
-  a lootshared one. **A lootshared drop plays the cutscene like any other** (the user, 2026-09-28).
+  a lootshared one. **A lootshared drop plays the cutscene like any other**.
 - A kill: SBO tracks armour-stand nametags containing the mythological mob-type glyph (`§2` +
   U+E07E) and fires its death event when the HP parsed from the name (`([0-9]+(?:\.[0-9]+)?[MK]?)§f/`)
   reaches 0 - once per entity id. That is positive evidence of a kill, unlike the Scatha's
@@ -669,7 +659,7 @@ its constructor, so the flag has to be a constructor argument); Vanguard tests g
 
 ## Cutscenes play in the HUD - the player keeps control (0.2.20)
 
-The user asked to be able to move and look round while an animation plays, SkyMaxx's way (MIT).
+The designer asked to be able to move and look round while an animation plays, SkyMaxx's way (MIT).
 The three cutscenes (`ScopeMinigameScreen`, `ThawScreen`, `ChopScreen`) are still written as
 `Screen`s but are **never opened**: `render/CutsceneHud.show(screen)` hands one to a HUD element
 (`cutscene_hud`, added last) that sizes it with `Screen.init(w, h)` - public on 26.2, sets width
@@ -679,7 +669,7 @@ screen is open, so the game keeps the mouse and keyboard. A cutscene takes itsel
 The profit window and the menu are still real screens - they are interactive.
 
 **The whole HUD is hidden, every mod's (0.2.37), SkyMaxx's way.** Hiding vanilla's elements one by
-one (`hideVanillaHud`, 0.2.20-0.2.35) left other mods' HUD up - the user's screenshots showed
+one (`hideVanillaHud`, 0.2.20-0.2.35) left other mods' HUD up - the designer's screenshots showed
 Skyblocker's status bars (registered through `HudElementRegistry`) and SkyHanni's lines, which
 SkyHanni draws in `Gui.extractRenderState` just *around* the `Hud.extractRenderState` call
 (`MixinGui_GameRenderer`), outside the HUD pass. Now:
@@ -689,7 +679,7 @@ SkyHanni draws in `Gui.extractRenderState` just *around* the `Hud.extractRenderS
 - `mixin/HudFadeMixin` cancels `Hud.extractRenderState` whole once `hudAlpha()` reaches 0; SkyHanni's
   draws around it are dropped by the fade at 0. It also keeps the frame's extractor (`HudFade.frame`).
 - **Our cutscenes are not HUD elements any more (0.2.40).** 0.2.37 drew them inside the HUD pass
-  (as Fabric elements under `HudFade.untouched`, or directly when the pass was skipped) and the user
+  (as Fabric elements under `HudFade.untouched`, or directly when the pass was skipped) and the designer
   heard every sound and saw nothing - the cause was never pinned down offline. Now `GuiFadeMixin`
   draws them where the fade window closes, fade off, after `graphics.nextStratum()`
   (`SbcsClient.drawOwnHud`): after the HUD, before screens. `HudFade.added` counts states; a
@@ -702,7 +692,7 @@ SkyHanni draws in `Gui.extractRenderState` just *around* the `Hud.extractRenderS
 `mixin/HudHiddenMixin` makes `Hud.isHidden()` (the method, not the field) answer true while
 `shouldHideHud()`. For SBO: it draws its overlays, the Diana loot tracker among them, at the RETURN of
 `Gui.extractRenderState`, after screens - outside the fade window - and skips them only on
-`hud.isHidden()`; the tracker showed the drop before the split (the user, 2026-10-02). Vanilla callers,
+`hud.isHidden()`; the tracker showed the drop before the split. Vanilla callers,
 read with javap: toasts, LivingEntityRenderer / ItemFrameRenderer name tags, the F3 overlay, and
 `GameRenderer.shouldRenderBlockOutline` - so those go for the length of the hide, as under F1. The HUD
 pass reads the field, so it is unaffected.
@@ -710,14 +700,14 @@ pass reads the field, so it is unaffected.
 **`GuiScreenMixin` now only keeps the chat box shut** (`SbcsClient.chatShut()`: a cutscene or
 the pre-kill hide) - its history is where a drop gives itself away (SkyMaxx's `chatShut`). Every
 other screen opens over a cutscene that keeps playing underneath. Unlike SkyMaxx, the pause menu
-does **not** skip it: the game opens that by itself when the window loses focus, and the user
+does **not** skip it: the game opens that by itself when the window loses focus, and the designer
 alt-tabs a lot. `ChatHold` (holding new lines until the cutscene is over) is unchanged - it is
 about not losing messages, not about hiding the chat.
 
 Known gap: with the GUI hidden (F1) the HUD elements, ours included, are not drawn.
 
 **The review's Tier 1 (0.2.84)** - the doc "SBCS animation review" (claude.ai/code/artifact/6e0782c3-c97e-430b-b957-1111c4f1af38)
-holds the full priority list; Tier 1 is built and **confirmed working in game (the user, 2026-10-12)**:
+holds the full priority list; Tier 1 is built and **confirmed working in game**:
 - `gui/Cutscene` (Chop, Hellion, Seraph, Eruption screens): `showsWin`, `skip`, `interrupt`. `SbcsClient.makeRoom` lets
   a known win interrupt a bust or a pending kill; anything else goes to `waitForTurn` (a bust is dropped after 5 s, a win
   always waits). Each watcher listener's `resolve` falls back to `killKnown` when its pending screen is gone, so a win
@@ -727,7 +717,7 @@ holds the full priority list; Tier 1 is built and **confirmed working in game (t
   price are set without sound. Scatha and Thaw skip by `onClose`.
 - `mixin/DroppedItemHideMixin` (EntityRenderDispatcher.shouldRender) + `PickupHideMixin` (ItemPickupParticleGroup):
   no ItemEntity drawn while `hideDroppedItems()` - a slayer cutscene or its pre-kill hide. Only slayer drops land on
-  the floor (the user).
+  the floor.
 - "Keep health and hotbar" (`keepVitals`, default on): `mixin/HudInvoker` calls vanilla's private
   `extractHotbarAndDecorations` again on a stratum after the cutscene (`drawVitals`); its `@Accessor isHidden` is F1
   itself, since `isHidden()` is ours while we hide.
@@ -770,7 +760,7 @@ holds the full priority list; Tier 1 is built and **confirmed working in game (t
   55%; the Scatha's shake knob reads it too. `vanguardQuick`: ThawScreen jumps a CRASH corpse from the intro to
   finaleStart - 1500, events fired muted. `SbcsClient.resetSettings` (stats untouched). `playTest` for the
   menu's "Try it" rows.
-- **"Try it" follows the bust setting (2026-10-16, the user)**: `playTest` sets `SbcsClient.tryingIt` while it opens
+- **"Try it" follows the bust setting (2026-10-16, the designer)**: `playTest` sets `SbcsClient.tryingIt` while it opens
   a screen, which the screen keeps as `followsBusts`, so `shortBust` applies to it; with busts off a bust "Try it"
   plays nothing and says so in chat (`testWins`). `/sbcs test` still plays everything in full.
 - Menu: tab "Animations"; Live prices + the floor under General > Prices; every volume also on the Sound tab
@@ -780,7 +770,7 @@ holds the full priority list; Tier 1 is built and **confirmed working in game (t
   the Seraph's world grey gild relief 0xD0; the Eye's rays drawn before the core; `HellionScene.flushLayer` draws
   the pixel layer before the showcase words; `dianaSize` default 130 (`dianaSizeRaised` migrates an untouched 100);
   the Scatha's card "Just gemstones..." / "Dwarven O's...". The glow is 40 texels in eight steps.
-- **Diana's win rays come out of the drop (0.2.87, the user)**: every showcase item goes through
+- **Diana's win rays come out of the drop (0.2.87, the designer)**: every showcase item goes through
   `ChopScene.showItem`, which remembers where it was drawn (`itemX/Y/Size`); `ChopFill.rays` starts there, a frame
   behind, and reaches 0.85 of the item's size (the downward ones 0.3-0.7, short of the words). They used to start
   at the block's head point and run to the screen's edges behind the text.
@@ -832,7 +822,7 @@ auto-bump keeps whichever suffix is there (`x.y.z-alpha|beta`).
   `Voices.finYank`. Drawn only in game - checked with a Python mock of the sprites.
 - Left of Tier 4: T8 is data (records at the next Fishing Festival). D10's pixel ring was done in Tier 3 (ChopArt.ring).
 
-**0.3.1-alpha, from the user's look at 0.3.0 (2026-10-12):** the vent drips are gone (they looked weird). Diana's
+**0.3.1-alpha, from the designer's look at 0.3.0 (2026-10-12):** the vent drips are gone (they looked weird). Diana's
 showcases go through `ChopSpecials.fit` - the drop at most 0.26 of the screen high (`ChopScene.screenH`) and lifted
 so the words clear the bottom; the Dye's `showScale` is 1.3 (at 1.45 with the 130% size its price was off-screen).
 `ChopFill.motes` draws before the drop and its words. The wedge rays step every ~1.5 cells and end 6 / 4 cells wide.
@@ -868,18 +858,18 @@ so the words clear the bottom; the Dye's `showScale` is 1.3 (at 1.45 with the 13
 ## Release (2026-10-15)
 
 0.3.3-alpha is the first build published to Modrinth. `docs/modrinth.md` holds the page's fields (summary, categories,
-dependencies) and the release notes; the project description is the README. The Stats rework the user asked for next
+dependencies) and the release notes; the project description is the README. The Stats rework the designer asked for next
 became the Ledger (below).
 
 ## The SBCS Ledger (2026-10-16)
 
-The user's achievement system: local only, a new "Ledger" tab beside Stats, "like an openable book ... with stamps,
+The designer's achievement system: local only, a new "Ledger" tab beside Stats, "like an openable book ... with stamps,
 maybe like a binder", a chapter per animation, old stats backfilled. They edited the stamp list as a spreadsheet.
 
 - **`docs/ledger_stamps.xlsx` is the source of the stamp list** (ID, chapter, name, what earns it, kind, four tier
   numbers, hidden, keep). `tools/gen_ledger.py` writes `ledger/StampTable.java` from it - edit the sheet and re-run,
   never the Java. IDs are stable; what each one *counts* is code, `Ledger.value` (a switch on the ID; unknown IDs are
-  events). The user's numbers: Scatha Worm Food 50/100/500/1000, Dry Aged 100 (45 Days 200, hidden), Beginner's Luck
+  events). The designer's numbers: Scatha Worm Food 50/100/500/1000, Dry Aged 100 (45 Days 200, hidden), Beginner's Luck
   20; Vanguard 5/25/50/100, Ice Cold 25 (without a legendary - what the stats count), In the Black 30M; Thermal
   Runaway 50; Spirit Level 100/250/500 Ghost drops. Fin's Big Fish is any Megalodon (the stats never kept the pet's
   rarity; both are titled "Megalodon"); Bigger Fish, the legendary, is an event from the update on.
@@ -913,13 +903,13 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   the thump at 170 ms with ink flecks and a jolt, "STAMPED!", the name, the grade; 2.95 s). `GuiDraw` is the menu's
   in-game `Draw`, shared. `Voices.stamp` (thump, edge click, paper, two bell notes, a third for a raised grade) on
   `ledgerVolume`; `ledgerPopups` under General. Offline: the scratchpad's `menu/src/CardPreview.java`.
-- `PANEL_W` is 440 (`PANEL_H_MAX` 400, `PAD` 12, `GAP` 4 - the user found 392 crowded); a tab too narrow for its name
+- `PANEL_W` is 440 (`PANEL_H_MAX` 400, `PAD` 12, `GAP` 4 - the designer found 392 crowded); a tab too narrow for its name
   draws its icon alone.
-- **The book is shown on its own (2026-10-16, the user)**: the Ledger tab sets `MenuView.ledgerMode` (static, so the
+- **The book is shown on its own (2026-10-16, the designer)**: the Ledger tab sets `MenuView.ledgerMode` (static, so the
   menu reopens in it); the menu fades out over 180 ms and the book drops in (`LedgerView.enter`, `backOut`), shut, and
   swings open. Esc (`MenuView.escape` from `SbcsMenuScreen.onClose`) and the ribbon (`shutByRibbon` -> `wantsLeave`) put it away (`leave`, `gone`). `tab`
   never becomes `TAB_LEDGER` any more. The book is 412 x 250, scaled to the screen in quarter steps (2.0 at a 960 x 540
-  GUI; 10 px kept clear above and below - the user had the "Back to the menu" and hint lines removed, 2026-10-17),
+  GUI; 10 px kept clear above and below - the designer had the "Back to the menu" and hint lines removed, 2026-10-17),
   resting at `TILT` -0.02 rad with more while it lands, leaves, opens and turns; `toBook` undoes the transform for
   the mouse. Stamp names are 0.75x, wrapped at 36.
 - **Pages turn** (`Spot` = chapter + page; `next`/`prev` run through the whole book): the folded corners (click, or drag -
@@ -929,28 +919,28 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
 - **Pencil** on the pages: a quip and a 2x doodle per chapter at the foot of the title page (`note`, `DOODLES` in
   Chapter order), a double squiggle under the title, a coffee ring on two chapters in three, tally marks of the
   chapter's stamps on the right page.
-- **92 stamps (2026-10-16, the user: "10 per page at least")**: 12 a chapter, 10 for Fin and Wisp (the Seraph's
+- **92 stamps (2026-10-16, the designer: "10 per page at least")**: 12 a chapter, 10 for Fin and Wisp (the Seraph's
   chapter stays taped, with none). The 33 added are marked in the sheet's notes column. They count from `Facts`
   fields added for them (`dwarvenOs`, `corpseRolls`, `corpseItems` by name, `dianaKillsBy` by creature,
   `allDrops()`, `dropSources()`), except the events: Big Ticket (`SbcsStats.onCoins`, one drop >= 10M), and Fin's
   Feeding Frenzy and Wisp's Double Haunting, Poltergeist, Matched Pair and Witching Hour, which `Ledger.timed` reads
   from the source's own recent drops (only when the clock is sane). LedgerTest checks every chapter has 10+.
-- **The user's sheet edits (2026-10-16)**: Beginner's Luck is a pet within the **day's** first 10 Scatha kills
+- **The designer's sheet edits (2026-10-16)**: Beginner's Luck is a pet within the **day's** first 10 Scatha kills
   (`LedgerData.scathaDay`/`scathaDayKills`, counted by `Ledger.scathaKill` from `SbcsStats.onKill`, local midnight)
   - an event, not backfilled. Dentist 25/50/200/500. The Ghosts' windows are `HAUNT_MS` 30 s (Double Haunting) and
   `GHOST_RUN_MS` 60 s (Poltergeist, Matched Pair). **An awarded event reads as its own number** (`need(grades)`):
   read as 1, Back to Back (50) and In the Black (30M) were flagged but never stamped. LedgerTest 409.
-- **Every stamp looks different (2026-10-16, the user)**: `StampArt.ITEMS` gives each its own vanilla item (each must
+- **Every stamp looks different (2026-10-16, the designer)**: `StampArt.ITEMS` gives each its own vanilla item (each must
   also be a case in `GuiDraw.stack`, or it draws as paper). **On 26.2 coloured items are collections**: there is no
   `Items.GREEN_DYE` or `YELLOW_WOOL` - wool is `Items.WOOL.pick(DyeColor.X)` (dyes are presumably the same, unverified),
   and the copper family (lightning rods, copper lanterns...) are `WeatheringCopperCollection`s: one of those in the
   `stack` switch makes the whole `new ItemStack(switch ...)` fail to compile. Every other name there was confirmed by
-  the user's build (javac reports all missing names at once, and only those three were)), and `StampArt.shape` one of six `Shape`s (circle, octagon,
+  the designer's build (javac reports all missing names at once, and only those three were)), and `StampArt.shape` one of six `Shape`s (circle, octagon,
   rounded square, shield, diamond, scalloped seal) by its place in the chapter, so neighbours never match.
   `inside(shape, x, y, r)` is the one definition; `fill`/`outline` draw it a row of runs at a time, and empty slots
   pencil the same outline dashed. **The cover keeps its face while it swings**: `cover` draws `coverFace` whole,
   squeezed towards the spine with `Draw.scale(sx, 1)` and darkened as it turns, opening and closing alike.
-- **Secrets and SkyBlock items (2026-10-17, the user: more secret, funnier stamps; SkyBlock items not vanilla)**:
+- **Secrets and SkyBlock items (2026-10-17, the designer: more secret, funnier stamps; SkyBlock items not vanilla)**:
   109 stamps, 27 secret, each with a `hint` (the sheet's last column, "Hint (secret stamps)") pencilled on its page in
   place of the rule; the pop-up says "SECRET STAMP!". The new ones are events: dates (Friday 13th, 29 Feb, Christmas -
   in `Ledger.timed`, so the clock check covers them), Two-Timer (two sources within 5 min), Natural Talent (a drop on
@@ -958,7 +948,7 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   the Scatha's comes from `scathaDayKills`), Round Number, Is That It? (a rare pet after 300+ dry - the gap from `recent`, or the whole count for a first
   pet, never guessed), Cereal Killer (`Ledger.scathaResult`, `LedgerData.cerealRun`), Brain Freeze (`onCorpse`, 2+
   legendaries), Nobody Expects It (`onDiana`: within the day's first 5 Inquisitors,
-  `killsToday(l, "diana:INQUISITOR")`; both daily rules are the user's), Number of the Beast, Snake Eyes, Hot Potato, Bigger Boat, Ain't Afraid,
+  `killsToday(l, "diana:INQUISITOR")`; both daily rules are the designer's), Number of the Beast, Snake Eyes, Hot Potato, Bigger Boat, Ain't Afraid,
   Loose Change (`onCoins`), Health Inspector (`stopAll(true)` with something playing). A desc's "N" / "Nth" is filled
   with the stamp's number by `LedgerView.describe`. **Icons**: `head:<set>:<name>` in `StampArt.ITEMS` draws the
   drop's own SkyBlock head (`HeadSkins.named(set).blob(name)`, `head:scatha:pet` is `PetHeadPopup.SKIN_BASE64`) as a
@@ -974,7 +964,7 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
 
 ## Fail-safes (2026-10-16)
 
-The user asked for fail-safes across the mod; these are the fifteen they approved. `com.sbcs.Safety` holds most:
+The designer asked for fail-safes across the mod; these are the fifteen they approved. `com.sbcs.Safety` holds most:
 - **Errors**: every animation draw (`drawOwnHud`), watcher tick and watcher chat call runs in `Safety.run(key, ...)`
   (keys are the stats' source keys plus "ledger"). A throw goes to `Safety.failed`: logged, `stopAll(false)`, one chat
   line; `STRIKES` (3) and `Safety.on(key)` is false for the session - its watcher stops and `mayOpen` refuses it.
@@ -1001,7 +991,7 @@ The user asked for fail-safes across the mod; these are the fifteen they approve
 
 ## Under maintenance: the Seraph (2026-10-15)
 
-The user is reworking the Seraph's Glyph before players see it. `Maintenance.SERAPH` (pure, no Minecraft) is the
+The designer is reworking the Seraph's Glyph before players see it. `Maintenance.SERAPH` (pure, no Minecraft) is the
 switch. While it is true, `SbcsClient.seraphOn()` is false whatever `seraphAnimation` says, and every Seraph path
 goes through it: the watcher's tick and chat lines, the pre-kill hide, `hideDroppedItems`. "Try it" for "seraph" only
 plays for `Dev.allowed()`, and `/sbcs test slayer enderman ...` (developer-only already) still plays it. The menu
@@ -1054,8 +1044,8 @@ hints and the version. The tab and the open cards are static, so the menu reopen
 
 ## Hellion (the blaze slayer, Inferno Demonlord tier IV) - first version 0.2.54
 
-Built without the user's Demonlord session (they asked for a start before it); detection waits for
-`slayer_line` records. The user's decisions: **tier IV only**, wins are drops worth **500k or more**,
+Built without the designer's Demonlord session (they asked for a start before it); detection waits for
+`slayer_line` records. The designer's decisions: **tier IV only**, wins are drops worth **500k or more**,
 **landing on grey (Ashen) is the bust tell**. Use Blender only for what code does badly (rigid-body
 physics: the dice tumble) - their call.
 
@@ -1082,19 +1072,19 @@ physics: the dice tumble) - their call.
 - `gui/HellionScreen` - the canvas for the game, sounds (reused Chopping Block/Thaw voices for now),
   the price (bazaar instant sell, else lowest BIN). `SbcsClient.openHellion`; tests via
   `/sbcs test slayer blaze <drop>`.
-- **0.2.55, from the user's first look:** "way too fast" - the build-up is 4.8 s (`REVEAL`; the user:
+- **0.2.55, from the designer's first look:** "way too fast" - the build-up is 4.8 s (`REVEAL`; the designer:
   the rods can take 4.5-5 s, this one is not rushed), the shield four rounds from 700 ms, 420 ms a
   step shrinking 9% each (`STEPS` computed), `HANG` at the last step's end (4335). The rods no longer
-  close in (the user) - only `spin` grows, 1 + 9x^2, integrated in `HellionScene.ticks`. Clang
-  pitch capped at an octave. The "fire pillars" the user meant are **the fight's own**: from their
+  close in - only `spin` grows, 1 + 9x^2, integrated in `HellionScene.ticks`. Clang
+  pitch capped at an octave. The "fire pillars" the designer meant are **the fight's own**: from their
   screenshot, four terracotta blocks (brown, red, orange, yellow bottom up) with fire on top and a
   "6s 8 Hits" nametag - now 3D boxes of the game's own terracotta and animated fire (soul fire for
   Crystal), adopted at runtime. The seconds count to 0 at the reveal, the hits fall with the clangs.
-  `SPIN_TOP` 5 (the user: a smaller top speed).
+  `SPIN_TOP` 5 (a smaller top speed).
 - `detect/HeadCapture` - the Paragon Shard is in neither the NEU repo nor Hypixel's
   `/v2/resources/skyblock/items` (hunting shards are missing there): any open chest-style menu showing
   a wanted head (the bazaar page is enough) gives up its textures property as a `head_capture`
-  record, once, with a chat line. Bundle it into `slayer_heads.json` from the user's records.
+  record, once, with a chat line. Bundle it into `slayer_heads.json` from real records.
 - **The rare drop endings (0.2.57).** Per ending, `HellionTimeline.arrive()` is when the drop is shown
   (name, odds, price all follow it).
   - **Dice** (`anim/HellionDice`): Blender 5.2 rigid body (a 2 m cube thrown from the core with spin,
@@ -1113,7 +1103,7 @@ physics: the dice tumble) - their call.
     pillars erupt (they stand through this ending, not blown apart), the dye rises; banner and score.
   - Preview: the classpath must include `src/main/resources` for the track, and in Git Bash set
     `MSYS_NO_PATHCONV=1` or the `;`-separated classpath is mangled and the die silently sits still.
-- **0.2.58, the user: its own sounds, better fire, pillars further out.**
+- **0.2.58, the designer: its own sounds, better fire, pillars further out.**
   - Sound is `audio/HellionSound.schedule(tl)`: the whole soundtrack as timed cues (`Voices.hellion*`),
     computed once. `HellionScreen` plays what is due; a `cut` cue silences first (the reveal, the
     Dye's freeze and ignition). `tools/HellionSoundtrack` renders the same list to WAV, the only way
@@ -1133,9 +1123,9 @@ physics: the dice tumble) - their call.
   texture cannot be adopted by name.** Now `SbcsClient.readGameTexture` reads the PNG through the
   resource manager (a pack's fire too). `HellionArt.fireStrip` normalises any strip to 32 frames of
   16 px, and `greyFire` makes a grey copy. The fire is that grey copy tinted with the shield's colour
-  (`HellionScene.fireTint`; Ashen lifted to #8E8E8E), the user's ask. The Dye's eruption uses the real
-  orange fire. The clang only adds 10% height (the user: vanilla's size).
-- **0.2.61, the jackpots (the user: High Class "a bit more hype", the best drop before the Dye; the
+  (`HellionScene.fireTint`; Ashen lifted to #8E8E8E), the designer's ask. The Dye's eruption uses the real
+  orange fire. The clang only adds 10% height (vanilla's size).
+- **0.2.61, the jackpots (High Class "a bit more hype", the best drop before the Dye; the
   Dye "extravagant, extraordinary").**
   - **High Class:**
     - **Bullet time.** `diceMs(t)` plays the track at `SLOW_RATE` 0.35 between `SLOW_FROM` 1150 and
@@ -1164,7 +1154,7 @@ physics: the dice tumble) - their call.
   - **Both:** the name stamps letter by letter (`letters()`; HellionScreen draws the first n where
     they sit in the whole name). `hellionGlow` lasts to the end, as the showcases used to go quiet.
 - **Detection (0.2.69)** - `detect/HellionWatcher` + `detect/HellionDrops`, written against a friend's real
-  tier IV session (2026-10-03: 13 kills, 4 bosses with nametags on 0.2.68; the user does not do slayers).
+  tier IV session (2026-10-03: 13 kills, 4 bosses with nametags on 0.2.68; the designer does not do slayers).
   What the records settled, against the guesses that were here before:
   - **No "Spawned by" line exists** under the boss (never seen in 4 bosses), and no "NICE! SLAYER BOSS
     SLAIN!". Ownership is the quest's own chat line `SLAYER BOSS! The Inferno Demonlord IV spawned!`: the first
@@ -1205,7 +1195,7 @@ physics: the dice tumble) - their call.
       1.5 s of the quest starting, at full health, within `INSTANT_REACH` 20; QUEST STARTED re-runs `claim` over the
       bosses already present. A spawn-line claim reaches 24 blocks for a full-health boss (one stood at 21).
     - **The trailing ✯ is not ownership** - it is a Shuriken's Magic Find mark, which any player can put on any mob
-      (the user). 0.3.1 briefly trusted it and was corrected. `PHASE_REACH` is 14 (was 24): neighbouring players'
+     . 0.3.1 briefly trusted it and was corrected. `PHASE_REACH` is 14 (was 24): neighbouring players'
       bosses at 19-26 blocks were taken as phase returns. An entity id that was ours this quest (`ownedIds`) is ours
       again whatever the distance - one boss walked to 25 blocks and back as the same entity.
     - **Quest complete with a win of ours and nothing claimed** plays the win (`killKnown`): a bracketed slayer drop
@@ -1221,7 +1211,7 @@ physics: the dice tumble) - their call.
 
 ## The Seraph's Glyph (the Enderman slayer, Voidgloom Seraph tier IV) - 0.2.63
 
-Pitched 2026-10-03; the user approved it with three calls: **End Crystals at the sides**, the
+Pitched 2026-10-03; the designer approved it with three calls: **End Crystals at the sides**, the
 **Judgement Core gets the extraordinary ending and the Upgrade the jackpot**, and a **black beam is the
 bust**. They do not do slayers: **a friend will play it with records on**, and detection waits on those
 records. The same rules as Hellion apply: tier IV only, a 500k floor, an honest tell, the Hellion
@@ -1250,8 +1240,8 @@ architecture.
     tex (0,16). Body 8x12x4 at (0,-14,0), tex (32,16). Arms 2x30x2 at (±5,-12,0) and legs at
     (±2,-5,0), tex (56,0), the left ones mirrored. Texture 64x32.
   - **Creepy:** the head lifts 5 px and the jaw stays.
-  - **Carrying (the user asked for exact vanilla):** both arms xRot -0.5, zRot ±0.05. They stay
-    there through the throw (0.2.65, the user: vanilla endermen never lift their arms). The glyph
+  - **Carrying (the designer asked for exact vanilla):** both arms xRot -0.5, zRot ±0.05. They stay
+    there through the throw (0.2.65, the designer: vanilla endermen never lift their arms). The glyph
     shakes in the carry, the arms push 0.3 forward at the release, and it flies from the carry spot.
     **CarriedBlockLayer**: translate (0, 0.6875, -0.75), rotX 20, rotY 45, translate (0.25, 0.1875,
     0.25), scale (-0.5, -0.5, 0.5), rotY 90. That puts a half-size block in front of it at hand
@@ -1275,7 +1265,7 @@ architecture.
     beacon's cyan core.
   - **The Void Conqueror skin** keeps its pattern in the hat layer, so the spread draws base and hat
     texels.
-- **The Judgement was replaced (0.2.66).** The user found the kneel / sky-crack / dissolve ending goofy and
+- **The Judgement was replaced (0.2.66).** The designer found the kneel / sky-crack / dissolve ending goofy and
   said the Core and the Dye must not share one: **every animation's dye gets its own, grandest ending**.
   Both were rebuilt exactly as pitched, previewed frame by frame:
   - **Judgement Core, "The Eye Opens"** (`Ending.EYE`, `E_*`): the beam lands purple and the stopped clock
@@ -1303,7 +1293,7 @@ architecture.
     - **The dragon is drawn whole, before the pillars while it is behind them** (`dragonBehind`), after
       them once in front - there is no depth buffer, and it was covering pillars it was behind.
     - The breath starts 12% past the jaws: the pixel layer is drawn over the scene and hid the head.
-  - **0.2.67, the user: "kills frames just like the scatha did".** Counted with a counting Canvas offline
+  - **0.2.67, the designer: "kills frames just like the scatha did".** Counted with a counting Canvas offline
     (every draw call per frame): a normal Seraph frame is ~1,300; the Dragon reached 37,700 once the world
     greyed and 80,000 by the end. Two causes:
     - **The gild drew two quads per texel** (`ChopSpecials.gildFace`). It now works out every texel's colour
@@ -1316,7 +1306,7 @@ architecture.
       sheets and culling took them off. The ink is 4 straight stamps; the preview showed no difference.
       ~1,000 quads now.
     Result: mean 2,500, worst 5,100. Any new ending: count it the same way before handing it over.
-  - **0.2.68, the user: "you can kind of see through him".** Not alpha (the vanilla and the user's
+  - **0.2.68, the designer: "you can kind of see through him".** Not alpha (the vanilla and the designer's
     Defrosted pack textures are both strictly 0/255; vanilla draws it cutout) and not the GUI's ordering
     (javap: 26.2's `GuiRenderState` keeps overlapping elements in submission order -
     `navigateToAboveHighestElementWithIntersectingBounds` - and only sorts by texture within a node).
@@ -1360,7 +1350,7 @@ architecture.
   once a second) and when gone. With `slayer_line` (widened to loot share, glyph, hitshield, quest
   complete...), that is what the friend's records must contain.
 - **Detection (0.2.78)** - `detect/SeraphWatcher` + `detect/SeraphDrops`, from a friend's records (2026-10-05,
-  0.2.69; the recorder is Friend1, not the user - three of their own tier IV kills among other players' bosses):
+  0.2.69; the recorder is Friend1, not the designer - three of their own tier IV kills among other players' bosses):
   - **Ownership is the boss's own "Spawned by: <player>" nametag**, an armour stand two entity ids after the boss's,
     seen the same tick (the Demonlord never showed one). No "SLAYER BOSS!" line exists for the Seraph. The player's
     name is `player.getGameProfile().name()`.
@@ -1378,7 +1368,7 @@ architecture.
 
 ## Eruption (lava fishing, the Crimson Isle's rare sea creatures) - 0.2.74
 
-The user lava fishes themself. Their calls (2026-10-05): every rare creature's kill plays, **loot-shared
+The designer lava fishes themself. Their calls (2026-10-05): every rare creature's kill plays, **loot-shared
 kills too**; the guaranteed drops (Jawbus's Magma Lord Fragment, the Scuttler's Scorched Crab Stick) are not
 the reveal - a bust shows them under the cooled vent with their price; **Plhlegblast plays only for the
 Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wins must feel special.
@@ -1434,35 +1424,35 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
   per-ending cues (thunder, zaps, clacks, anvil, Geiger clicks, Jawbus's groan, the crab's legs, book fire,
   ground cracking, Kuudra's freeze, choir, swell, tentacles, eyes and roar), the arrive and the glow.
   `tools/EruptionSoundtrack` renders a WAV.
-- **Detection** (`detect/LavaDrops` pure, `detect/LavaWatcher`) - from the user's logs, **no nametag seen yet**:
+- **Detection** (`detect/LavaDrops` pure, `detect/LavaWatcher`) - from real logs, **no nametag seen yet**:
   - Drops: `RARE DROP! Enchanted Book (Flash I) (+157 ✯ Magic Find)` - no brackets round the item. The
     Carmine Dye's line is unknown: any drop or WOW! line naming it.
   - Ours: the nametag first seen within 20 blocks, 2 s before to 6 s after its catch line - Hypixel's own or
     **Feesh's rewrite** ("A Thunder has spawned!"; Feesh hides the original, which is why our chat listeners
     run in an early phase, 0.2.72). **Nothing else makes a creature ours (0.2.82).** 0.2.74-0.2.80 also took any
-    creature that armed the hide, any a loot share line named, and any CHARM: in the user's lava party
+    creature that armed the hide, any a loot share line named, and any CHARM: in the designer's lava party
     (2026-10-05, Friend1, Friend2, Friend3, Friend4...) nearly every bust that opened was a party member's
     Jawbus, Thunder or Scuttler, and their one charm was on someone else's Thunder.
   - Someone else's creature plays **only when its own win comes to us**: its death, a loot share line within 2 s,
     and a rare drop that creature can give (either order). A charm on ours is our kill; on anyone else's it is
     their death.
   - Dead: HP reads 0, or the nametag goes at 5% or less, close, no teleport. Also ours going short of 5% with a
-    loot share for its kind within 2 s either side (a party member landed the last hit - the user's Thunder at
+    loot share for its kind within 2 s either side (a party member landed the last hit - the designer's Thunder at
     7%, 23:38), or right after a win of its own. Pending until a win within 3 s, else a bust; a win up to 1.5 s
     before the death is the outcome already.
   - The pre-kill hide: ours only, at `lavaHidePct` of its health.
-  - **Jawbus floats up immune (0.2.83, the user 2026-10-11)**: the same entity, but its nametag shows no health for
+  - **Jawbus floats up immune (0.2.83, the designer 2026-10-11)**: the same entity, but its nametag shows no health for
     ~4 s (2026-10-05 records: both stands "gone" at 18M, the same ids back at 20M). The scan only matched names with
     "/" and "❤", so it looked like a vanish and opened Eruption. A followed entity now stays followed whatever its
     name says, and health is only read off a name that shows it. HellionWatcher does the same for the Demonlord,
     reported to do it too - **its immune nametag has never been recorded; check the first records** (0.2.83's
     `SlayerRecorder` follows ids through name changes, 4/s, with `dy`, height above the player).
-  - **Kills go to the last hitter.** Loot share names the player who killed it, even for the user's own catch.
-  - `tools/LavaDetectTest` (32 checks). The user's whole 2026-10-05 session replayed through the watcher (records
+  - **Kills go to the last hitter.** Loot share names the player who killed it, even for the designer's own catch.
+  - `tools/LavaDetectTest` (32 checks). The designer's whole 2026-10-05 session replayed through the watcher (records
     sample nametags once a second, so it misses some 0s the game saw) opens exactly their own 3 Ragnaroks (one
     Burnt Texts) and 7 Thunders, no one else's.
 - Menu "Lava Fishing - Eruption" (`lava*` config); `/sbcs test lava <drop> [creature]`.
-- **0.2.75-0.2.78, from the user's screenshots:** GPU quads wound the wrong way vanish in game (fixed in
+- **0.2.75-0.2.78, from the designer's screenshots:** GPU quads wound the wrong way vanish in game (fixed in
   `drawGpu`); the far shore/cliff never looked right (0.2.76-0.2.77) and is gone - **the floor image covers the whole
   view** (to +-700/900 units) and fades to near-black with distance (`fog`, from 70 units back), so nothing of the
   game shows over it. **The vent** is a cone: half-sunk blackstone boulders (`SLOT_STONE`, GPU-only), a ring of
@@ -1472,19 +1462,19 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
   colour - green and carmine lava stay lava (multiplying the orange texture went olive). **The Vial is "Meltdown"**:
   `V_PULSES` (six, faster), `critical()` (green screen edges, shake), `V_FREE` the detonation (Jawbus gone, debris,
   `mushroom()` cloud, the radiation ring), the vial blown up into the cloud and down to rest (`V_DESCEND`).
-- **0.2.79, the user:** the lava streams "looked ass" - removed; the crater opening is 7 units, not 12. **The sides**
+- **0.2.79, the designer:** the lava streams "looked ass" - removed; the crater opening is 7 units, not 12. **The sides**
   (their pick of four): `pillars()` - clusters of basalt columns (GPU, `SLOT_BASALT`/`_TOP`, tinted dark, 1-3
   blocks, placed by screen x) - and `smoke()` - grey plumes off the field by them and ash across the screen, thicker
   to the reveal (identical every run), cleared by a win. (Not picked: magma cubes hopping, side vents.)
 - `tools/EruptionTest` (167 checks; needs the client classpath like the preview): frame honesty per creature
   (the raster image hashed pixel by pixel, the floor image too) on four seeds, sound honesty, heat order,
   Kuudra's clock, every ending's beats in order, the draw-call budget. `tools/EruptionPreview` as the Seraph's.
-- **Next:** the user's lava session with records on - check the nametag format and the catch lines, and write
+- **Next:** the designer's lava session with records on - check the nametag format and the catch lines, and write
   `LavaDetectTest` / a replay against them as Hellion's were.
 
 ## Fin (Fishing Festival, 0.2.42)
 
-The user's brief (2026-10-02): very fast, very simple, no dim, no kill animation - an announcement
+The designer's brief (2026-10-02): very fast, very simple, no dim, no kill animation - an announcement
 when a Great White Shark drops a **Megalodon** pet or a **Great White Shark Tooth**. `detect/SharkDrops`
 reads the drop line (pure; any "... DROP!" prefix; the pet's rarity is in the text, as SkyHanni's own
 example "PET DROP! EPIC Slug (+1300☘)" shows; colour codes stripped). **No real line had been seen**
@@ -1500,13 +1490,13 @@ outline. Sounds: `onFinRise` (blup), `onFinChop` (chop + splash), `onFinReveal` 
 legendary), on `fishingVolume`. Config `fishingAnnounce`, menu "Fishing Festival - Fin",
 `/sbcs test shark megalodon|legendary|tooth`.
 
-0.2.51, from the user's test: the fin waits half a second longer before the chop (`FALL` 800,
+0.2.51, from the designer's test: the fin waits half a second longer before the chop (`FALL` 800,
 `CHOP` 920, `POP` 1020, `END` 3000). The Megalodon looked "weirdly put" because `PlayerHeadMesh`
 had its sides swapped (above, 0.2.53). 0.2.51 tried the game's item renderer instead - right, but
 flat and pixelated scaled up - so 0.2.53 is the fixed 3D head again, three-quarters on (yaw 35 with
 a 9 degree sway, no spin: its skin wraps round the cube, eyes on the sides).
 
-**0.2.59, the user: George's price for the pets, and a bust.**
+**0.2.59, the designer: George's price for the pets, and a bust.**
 - The pets show what George pays, fixed in `FinPopup` (`GEORGE_LEGENDARY` 2.5M, `GEORGE_EPIC` 500k),
   labelled "at George". The tooth keeps the bazaar's instant sell.
 - **The bust** is `detect/SharkWatcher`, written with no real line or nametag captured. It follows
@@ -1526,9 +1516,9 @@ a 9 degree sway, no spin: its skin wraps round the cube, eyes on the sides).
   drop that is showing. Sounds are `onFinMiss`: `Voices.miss` plus `finPlunge`.
   `/sbcs test shark bust`.
 
-## Wisp (Dwarven Mines Ghosts, 0.2.90) - works in game (the user, 2026-10-12)
+## Wisp (Dwarven Mines Ghosts, 0.2.90) - works in game
 
-The user's brief (2026-10-12): like Fin, only for the drop - **Sorrow** or **Plasma** from a Ghost in the Mist.
+The designer's brief (2026-10-12): like Fin, only for the drop - **Sorrow** or **Plasma** from a Ghost in the Mist.
 `detect/GhostDrops` (pure): any "... DROP!" line whose item is Sorrow or Plasma (by name, alone - not Plasmaflux),
 no player chat. **No real line has been seen**: the wiki gives Sorrow 0.12% "Rare Loot" and Plasma 0.1% "Legendary
 Loot" but not the message; both items are RARE (§9) in NEU. DropRecorder keeps `ghost_line` - check the first.
@@ -1577,17 +1567,17 @@ Frostbitten Dye alone, glowing pink, never gold.
 only asks it what is happening now. Five endings - CRASH, REVEAL, EXPLODE from the best
 tier, plus LOCKET (a legendary headline that is the Shattered Locket) and SPECIAL (the Dye)
 - and **one pace for every run** until the last strike. Losses used to play at 0.45x so
-they were over quickly, but that told the player the outcome from the first strike; the user
+they were over quickly, but that told the player the outcome from the first strike; the designer
 asked for every run to strike at the win pace. Even the last hit lands at the same moment
 whatever the drop. Only the ending differs: loss ~10.4s, legendary ~13.3s, Locket ~18s, Dye
 ~20s. ThawTest fails if anything before the landing depends on the ending.
 
 **The flare never lies.** An earlier version let ordinary strikes flare gold sometimes; the
-user found that a signal which can lie kills the tension instead of building it. Every flare
+designer found that a signal which can lie kills the tension instead of building it. Every flare
 is now its drop's true colour, and the tension lives in the **last** strike, which **cycles**
 blue -> violet -> gold three times round from an opening blue and back to blue (`CYCLE`),
 each colour fading into the next, the steps shortening from 380ms to 145ms, before landing on
-the truth. No white anywhere - the user took it out. The cycle is identical for every drop,
+the truth. No white anywhere - the designer took it out. The cycle is identical for every drop,
 so nothing before the landing gives it away; ending on blue makes a legendary's landing the
 biggest jump, blue to gold. (It replaced a climb that stopped at the truth - a common stopped after one rung, so the
 climb's length was the answer.) Under it: one rising riser (`Voices.thawBuildUp`, cut dead at
@@ -1606,13 +1596,13 @@ only colour on screen. The Locket's price comes from `market/LivePrice` - Coflne
 (never waited for) when the counter starts, NPC 5M if it has not arrived. Off in the menu.
 
 **The flare's size is settled - do not enlarge it.** 0.1.34 made it much bigger (a screen
-wash, `ThawArt.aura()`, saturated colours, 42% into the ice); the user found it too big and too
+wash, `ThawArt.aura()`, saturated colours, 42% into the ice); the designer found it too big and too
 colourful and it was reverted to the gem glow at 1.35/0.8 screen heights with 18% in the ice.
 `ThawArt.aura()` stays: the special endings use it for their own glows.
 
 **Art and geometry** (`render/art/ThawArt`, `render/model/ThawMeshes`) were tuned by
 rendering frames offline with `tools/ThawPreview`, which draws the real meshes through the
-real projection - the IconGen trick. Things the previews settled that reasoning got wrong:
+real projection. Things the previews settled that reasoning got wrong:
 
 - **The pick's striking prong is on +Y.** On -Y the tip still landed on the target (the
   pivot is solved from it) but the head arrived back-first.
@@ -1627,7 +1617,7 @@ real projection - the IconGen trick. Things the previews settled that reasoning 
   **Far facets are painted mirrored** (`ThawArt.flip`): a face seen from behind can only be
   drawn with its texture flipped (`ModelProjection`'s winding fix), invisible on the old
   rectangles but on a chipped outline it put every far facet's shape in the wrong place - a
-  grey fringe outside the block and gaps between the facets seen through it. The user saw
+  grey fringe outside the block and gaps between the facets seen through it. The designer saw
   that as "the faces don't connect", twice; the first fix (trimming) treated the symptom.
   A plane's
   `d` is a true distance along its direction - when it was divided by the normal's length
@@ -1637,7 +1627,7 @@ real projection - the IconGen trick. Things the previews settled that reasoning 
   `ThawArt.K` but stay one texel wide, so they do not web over the Vanguard.
 - **The Vanguard is a posed 3D figure painted as a shadow** (`ThawMeshes.vanguard`,
   `ThawArt.corpse`): player-shaped boxes on the standard 64x64 skin layout, plus pauldrons.
-  He was painted in his real armour for 0.2.0 and the user sent it back - a dark shape behind
+  He was painted in his real armour for 0.2.0 and the designer sent it back - a dark shape behind
   frost is the look; the shape is what makes it a Vanguard. Fully opaque - see-through read
   as a ghost. Upward faces are lifted a little, and the visor T glints faintly, edge to edge
   and down to the chin as on the real helmet. A rim on every face drew him as a wireframe.
@@ -1667,7 +1657,7 @@ A high flare cut off by a short, unrelated hit is what made the first version so
 wrong. Strikes are deliberately long - crunch, heavy thud, a ringing steel tone with an
 inharmonic partial at 2.76x, then loose ice crumbling off for a third of a second.
 
-**The screen freezing (0.2.49)** - the user's pick for filling the Thaw's empty sides.
+**The screen freezing (0.2.49)** - the designer's pick for filling the Thaw's empty sides.
 `render/ThawFrost`: pure (a grid, a seed, a fill call), drawn by `ThawScreen.drawFrost` under the tray
 and captions. Frost ferns walk in from each corner over a textured rime, and a ragged band creeps
 along the top and sides (the bottom middle stays clear for the tray); every cell has an arrival
@@ -1680,7 +1670,7 @@ frame (the ThawPreview tool only draws the ice).
 
 **Draw a screen of pixel cells as ONE image (0.2.51).** The frost and the crystal veins first sent
 every cell to the GUI as its own `fill` (twice, with the outline): thousands of render states a frame
-at full growth, more with each cut - the user's frame rate fell with every slice of the Scatha.
+at full growth, more with each cut - the designer's frame rate fell with every slice of the Scatha.
 `render/PixelLayer` implements both classes' `Fill`: cells are blended into an ARGB buffer one texel
 per grid cell (~213 x 120), copied into a `NativeImage` (ABGR), `DynamicTexture.upload()`ed and
 blitted once with the pose scaled by the cell size - nearest sampling keeps the squares crisp. One
@@ -1695,7 +1685,7 @@ first, minus the Skeleton Key:
 
 - `VanguardLoot.listing` - each drop's item ID (NEU repo) and market. Checked live 2026-09-24:
   Dye, Locket, Wisp are auction-only; the crystals and Glacite Powder have no market and count
-  as 0 (the user's call); everything else, the key included, is on the bazaar.
+  as 0; everything else, the key included, is on the bazaar.
 - `market/Bazaar` - Hypixel's public `/v2/skyblock/bazaar`, no key, one request for all
   products. Drops at `quick_status.sellPrice` (instant sell), the key at `buyPrice` (instant
   buy). `market/LivePrice` - Coflnet lowest BIN for the auction items.
@@ -1705,13 +1695,13 @@ first, minus the Skeleton Key:
 
 **Glacite Powder** is in the loot table with weight 0 - not a roll; every corpse gives some -
 so it is never rolled and sorts first. Drawn as a flat sprite (`VanguardItems.sprite`,
-`ThawArt.glacitePowder`) in the manner of the pre-1.14 light blue dye the user wanted.
-**Mojang's own sprite is deliberately not in the jar**; it lives in the user's
+`ThawArt.glacitePowder`) in the manner of the pre-1.14 light blue dye the designer wanted.
+**Mojang's own sprite is deliberately not in the jar**; it lives in the designer's
 `config/sbcs/textures/glacite_powder.png`, copied from their own 1.12.2 install, and
 `ArtOverrides` prefers it. Do not bundle it.
 
 **The menu is on the vanilla font again.** `render/SbcsFont` and `assets/sbcs/font/`
-are unused for now and kept on purpose: the user is choosing a replacement, and swapping
+are unused for now and kept on purpose: the designer is choosing a replacement, and swapping
 it in is `ui.json` plus the `.ttf`.
 
 Offline suites, both runnable without the game: `tools/VgTest.java` (parser, 52 checks

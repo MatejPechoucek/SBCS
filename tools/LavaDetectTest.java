@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Offline checks for lava fishing's detection, against the real lines from the user's own records
+ * Offline checks for lava fishing's detection, against the real lines from the designer's own records
  * (2026-10-05, 0.2.69 - no lava nametags yet, those came in 0.2.71).
  *
  *   javac -d out -cp <fabric+mc classpath> -sourcepath "src/main/java;tools" tools/LavaDetectTest.java
@@ -75,7 +75,7 @@ public final class LavaDetectTest {
         w.onChatLine("RARE DROP! Moogma Leggings (+281  Magic Find)", t + 200_010);
         check("a common drop after a share opens nothing (" + opened + ")", opened.isEmpty());
 
-        // The false triggers (the user, 2026-10-06): a party member's Jawbus, loot-shared, dying 6 blocks away.
+        // The false triggers: a party member's Jawbus, loot-shared, dying 6 blocks away.
         String jaw = "﴾ [Lv600]  Lord Jawbus 69.3M/100M❤ ﴿ ✯", jawLow = "﴾ [Lv600]  Lord Jawbus 2.1M/100M❤ ﴿ ✯",
                 jawDead = "﴾ [Lv600]  Lord Jawbus 0/100M❤ ﴿ ✯";
         long u = t + 400_000;
@@ -115,7 +115,7 @@ public final class LavaDetectTest {
         w.observe(List.of(new LavaWatcher.Tag(53, jawDead, 25)), false, u + 121_000);
         w.afterTick(u + 125_000);
         check("our own Jawbus opens on the kill and busts (" + opened + ")", opened.equals(List.of("kill JAWBUS", "resolve BUST")));
-        // A charm on a party member's Thunder (the user, 23:19) opens nothing; on ours it is the kill.
+        // A charm on a party member's Thunder (the designer, 23:19) opens nothing; on ours it is the kill.
         opened.clear();
         w.observe(List.of(new LavaWatcher.Tag(54, thu, 36)), false, u + 140_000);
         w.onChatLine("§b§lCHARM! §7You charmed the §cThunder §7and received §a2 §9Thunder Shards§7!", u + 141_000);

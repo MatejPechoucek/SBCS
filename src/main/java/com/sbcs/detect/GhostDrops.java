@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The two Ghost drops worth an announcement (the user, 2026-10-12): Sorrow and Plasma, from the Ghosts in the Dwarven
+ * The two Ghost drops worth an announcement: Sorrow and Plasma, from the Ghosts in the Dwarven
  * Mines' Mist. Read from the drop's chat line; pure, so it can be checked offline.
  *
  * <b>The real line</b> (a friend's records, 2026-10-12, 32 Sorrow and 38 Plasma): {@code RARE DROP! Sorrow (+325 ✯ Magic

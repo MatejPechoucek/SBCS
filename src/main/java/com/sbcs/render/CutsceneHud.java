@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
  *
  * <h2>Where it comes from</h2>
  *
- * SkyMaxx (MIT) draws its animations as HUD elements for exactly this reason; the user asked for
+ * SkyMaxx (MIT) draws its animations as HUD elements for exactly this reason; the designer asked for
  * it by name. Our cutscenes are written as Screens and keep being Screens - they are simply
  * never opened: {@link #show} hands one over, and {@link #draw} (called by SbcsClient.drawOwnHud,
  * after the HUD pass) sizes it with {@link Screen#init(int, int)} (public, and sets width, height and

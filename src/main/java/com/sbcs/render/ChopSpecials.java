@@ -72,7 +72,7 @@ final class ChopSpecials {
 
     /**
      * Keeps a showcase on the screen: the drop at most a quarter of the screen high, lifted so its name, lines and
-     * price clear the bottom edge. The Dye at 1.45x on a short window ran its words off the screen (the user, 0.3.0).
+     * price clear the bottom edge. The Dye at 1.45x on a short window ran its words off the screen (0.3.0).
      * {y, size}.
      */
     static float[] fit(float y, float size) {

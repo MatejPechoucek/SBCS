@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
  * resource manager, so a resource pack's fire is the one used) and never bundled. It cannot simply be
  * adopted by its name, as the terracotta is: the game hands an animated block texture over as its first
  * frame only, 16 x 16, and the scene's frame rects then sampled a half-pixel sliver of it, stretched -
- * the streaks the user saw in game (0.2.59). So the strip is read here and normalised.
+ * the streaks the designer saw in game (0.2.59). So the strip is read here and normalised.
  */
 public final class HellionArt {
     private HellionArt() {}
@@ -40,7 +40,7 @@ public final class HellionArt {
     }
 
     /**
-     * The same fire in greys, so a tint gives it any colour outright - the shield's (the user: "change its
+     * The same fire in greys, so a tint gives it any colour outright - the shield's ("change its
      * colour literally to match the current shield"). Brightness is kept, stretched so the hottest texel
      * is white, with a little lift so the dark red edges do not go to black under a dark tint.
      */

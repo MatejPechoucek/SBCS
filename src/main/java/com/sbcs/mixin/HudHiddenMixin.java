@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * For SBO: it draws its overlays, the Diana loot tracker among them, at the very end of
  * {@code Gui.extractRenderState}, after screens - outside everything GuiFadeMixin covers - and
  * skips them only when this says the HUD is hidden. The tracker counts a drop before the Chopping
- * Block reaches its split, so it gave the answer away (the user, 2026-10-02).
+ * Block reaches its split, so it gave the answer away.
  *
  * Only the method answers; the field is untouched, so real F1 is unchanged and so is the HUD pass,
  * which reads the field. Vanilla asks the method too, so for as long as the hide lasts it also does

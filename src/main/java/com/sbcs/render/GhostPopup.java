@@ -12,7 +12,7 @@ import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2fStack;
 
 /**
- * "Wisp" - a Ghost in the Dwarven Mines' Mist dropped Sorrow or Plasma (the user, 2026-10-12: like Fin, only for the
+ * "Wisp" - a Ghost in the Dwarven Mines' Mist dropped Sorrow or Plasma (like Fin, only for the
  * drop). Small and quick, the same place and size as Fin, about 3 s, nothing hidden:
  *
  * <ol>

@@ -463,7 +463,7 @@ public final class HellionScene {
      * its 6 - the throw is Blender's rigid-body simulation, baked (HellionDice). Sparks and a thud on each
      * hard bounce, a shadow under it so the floor is felt, then the camera leans over it.
      *
-     * The High Class one is the jackpot (0.2.61, the user: the best drop before the dye, make it hype):
+     * The High Class one is the jackpot (0.2.61, the designer: the best drop before the dye, make it hype):
      * its last tip onto the 6 plays in bullet time, then the six pips light gold one by one and on the
      * sixth everything goes - a shake, a gold shockwave, the pillars erupting gold, rays, and a fountain
      * of coins.
@@ -833,7 +833,7 @@ public final class HellionScene {
     public static final String TEX_FIRE = "hellion_fire", TEX_FIRE_GREY = "hellion_fire_grey";
 
     /**
-     * The fire's colour is the shield's, outright (the user, 0.2.59): the grey fire tinted. Ashen is
+     * The fire's colour is the shield's, outright (0.2.59): the grey fire tinted. Ashen is
      * lifted a little - its own dark grey multiplied into the fire left it nearly black.
      */
     static int fireTint(Attunement att) {
@@ -845,7 +845,7 @@ public final class HellionScene {
     private static final float PILLAR_COS = (float) Math.cos(Math.toRadians(26)), PILLAR_SIN = (float) Math.sin(Math.toRadians(26));
 
     /**
-     * How far out the pillars stand: well clear of the rods (the user, 0.2.58), but pulled in on a
+     * How far out the pillars stand: well clear of the rods (0.2.58), but pulled in on a
      * narrow window so they never leave the screen - 33 on 16:9, about 25 on 4:3 (screen units).
      */
     static float pillarX(int w, int h) {
@@ -913,7 +913,7 @@ public final class HellionScene {
     private static final int[][] FACES = {FULL, FULL, FULL, FULL, FULL, FULL};
 
     /**
-     * Two of the fight's fire pillars, one each side - the user's screenshot (2026-10-02): yellow, orange,
+     * Two of the fight's fire pillars, one each side - the designer's screenshot (2026-10-02): yellow, orange,
      * red and brown terracotta with fire on top and a nametag, "6s 8 Hits". Here the seconds count down
      * to 0 at the reveal and the hits drop with the dagger clangs, as the real pillar loses them to
      * hits. The fire burns in the shield's colour (soul fire for Crystal) and flares on each clang. At
@@ -974,7 +974,7 @@ public final class HellionScene {
             float fireH = (burn >= 0f ? 1f - ease((t - snuffAt) / 110f) : 1f) * (shatter >= 0f ? 1f - ease(shatter / 0.25f) : 1f);
             if (burn >= 0f && t >= snuffAt && t < snuffAt + 900) snuffPuff(embers, px, fireBase, pz, t - snuffAt, side, h, alpha);
             if (fireH > 0.02f) {
-                // Vanilla's own size; only a small lick upwards on each clang (the user: no taller).
+                // Vanilla's own size; only a small lick upwards on each clang (no taller).
                 float grow = (1f + 0.1f * clang + 2.2f * er) * fireH, wide = 1f + 0.35f * er;
                 float fh = BLOCK * 2f * 1.4f * grow;
                 int frame = (int) ((pt / 50) % 32);

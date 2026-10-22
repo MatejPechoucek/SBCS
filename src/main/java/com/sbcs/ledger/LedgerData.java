@@ -48,7 +48,7 @@ public final class LedgerData {
     public long coins;
     /** The Scatha kill the first pet came on (0 = none yet; backfilled as an upper bound). */
     public long firstPetKill;
-    /** Today's Scatha kills, for Beginner's Luck (the user: it resets every day): the day (local epoch day) and the
+    /** Today's Scatha kills, for Beginner's Luck (it resets every day): the day (local epoch day) and the
      *  kills on it. A new day starts the count again. */
     public long scathaDay = -1, scathaDayKills;
     /** Today's kills per animation ("blaze", "diana", "diana:INQUISITOR"...), for the stamps that reset every day

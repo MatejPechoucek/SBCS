@@ -282,7 +282,7 @@ public class PatternConfig {
      * before the cleaver has moved.
      *
      * Before the kill the HUD simply goes, the moment the hide starts - Diana's way. The dark
-     * veil that used to grow over the screen first is gone (the user asked).
+     * veil that used to grow over the screen first is gone.
      *
      * ON by default. {@code mixin/HudFadeMixin} fades the whole HUD pass out - every mod's
      * elements, not only vanilla's - and skips it once it has gone, as the game does for F1.

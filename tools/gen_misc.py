@@ -161,18 +161,6 @@ def slash():
         d.ellipse([x - 2, h // 2 - 6, x + 2, h // 2 - 2], fill=col)
     save(img, "slash.png")
 
-# ---------------------------------------------------------------- mod icon
-def icon():
-    w, h = 128, 128
-    img = Image.new("RGBA", (w, h), (46, 26, 58, 255))
-    d = ImageDraw.Draw(img)
-    d.rounded_rectangle([10, 70, 118, 118], radius=10, fill=(120, 84, 47, 255), outline=(60, 40, 20, 255), width=4)
-    _draw_scatha_head(d, 30, 20, 4)
-    # knife diagonally
-    d.polygon([(20, 100), (95, 25), (105, 35), (30, 110)], fill=(222, 226, 230, 255), outline=(150, 155, 160, 255))
-    d.polygon([(95, 25), (112, 8), (120, 16), (105, 35)], fill=(61, 38, 22, 255))
-    save(img, "../../icon.png")
-
 if __name__ == "__main__":
     # NOTE: as of the guillotine redesign, guillotine_frame.png / blade.png /
     # scatha_head*.png are real custom art (ported from the reference
@@ -182,7 +170,3 @@ if __name__ == "__main__":
     # overwrite the real art with placeholders again.
     gemstone()
     spark()
-    # icon() is NOT called any more. The mod's icon is rendered from the real cleaver
-    # mesh and texture by tools/IconGen.java, so it cannot drift from what the mod
-    # draws; running the placeholder version below would overwrite it with the old
-    # hand-drawn one. Kept for reference only.

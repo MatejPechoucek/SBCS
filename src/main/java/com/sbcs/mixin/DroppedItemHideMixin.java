@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Slayer drops land on the floor as real items about 1.2 s after the boss dies, while Hellion or the Seraph's Glyph is
  * still building up - visible behind the dimmed cutscene and in the gameplay window (the review, A13). From the pre-kill
  * hide to the end of the cutscene no dropped item is drawn: its model, its shadow, any glow another mod puts on it,
- * and the copy in the gameplay window, which is the same world render. Only slayers drop to the floor (the user,
+ * and the copy in the gameplay window, which is the same world render. Only slayers drop to the floor (the designer,
  * 2026-10-11), so only theirs hide.
  */
 @Mixin(EntityRenderDispatcher.class)

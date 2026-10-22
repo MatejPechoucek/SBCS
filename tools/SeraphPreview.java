@@ -18,7 +18,7 @@ import java.util.Map;
  *   java -Dvanilla=<dir with the game's textures> -Dskins=<dir with ID_skin.png> -Dbg=<screenshot>
  *        -Dat=0,700,1400 -cp "out;src/main/resources" SeraphPreview <outdir> <seed> DROP...
  *
- * The game's textures are read from the user's own client jar for the preview only - the mod adopts
+ * The game's textures are read from the designer's own client jar for the preview only - the mod adopts
  * them at runtime and never bundles them.
  */
 public final class SeraphPreview {

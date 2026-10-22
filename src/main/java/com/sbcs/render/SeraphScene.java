@@ -78,7 +78,7 @@ public final class SeraphScene {
     static final float FEET = -23f;
     /**
      * Where the glyph lands: in front of its feet, in the middle of the shot - so every drop is shown in
-     * the middle (the user, 0.2.64: a spot to its side made the showcase drift off to one side).
+     * the middle (0.2.64: a spot to its side made the showcase drift off to one side).
      */
     static final float BX = 0f, BZ = 18f;
     /** The camera's resting yaw: the pillars stand along its sideways so they sit level on screen. */
@@ -232,7 +232,7 @@ public final class SeraphScene {
         }
         // The showcase: as the drop comes in, the camera eases its focus onto where the drop comes to rest
         // and pins that point so the whole block - banner, drop, name, odds, price - sits in the middle of the
-        // screen. The sway turns about the focus, so it no longer carries the drop off centre (the user, twice).
+        // screen. The sway turns about the focus, so it no longer carries the drop off centre.
         float[] show = showTarget(tl);
         if (show != null) {
             float k = ease((t - tl.arrive() + 900) / 900f);
@@ -669,7 +669,7 @@ public final class SeraphScene {
             p.shakeX = 0.35f * (float) Math.sin(t * 1.7) * p.creepy;
             p.shakeZ = 0.35f * (float) Math.cos(t * 2.3) * p.creepy;
         }
-        // The throw. A vanilla enderman never lifts its arms (the user): they stay in the carry pose
+        // The throw. A vanilla enderman never lifts its arms: they stay in the carry pose
         // (xRot -0.5) through the hold, and only push a little forward as the glyph leaves them.
         float tk = SeraphTimeline.throwK(t);
         if (tk > 0f) {
@@ -1324,7 +1324,7 @@ public final class SeraphScene {
         long spread = t - SeraphTimeline.HEAD_LANDS;
         boolean done = t >= SeraphTimeline.SKIN_DONE;
         // The jaw comes off with it, hanging open as it was (creepy), and closes up into the head as the
-        // skin takes it (the user, 0.2.64).
+        // skin takes it (0.2.64).
         float open = 5f * (1f - ease(spread / (float) (SeraphTimeline.SKIN_DONE - SeraphTimeline.HEAD_LANDS)));
         float jx = x - Y[0] * open, jy = y - Y[1] * open, jz = z - Y[2] * open;
         ChopScene.inkWidth = Math.max(1.5f, ChopScene.size / 2.5f);
@@ -1531,7 +1531,7 @@ public final class SeraphScene {
     }
 
     /**
-     * "The Eye Opens" (the user, 0.2.66). Everything froze at the reveal but this: the glyph's glass cracks
+     * "The Eye Opens" (0.2.66). Everything froze at the reveal but this: the glyph's glass cracks
      * and bursts; what is left is the Judgement Core itself, its real skin, turned to the camera. The eye -
      * a three-texel slit between the white lids of its hat layer - opens a row at a time, glances left,
      * then right, then stares straight out with a heavy pulse; the Seraph and both crystals are pulled

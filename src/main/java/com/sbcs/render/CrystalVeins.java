@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * The Scatha's screen fill (the user, 2026-10-02, "variant A"): gemstone crystals in the Crystal
+ * The Scatha's screen fill (the designer, 2026-10-02, "variant A"): gemstone crystals in the Crystal
  * Hollows' colours grow in from the edges of the screen, a batch with every cut. At the reveal they
  * shatter like glass for a gemstone, flare in the pet's rarity colour and turn to point at the head
  * for a pet, and sink back into the edges when the worm ducks the last swing.

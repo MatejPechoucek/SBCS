@@ -25,7 +25,7 @@ public final class Ledger {
     public static final int RECENT = 60;
     /** "Hot Streak": two rare drops this close together. */
     public static final long HOT_STREAK_MS = 10 * 60_000L;
-    /** The Ghosts' windows (the user's numbers): Double Haunting 30 s; Poltergeist and Matched Pair a minute. */
+    /** The Ghosts' windows: Double Haunting 30 s; Poltergeist and Matched Pair a minute. */
     public static final long HAUNT_MS = 30_000L, GHOST_RUN_MS = 60_000L;
     /** The secret runs of luck: Two-Timer and Hot Potato within 5 minutes; a Bigger Boat and No Ghost within 10. */
     public static final long TWO_TIMER_MS = 5 * 60_000L, FRENZY_MS = 10 * 60_000L;
@@ -243,7 +243,7 @@ public final class Ledger {
         if (clockOk) timed(d, source, title, kill, now, zone);
         Stamp jackpot = byId("house_jackpot_777");
         if (kill > 0 && kill == (jackpot == null ? 777 : jackpot.number(777))) award(d, "house_jackpot_777", kill);
-        // Natural Talent: a drop on the day's first kill of that animation (the user: it resets every day).
+        // Natural Talent: a drop on the day's first kill of that animation (it resets every day).
         if ("scatha".equals(source) ? d.scathaDay == day(now, zone) && d.scathaDayKills == 1 : killsToday(d, source, now, zone) == 1) {
             award(d, "house_natural", kill);
         }

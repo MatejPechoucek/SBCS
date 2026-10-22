@@ -325,7 +325,7 @@ public final class ThawArt {
     /**
      * The Vanguard's skin: a shadow, not a painted man.
      *
-     * He was drawn in his real armour colours for a build, and the user preferred the frozen
+     * He was drawn in his real armour colours for a build, and the designer preferred the frozen
      * silhouette - a dark shape behind frost is eerier than a figure you can see every pixel
      * of. What makes it a Vanguard now is the shape: the posed 3D body, the helmet, the
      * pauldrons. The paint only helps that along: near-black with a faint grain, the upward

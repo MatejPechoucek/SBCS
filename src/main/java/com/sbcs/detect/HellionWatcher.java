@@ -37,7 +37,7 @@ import java.util.Set;
  *   <li>"SLAYER QUEST FAILED!" (the boss killed the player) and a cancelled quest forget the boss.</li>
  * </ul>
  *
- * Tier IV only (the user's call): the nametag must name "Inferno Demonlord IV". Every decision is narrated.
+ * Tier IV only: the nametag must name "Inferno Demonlord IV". Every decision is narrated.
  */
 public final class HellionWatcher {
 
@@ -64,7 +64,7 @@ public final class HellionWatcher {
     private static final double SCAN_RADIUS = 48, CLAIM_REACH = 16,
             // A demon phase comes back where it left, a few blocks off; neighbouring players' bosses stood at 19-26
             // blocks and were taken for it (a friend's records, 2026-10-12). The trailing ✯ on a nametag is not
-            // ownership - it is a Shuriken's Magic Find mark, which anyone can put on any mob (the user).
+            // ownership - it is a Shuriken's Magic Find mark, which anyone can put on any mob.
             PHASE_REACH = 14, TELEPORT = 12, FALLBACK_REACH = 12;
     private static final long CLAIM_BEFORE_MS = 2_000, CLAIM_AFTER_MS = 5_000, PHASE_GAP_MS = 45_000;
     /**

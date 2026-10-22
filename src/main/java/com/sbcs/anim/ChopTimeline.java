@@ -756,7 +756,7 @@ public final class ChopTimeline {
 
     /**
      * The cheap drops - Brain Food (~1M), the Crown of Greed (~1.8M), the Fateful Stinger (~2.9M),
-     * checked 2026-09-29 - get short endings, and their lines and price come in quicker. The user:
+     * checked 2026-09-29 - get short endings, and their lines and price come in quicker. The designer:
      * the drops that are not that expensive do not need that much animation.
      */
     /**

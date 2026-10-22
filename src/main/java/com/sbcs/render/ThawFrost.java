@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * The Thaw's screen freezing (the user, 2026-10-02): frost grows in from the corners and along the
+ * The Thaw's screen freezing: frost grows in from the corners and along the
  * edges of the screen, a step with every pick strike, glinting in the strike's flare colour; when the
  * run lands it melts away on a loss and shatters outward on a win.
  *

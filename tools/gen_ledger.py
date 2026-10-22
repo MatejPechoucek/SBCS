@@ -1,4 +1,4 @@
-"""The Ledger's stamp table, from the spreadsheet the user edits.
+"""The Ledger's stamp table, from the spreadsheet the designer edits.
 
     python3 tools/gen_ledger.py
 

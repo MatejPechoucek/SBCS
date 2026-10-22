@@ -10,7 +10,7 @@ import static com.sbcs.render.ChopScene.ease01;
 import static com.sbcs.render.ChopScene.project;
 
 /**
- * The Chopping Block filling the screen (the user, 2026-10-02: the sides felt empty; of the ideas, "the
+ * The Chopping Block filling the screen (the sides felt empty; of the ideas, "the
  * screen filling option" - visual only, nothing to read, and no walls, since it plays over the real game).
  *
  * <ul>
@@ -85,7 +85,7 @@ final class ChopFill {
 
     /** Drawn behind the block. */
     static void rays(ChopTimeline tl, long t, long ts, int w, int h, ChopScene.Canvas c) {
-        // Only once the drop is being shown - not when the head splits (the user, 2026-10-02).
+        // Only once the drop is being shown - not when the head splits.
         long show = tl.arrive() - 150;
         if (!hasLight(tl) || t < show) return;
         float in = ease01((t - show) / 450f);
@@ -94,7 +94,7 @@ final class ChopFill {
         float strength = 0.32f * in * settle * ChopScene.sceneAlpha;
         if (strength < 0.01f) return;
         // Out of the drop itself, and only round it: from the block's middle to the screen's edges they ran behind the
-        // words too, and read as coming from the whole showcase (the user, 2026-10-11). Where the item is not drawn
+        // words too, and read as coming from the whole showcase. Where the item is not drawn
         // yet, from the block as before.
         float ox, oy, size;
         if (!Float.isNaN(ChopScene.itemX) && ChopScene.itemSize > 0f) {
@@ -122,7 +122,7 @@ final class ChopFill {
             float reach = size * (sa > 0.25f ? 0.3f + 0.4f * (1f - sa) : 0.85f);
             float start = size * 0.3f;
             // Stepped a cell or two at a time, each band a little weaker and a little wider - long bands six cells
-            // wide drew as big translucent squares (the user's screenshot, 0.3.0).
+            // wide drew as big translucent squares (the designer's screenshot, 0.3.0).
             int steps = Math.max(7, Math.round(reach / (1.5f * u)));
             for (int sIdx = 0; sIdx < steps; sIdx++) {
                 float r0 = start + reach * sIdx / steps, r1 = start + reach * (sIdx + 1) / steps;

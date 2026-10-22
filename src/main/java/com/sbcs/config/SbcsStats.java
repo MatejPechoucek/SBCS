@@ -124,7 +124,7 @@ public final class SbcsStats {
             Ledger.drop(l, "diana", drop, kills, now, java.time.ZoneId.systemDefault());
             long shared = dianaShareAt.getAsLong();
             if (shared > 0 && now - shared <= SHARE_MS) Ledger.award(l, "diana_shared_custody", kills);
-            // Nobody Expects It: a drop within the day's first N Inquisitors (the user: 5, and it resets every day).
+            // Nobody Expects It: a drop within the day's first N Inquisitors (5, and it resets every day).
             Stamp early = Ledger.byId("diana_nobody_expects");
             long inquisitors = Ledger.killsToday(l, "diana:INQUISITOR", now, zone);
             if ("INQUISITOR".equals(creature) && inquisitors > 0 && inquisitors <= (early == null ? 5 : early.number(5))) {

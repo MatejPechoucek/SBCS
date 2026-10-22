@@ -69,7 +69,7 @@ public final class HellionTest {
 
         HellionTimeline bust = new HellionTimeline(Drop.BUST, 7);
         check("a bust is over within 1 s of the reveal (" + bust.total() + ")", bust.total() - HellionTimeline.REVEAL <= 1000);
-        check("the build-up takes 4.5-5 s, the user's ask (" + HellionTimeline.REVEAL + ")",
+        check("the build-up takes 4.5-5 s, the designer's ask (" + HellionTimeline.REVEAL + ")",
                 HellionTimeline.REVEAL >= 4500 && HellionTimeline.REVEAL <= 5000);
         check("the shield's last step ends before the reveal", HellionTimeline.HANG < HellionTimeline.REVEAL);
         for (Drop d : Drop.values()) {

@@ -78,7 +78,7 @@ public final class PlayerHeadMesh {
         // head's own RIGHT side - the slot left of the front - sits on the viewer's LEFT (-X) when
         // the face looks at the camera, and its left side on +X. These were swapped until 0.2.53:
         // invisible on a symmetric skin, but the Megalodon's mouth wraps round the front corners
-        // and came out broken at them (the user, 2026-10-02). ChopScene's own head boxes already had
+        // and came out broken at them. ChopScene's own head boxes already had
         // it this way round. Each side's u runs so its edge meets the front's edge at the corner.
         // head's left side: +X
         mesh.quad( h,  h,  h,   0, 0, -2 * h,   0, -2 * h, 0,   1, 0,  0,   u + 2 * s, v + s, s, s);
