@@ -26,5 +26,7 @@ public class HudHiddenMixin {
     private void sbcs$hiddenWhileWeHide(CallbackInfoReturnable<Boolean> cir) {
         com.sbcs.Safety.hook(2);
         if (SbcsClient.shouldHideHud()) cir.setReturnValue(true);
+        // Over the Ossuary too: SBO and the like draw after screens, over the roll, unless the HUD is hidden.
+        else if (com.sbcs.detect.dungeon.DungeonRolls.covers(net.minecraft.client.Minecraft.getInstance().gui.screen())) cir.setReturnValue(true);
     }
 }

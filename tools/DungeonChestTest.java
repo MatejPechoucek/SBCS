@@ -150,6 +150,40 @@ public class DungeonChestTest {
         mem.load(Map.of("old", 0L, "new", RollMemory.KEEP_MS), RollMemory.KEEP_MS + 5);
         check("load drops the expired", !mem.entries().containsKey("old") && mem.entries().containsKey("new"), "");
 
+        System.out.println("Which menu rolls, and which chest");
+        int bits = ChestTier.DEFAULT_BITS;
+        RollMemory m2 = new RollMemory();
+        check("candidate: Bedrock Chest", RollPicker.candidate("Bedrock Chest", bits, 1), "");
+        check("candidate: not Wood by default", !RollPicker.candidate("Wood Chest", bits, 1), "");
+        check("candidate: a run page", RollPicker.candidate("Catacombs - Floor VII", bits, 1), "");
+        check("candidate: no run page with Croesus off", !RollPicker.candidate("Catacombs - Floor VII", bits, 0), "");
+        RollPicker.Decision d = RollPicker.decide("Bedrock Chest", run, f7, names, bits, 1, m2, 1000, prices::get);
+        check("the boss room's chest rolls", d.kind() == RollPicker.Kind.ROLL && d.chest().tier() == ChestTier.BEDROCK, d.why());
+        check("loading: wait", RollPicker.decide("Bedrock Chest", loading, f7, names, bits, 1, m2, 1000, prices::get).kind() == RollPicker.Kind.WAIT, "");
+        check("a switched-off tier does not", RollPicker.decide("Bedrock Chest", run, f7, names, ChestTier.OBSIDIAN.bit(), 1, m2, 1000, prices::get).kind()
+                == RollPicker.Kind.NONE, "");
+        for (String fp : d.remember()) m2.remember(fp, 1000);
+        check("rolled once, never again", RollPicker.decide("Bedrock Chest", run, f7, names, bits, 1, m2, 2000, prices::get).kind()
+                == RollPicker.Kind.NONE, "");
+        check("a chest's own page at Croesus: only with 'every chest'",
+                RollPicker.decide("Bedrock", page, null, names, bits, 1, new RollMemory(), 1000, prices::get).kind() == RollPicker.Kind.NONE
+                        && RollPicker.decide("Bedrock", page, null, names, bits, 2, new RollMemory(), 1000, prices::get).kind() == RollPicker.Kind.ROLL, "");
+        RollMemory m3 = new RollMemory();
+        RollPicker.Decision rp = RollPicker.decide("Catacombs - Floor VII", runPage, null, names, bits, 1, m3, 1000, prices::get);
+        check("the run page rolls its best: Bedrock", rp.kind() == RollPicker.Kind.ROLL && rp.chest().tier() == ChestTier.BEDROCK, rp.why());
+        for (String fp : rp.remember()) m3.remember(fp, 1000);
+        check("the page rolls once", RollPicker.decide("Catacombs - Floor VII", runPage, null, names, bits, 1, m3, 2000, prices::get).kind()
+                == RollPicker.Kind.NONE, "");
+        RollMemory m4 = new RollMemory();
+        m4.remember(chests.get(2).fingerprint(), 1000);
+        RollPicker.Decision after = RollPicker.decide("Catacombs - Floor VII", runPage, null, names, bits, 1, m4, 2000, prices::get);
+        check("Bedrock rolled in the boss room: the page rolls Obsidian", after.kind() == RollPicker.Kind.ROLL
+                && after.chest().tier() == ChestTier.OBSIDIAN, after.why());
+        check("Croesus off: the page does nothing", RollPicker.decide("Catacombs - Floor VII", runPage, null, names, bits, 0, new RollMemory(), 1000, prices::get).kind()
+                == RollPicker.Kind.NONE, "");
+        check("Wood switched on: still picks by profit", RollPicker.decide("Catacombs - Floor VII", runPage, null, names, 0x3F, 1, new RollMemory(), 1000, prices::get)
+                .chest().tier() == ChestTier.BEDROCK, "");
+
         System.out.println("The reel pool");
         check("every floor has an Obsidian pool", List.of("F1", "F2", "F3", "F4", "F5", "F6", "F7", "M1", "M7").stream()
                 .allMatch(k -> !pool.pool(DungeonFloor.fromLabel(k), ChestTier.OBSIDIAN).isEmpty()), "");
