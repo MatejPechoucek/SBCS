@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "butcher",
+	"version": "${version}",
+	"name": "Butcher",
+	"description": "Cutscenes for Hypixel SkyBlock's rare drops: the Scatha, Vanguard corpses, Diana's Mythological Ritual, the Inferno Demonlord, lava fishing, the Fishing Festival's Great White Shark and the Dwarven Mines' Ghosts. The drop is hidden until the reveal; you keep control while it plays. /butcher opens the settings.",
+	"authors": [
+		"Matej"
+	],
+	"contact": {
+		"sources": "https://github.com/MatejPechoucek/SkyBlockCutScenes",
+		"issues": "https://github.com/MatejPechoucek/SkyBlockCutScenes/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/butcher/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.butcher.ButcherClient"
+		],
+		"modmenu": [
+			"com.butcher.gui.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"butcher.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.0",
+		"minecraft": "~26.2",
+		"fabric-api": "*",
+		"java": ">=25"
+	},
+	"suggests": {
+		"modmenu": "*"
+	}
+}
