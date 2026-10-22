@@ -1472,6 +1472,49 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
 - **Next:** the designer's lava session with records on - check the nametag format and the catch lines, and write
   `LavaDetectTest` / a replay against them as Hellion's were.
 
+## The Ossuary (dungeon reward chests, 2026-10-22) - unverified in game
+
+Matej's ask: a roll for F1-F7 / M1-M7 reward chests, plan artifact claude.ai/artifact/3AS1UWyfaMuB4Hzo7Wuvk1. His calls:
+the chain is optional ("Just watch" spins at a default pace); the floor boss deals; Master Mode gets the red chest with
+seals; F7/M7 the Wither Throne (four lords' drums with levers, M7's dragon statues as the tell); default tiers Obsidian and
+Bedrock, the rest selectable; in a run the chest being opened rolls; at Croesus clicking a run rolls only its most profitable
+chest (least negative if all lose), the menu covered so a hover cannot show it; a setting turns Croesus off. **Read and draw
+only** - never a click, packet or "Open Reward Chest" for the player (ban risk). Licences: SkyOcean's code and repo data are
+MIT (the pools come from its `dungeon_chests.json`, credited in the JSON's note), its textures are not; BCCO is all rights
+reserved (ideas only); Skyblocker/SkyHanni strings are used as facts.
+
+- **Records first**: `detect/dungeon/DungeonRecorder` (0.3.5-alpha) writes `dungeon_chest` (title, every slot with SNBT
+  and lore, the sidebar), `dungeon_sidebar`, and `dungeon_line` chat. **The menu strings in `ChestReader` are other mods'
+  until Matej's records confirm them** - check "Open Reward Chest" at slot 31, the cost lore, the Croesus page's
+  "Contents"/"Cost" lore and the back arrow "To Catacombs - Floor VII" against the first records.
+- **Pure**: `ChestReader` (a chest's menu: null until "Open Reward Chest" is there; a run's page from each head's lore),
+  `PriceKeys`, `ChestValue` (best item ranks essence last; the key's price is added to the cost), `RewardChest.fingerprint`
+  (price keys, so the boss room and Croesus agree), `RollMemory` (72 h), `DungeonPool` (`tools/gen_dungeon_pool.py`
+  -> `dungeon_pool.json`; Wood and the others borrow the floor's Obsidian pool), `RollPicker` (which menu rolls, which
+  chest; a run's page is remembered as `RUN|...` so it rolls once - a chest rolled in the boss room does not count, the
+  page then rolls its best other chest). `tools/DungeonChestTest` (68).
+- **The roll**: `anim/OssuaryTimeline` (event log: pulls solved so the drum lands exactly on its niche whatever the
+  strength; the hand waits `AUTO_WAIT` in chain mode, then keeps going at watch pace; seals, levers, Livid's shell game
+  on F5; the tell's steps; bands BUST/BLUE (>= max(1M, the menu's floor))/PURPLE 5M/GOLD 25M/JACKPOT 150M or a floor's
+  jackpot item; endings BUST/WIN/JACKPOT/DYE), `render/OssuaryScene` (through ChopScene's box renderer, so it sits in
+  `com.sbcs.render`), `audio/OssuarySound` (event-driven: the host asks for the cues due since the last frame).
+  `tools/OssuaryTest` (242) hashes every frame and sound before the reveal over floors x tiers x input scripts x chain/watch
+  x outcomes - the lords' drums show real items on purpose and are the exception. `tools/OssuaryPreview` renders frames
+  (`FLOOR:TIER:KEY:WORTH[:chain]`, WORTH 0 a bust).
+- From the preview: the machine steps back and darkens for the showcase and the bust's strip; the 3D never fades (its
+  faces showed through each other), it shrinks away over the last `FADE_MS`.
+- **In game**: `DungeonRolls` (every tick, Hypixel only) reads the open `AbstractContainerScreen`'s own slots into
+  `SlotView`s and keeps the live `gui/OssuaryRoll`. `mixin/ContainerCoverMixin` cancels the menu's `extractRenderState`
+  and swallows its mouse and keys while `covers()` (Escape ends the roll and closes as usual; Space/Backspace skip);
+  `ChestBackgroundMixin` drops the chest panel; `GuiOssuaryMixin` keeps the frame's extractor as it is handed to
+  `Hud.extractRenderState` and draws the roll before `Hud.extractDeferredSubtitles` - after the screen and toasts, the
+  only unconditional call there (the saving indicator and toasts sit behind flags). All `require = 0` with
+  `Safety.hook(3/4)`; a cover nothing draws lifts after a second. `HudHiddenMixin` answers hidden while covered (SBO).
+  A candidate menu is covered from its first frame for up to 1.5 s while its contents load; a run's page waits up to
+  1.2 s for prices before picking. Try it / `/sbcs test dungeon <f1..m7> <bust|blue|purple|gold|jackpot|dye> [tier]` play
+  `anim/OssuaryTests` chests on `gui/OssuaryTestScreen`. Config `dungeon*`, stats key "dungeon".
+- Next: Matej's records (2-3 runs, one Master Mode, Croesus, a Kismet reroll) - fix the strings, then watch it in game.
+
 ## The Vault (the Crystal Nucleus loot bundle, 2026-10-22) - unverified in game
 
 The designer asked for more loot pools, the Nucleus first, with a **black box over the drops where they land** - only an
