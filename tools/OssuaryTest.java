@@ -314,6 +314,26 @@ public class OssuaryTest {
             check("sound: " + o[0] + " the whole roll sounds", whole.size() > 20, whole.size() + " cues");
         }
 
+        // ---- Try it's made-up chests play the band they name, on every floor
+        for (String fl : new String[]{"F1", "F2", "F3", "F4", "F5", "F6", "F7", "M1", "M3", "M5", "M7"}) {
+            DungeonFloor f = DungeonFloor.fromLabel(fl);
+            for (String out : com.sbcs.anim.OssuaryTests.OUTCOMES) {
+                com.sbcs.anim.OssuaryTests.Test tt = com.sbcs.anim.OssuaryTests.make(f, ChestTier.BEDROCK, out, pool);
+                OssuaryTimeline tl = make(f, ChestTier.BEDROCK, false, 5);
+                tl.resolve(ChestValue.of(tt.chest(), tt.prices()::get), 1_000_000);
+                Band wantBand = switch (out) {
+                    case "bust" -> Band.BUST;
+                    case "blue" -> Band.BLUE;
+                    case "purple" -> Band.PURPLE;
+                    case "gold" -> Band.GOLD;
+                    default -> Band.JACKPOT;
+                };
+                boolean dyeOk = !out.equals("dye") || (f.number() == 5 || f.number() == 7) == (tl.ending() == Ending.DYE);
+                check("try " + fl + " " + out, tl.band() == wantBand && dyeOk, tl.band() + " " + tl.ending() + " best "
+                        + (tl.value().bestItem() == null ? null : tl.value().bestItem().key()));
+            }
+        }
+
         System.out.printf("%n%d passed, %d failed%n", pass, fail);
         if (fail > 0) System.exit(1);
     }

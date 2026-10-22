@@ -272,6 +272,27 @@ public class PatternConfig {
     /** How fast the Vault plays, in percent (50-200). */
     public int nucleusSpeed = 100;
 
+    /**
+     * "The Ossuary": dungeon reward chests rolled before they are seen. Only the chests whose tier bit is set in
+     * {@code dungeonTiers} roll (ChestTier.bit(): Obsidian and Bedrock by default, Matej's call).
+     */
+    public boolean dungeonAnimation = true;
+    public int dungeonTiers = com.sbcs.detect.dungeon.ChestTier.DEFAULT_BITS;
+    /** At Croesus: 0 off, 1 a run's most profitable chest rolls when the run's page is opened, 2 also any chest's own page. */
+    public int dungeonCroesus = 1;
+    /** "Pull the chain" (the player drives it; the skeleton's hand takes over if left alone), else "Just watch". */
+    public boolean dungeonChain = true;
+    /** Master Mode's red chest and its seals. */
+    public boolean dungeonMasterRed = true;
+    public boolean dungeonBanner = true;
+    public boolean dungeonPrice = true;
+    /** The Ossuary's sounds, 0-150%. */
+    public int dungeonVolume = 100;
+    /** How fast the Ossuary plays, in percent (50-200). */
+    public int dungeonSpeed = 100;
+    /** Busts: 0 full, 1 short (straight to the tell), 2 none - only a chest over the floor rolls. */
+    public int dungeonBusts = 0;
+
     /** "Fin": the short pop-up when a Great White Shark drops a Megalodon pet or its tooth. */
     public boolean fishingAnnounce = true;
     /** Fin's bust: the fin ducks the cleaver when your Great White Shark dies with nothing. */
@@ -435,6 +456,11 @@ public class PatternConfig {
         seraphBusts = clamp(seraphBusts, 0, 2);
         lavaBusts = clamp(lavaBusts, 0, 2);
         nucleusBusts = clamp(nucleusBusts, 0, 2);
+        dungeonBusts = clamp(dungeonBusts, 0, 2);
+        dungeonVolume = clamp(dungeonVolume, 0, 150);
+        dungeonSpeed = clamp(dungeonSpeed, 50, 200);
+        dungeonCroesus = clamp(dungeonCroesus, 0, 2);
+        dungeonTiers &= (1 << com.sbcs.detect.dungeon.ChestTier.values().length) - 1;
         minWorth = clamp(minWorth, 0, MIN_WORTH.length - 1);
         gameplayCorner = clamp(gameplayCorner, 0, 4);
     }

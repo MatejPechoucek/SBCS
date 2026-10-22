@@ -86,7 +86,7 @@ public final class MenuView {
     /** Each animation's own colour: its card, its bar, its switches and sliders. */
     static final int SCATHA = 0xFFB27BE6, VANGUARD = 0xFF72C6F2, DIANA = 0xFFE4573F, FIN = 0xFF3FB0D0,
             WISP = 0xFFA9E4EE, LAVA = 0xFFFF8C2E, SLAYERS = 0xFFD04848, BLAZE = 0xFFFFA238, SERAPH = 0xFFA36BF5,
-            NUCLEUS = 0xFF55D8FF;
+            NUCLEUS = 0xFF55D8FF, OSSUARY = 0xFFD9C9A3;
 
     // ------------------------------------------------------------------ state (kept while the game runs)
 
@@ -478,6 +478,7 @@ public final class MenuView {
                 ghostRows(rows, cfg);
                 lavaRows(rows, cfg);
                 nucleusRows(rows, cfg);
+                dungeonRows(rows, cfg);
                 slayerRows(rows, cfg);
             }
         }
@@ -486,6 +487,12 @@ public final class MenuView {
     }
 
     // ------------------------------------------------------------------ the Animations tab
+
+    /** The Ossuary's drops are whatever the chests held: every name the stats have seen, most first. */
+    private static String[] dungeonDrops(SbcsStats st) {
+        java.util.Map<String, Integer> d = st.source("dungeon").drops;
+        return d.keySet().stream().sorted((a, b) -> Integer.compare(d.get(b), d.get(a))).toArray(String[]::new);
+    }
 
     private void scathaRows(List<Row> rows, PatternConfig cfg) {
         boolean on = cfg.animationMode != AnimationMode.NONE;
@@ -655,6 +662,46 @@ public final class MenuView {
         tryRows(rows, "nucleus", VAULT_TRY, n -> com.sbcs.anim.VaultTimeline.Prize.test(n).title());
     }
 
+    /** The Ossuary's Try it outcomes, each on a floor that shows its own setup off. */
+    private static final List<String> OSSUARY_TRY = List.of("F3:bust", "F2:blue", "F4:purple", "F6:gold", "F5:dye",
+            "F7:jackpot", "M3:gold", "M7:jackpot", "F7:dye");
+    private static final String[] CROESUS = {"Off", "A run's best chest", "Every chest"};
+
+    private void dungeonRows(List<Row> rows, PatternConfig cfg) {
+        if (!group(rows, "dungeon", "Dungeons - The Ossuary", "Reward chests, before you see what is in them", "skeleton_skull", OSSUARY,
+                cfg.dungeonAnimation, () -> { cfg.dungeonAnimation = !cfg.dungeonAnimation; cfg.save(); })) return;
+        rows.add(new NoticeRow("A reward chest's menu is covered the moment it opens, and the floor's boss deals: the drum lands, "
+                + "the lantern's colour is the chest's best item. You still open the chest yourself afterwards."));
+        rows.add(new SectionRow("Which chests"));
+        for (com.sbcs.detect.dungeon.ChestTier tier : com.sbcs.detect.dungeon.ChestTier.values()) {
+            int bit = tier.bit();
+            rows.add(toggle(tier.title + " Chest", (cfg.dungeonTiers & bit) != 0, () -> cfg.dungeonTiers ^= bit, cfg));
+        }
+        int cr = Math.max(0, Math.min(2, cfg.dungeonCroesus));
+        rows.add(new ValueRow("At Croesus", CROESUS[cr], cr != 0, () -> { cfg.dungeonCroesus = (cr + 1) % 3; cfg.save(); },
+                () -> { cfg.dungeonCroesus = (cr + 2) % 3; cfg.save(); }));
+        if (cr == 1) rows.add(new NoticeRow("Opening a run's page rolls its most profitable chest you have not seen (the smallest loss if all lose)."));
+        if (cr == 2) rows.add(new NoticeRow("A run's page rolls its best chest, and each chest's own page rolls too if it has not yet."));
+        rows.add(new NoticeRow("A chest that has rolled - in the boss room or at Croesus - never rolls again (72 hours, as Croesus keeps it)."));
+        rows.add(new SectionRow("The roll"));
+        rows.add(toggle("Pull the chain yourself", cfg.dungeonChain, () -> cfg.dungeonChain = !cfg.dungeonChain, cfg));
+        rows.add(new NoticeRow(cfg.dungeonChain ? "Drag the chain down and let go - harder spins longer. Left alone, a skeleton's hand pulls it for you."
+                : "Just watch: the skeleton's hand pulls every chain at an even pace."));
+        rows.add(toggle("Master Mode: the red chest and its seals", cfg.dungeonMasterRed, () -> cfg.dungeonMasterRed = !cfg.dungeonMasterRed, cfg));
+        rows.add(new SectionRow("The endings"));
+        rows.add(toggle("RARE REWARD! banner", cfg.dungeonBanner, () -> cfg.dungeonBanner = !cfg.dungeonBanner, cfg));
+        rows.add(toggle("Show the price", cfg.dungeonPrice, () -> cfg.dungeonPrice = !cfg.dungeonPrice, cfg));
+        rows.add(new SliderRow("dungeon_volume", "Volume", cfg.dungeonVolume, 0, 150, 5, v -> cfg.dungeonVolume = v, v -> v + "%"));
+        speedRow(rows, "dungeon_speed", cfg.dungeonSpeed, v -> cfg.dungeonSpeed = v);
+        bustsRow(rows, cfg.dungeonBusts, v -> cfg.dungeonBusts = v, cfg);
+        tryRows(rows, "dungeon", OSSUARY_TRY, n -> {
+            String[] p = n.split(":");
+            String o = p[1].equals("dye") ? (p[0].endsWith("5") ? "Livid Dye" : "Necron Dye") : p[1].equals("bust") ? "Bust"
+                    : Character.toUpperCase(p[1].charAt(0)) + p[1].substring(1);
+            return p[0] + " - " + o;
+        });
+    }
+
     /** The slayers: one card, each boss its own card inside it. */
     private void slayerRows(List<Row> rows, PatternConfig cfg) {
         if (!group(rows, "slayers", "Slayers", com.sbcs.Maintenance.SERAPH ? "Hellion (the Seraph's Glyph is on its way)" : "Hellion and the Seraph's Glyph", "diamond_sword", SLAYERS, null, null)) return;
@@ -799,6 +846,7 @@ public final class MenuView {
         soundSlider(rows, "snd_diana", "Diana - The Chopping Block", DIANA, cfg.dianaVolume, v -> cfg.dianaVolume = v);
         soundSlider(rows, "snd_lava", "Lava fishing - Eruption", LAVA, cfg.lavaVolume, v -> cfg.lavaVolume = v);
         soundSlider(rows, "snd_nucleus", "Crystal Nucleus - The Vault", NUCLEUS, cfg.nucleusVolume, v -> cfg.nucleusVolume = v);
+        soundSlider(rows, "snd_dungeon", "Dungeons - The Ossuary", OSSUARY, cfg.dungeonVolume, v -> cfg.dungeonVolume = v);
         soundSlider(rows, "snd_blaze", "Inferno Demonlord - Hellion", BLAZE, cfg.blazeVolume, v -> cfg.blazeVolume = v);
         if (!com.sbcs.Maintenance.SERAPH) {
             soundSlider(rows, "snd_seraph", "Voidgloom Seraph", SERAPH, cfg.seraphVolume, v -> cfg.seraphVolume = v);
@@ -950,6 +998,8 @@ public final class MenuView {
                 new String[]{"Quick Claw", "Fine Jasper Gemstone", "Flawless Ruby Gemstone", "Flawless Amethyst Gemstone",
                         "Flawless Jade Gemstone", "Flawless Amber Gemstone", "Flawless Sapphire Gemstone", "Flawless Topaz Gemstone",
                         "Flawless Jasper Gemstone", "Divan's Alloy", "Jade Dye"});
+        sourceGroup(rows, st, "dungeon", "The Ossuary - dungeon chests", "skeleton_skull", OSSUARY, "chest", "Chests rolled",
+                dungeonDrops(st));
         sourceGroup(rows, st, "shark", "Fin - Great White Sharks", "tropical_fish", FIN, "shark", "Sharks killed",
                 titles(com.sbcs.detect.SharkDrops.Drop.values()));
         if (group(rows, "stats-ghost", "Wisp - Dwarven Mines Ghosts", ghostTotal(st) + (ghostTotal(st) == 1 ? " drop" : " drops") + " so far", "ghast_tear", WISP, null, null)) {

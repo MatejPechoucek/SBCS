@@ -688,6 +688,10 @@ public class SbcsClient implements ClientModInitializer {
             Safety.run("nucleus", nucleusWatcher::tick);
             if (live) Safety.run("nucleus", () -> com.sbcs.detect.nucleus.BundleSpotter.tick(client.player, decisions));
 
+            // The Ossuary: reward chests and Croesus pages read, a roll put over them. Read only - see DungeonRolls.
+            if (live) Safety.run("dungeon", () -> com.sbcs.detect.dungeon.DungeonRolls.tick(client, decisions));
+            else if (com.sbcs.detect.dungeon.DungeonRolls.active()) com.sbcs.detect.dungeon.DungeonRolls.stop();
+
             if (live && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.tick(client.player, config.dianaHidePct));
             if (live && config.fishingAnnounce) Safety.run("shark", () -> sharkWatcher.tick(client.player));
             if (live && config.blazeAnimation) Safety.run("blaze", () -> hellionWatcher.tick(client.player, config.blazeHidePct));
@@ -1005,6 +1009,34 @@ public class SbcsClient implements ClientModInitializer {
                 }));
             }
 
+            // /sbcs test dungeon <floor> <outcome> [tier]: a made-up chest rolled on a screen of its own.
+            LiteralArgumentBuilder<FabricClientCommandSource> dungeonNode = ClientCommands.literal("dungeon")
+                    .executes(ctx -> options(ctx, "test dungeon <floor> <outcome> [tier]",
+                            "f1 .. f7, m1 .. m7", "the floor (f7/m7: the Wither Throne; m*: the red chest's seals)",
+                            "bust blue purple gold", "the bands",
+                            "jackpot", "the floor's jackpot",
+                            "dye", "Livid's (f5) or Necron's (f7) dye; elsewhere a jackpot",
+                            "obsidian / bedrock / ...", "the chest's tier (bedrock if left out)"));
+            for (String fl : new String[]{"f1", "f2", "f3", "f4", "f5", "f6", "f7", "m1", "m2", "m3", "m4", "m5", "m6", "m7"}) {
+                LiteralArgumentBuilder<FabricClientCommandSource> floorNode = ClientCommands.literal(fl);
+                com.sbcs.detect.dungeon.DungeonFloor floor = com.sbcs.detect.dungeon.DungeonFloor.fromLabel(fl.toUpperCase(java.util.Locale.ROOT));
+                for (String out : com.sbcs.anim.OssuaryTests.OUTCOMES) {
+                    LiteralArgumentBuilder<FabricClientCommandSource> outNode = ClientCommands.literal(out).executes(ctx -> {
+                        Minecraft.getInstance().execute(() -> com.sbcs.gui.OssuaryTestScreen.open(floor,
+                                com.sbcs.detect.dungeon.ChestTier.BEDROCK, out));
+                        return 1;
+                    });
+                    for (com.sbcs.detect.dungeon.ChestTier tier : com.sbcs.detect.dungeon.ChestTier.values()) {
+                        outNode.then(ClientCommands.literal(tier.name().toLowerCase(java.util.Locale.ROOT)).executes(ctx -> {
+                            Minecraft.getInstance().execute(() -> com.sbcs.gui.OssuaryTestScreen.open(floor, tier, out));
+                            return 1;
+                        }));
+                    }
+                    floorNode.then(outNode);
+                }
+                dungeonNode.then(floorNode);
+            }
+
             // The developer commands (test, debug) exist only for the accounts in Dev - for everyone else
             // they are not there at all, not even in tab completion. Players use the menu's "Try it".
             LiteralArgumentBuilder<FabricClientCommandSource> testNode = ClientCommands.literal("test")
@@ -1018,6 +1050,7 @@ public class SbcsClient implements ClientModInitializer {
                             "slayer", "the slayer bosses",
                             "lava", "Eruption, lava fishing",
                             "nucleus", "the Vault, a Crystal Nucleus bundle",
+                            "dungeon", "the Ossuary, a dungeon reward chest",
                             "ledger", "the Ledger: pop-ups, stamps, the book"))
                     .then(scathaNode)
                     .then(vanguardNode)
@@ -1027,6 +1060,7 @@ public class SbcsClient implements ClientModInitializer {
                     .then(slayerNode)
                     .then(lavaNode)
                     .then(nucleusNode)
+                    .then(dungeonNode)
                     .then(ledgerTestNode());
 
             dispatcher.register(ClientCommands.literal("sbcs")
@@ -1239,6 +1273,7 @@ public class SbcsClient implements ClientModInitializer {
             case "seraph" -> config.seraphBusts;
             case "lava" -> config.lavaBusts;
             case "nucleus" -> config.nucleusBusts;
+            case "dungeon" -> config.dungeonBusts;
             default -> 0;
         };
     }
@@ -1328,6 +1363,7 @@ public class SbcsClient implements ClientModInitializer {
                 case "seraph" -> com.sbcs.anim.SeraphTimeline.Drop.valueOf(name).win();
                 case "lava" -> com.sbcs.anim.EruptionTimeline.Drop.valueOf(name).win();
                 case "nucleus" -> com.sbcs.anim.VaultTimeline.Prize.test(name).win();
+                case "dungeon" -> !name.endsWith(":bust");
                 default -> true;
             };
         } catch (IllegalArgumentException e) {
@@ -1340,6 +1376,12 @@ public class SbcsClient implements ClientModInitializer {
             case "diana" -> openChop(com.sbcs.anim.ChopTimeline.Verdict.valueOf(name), null, true);
             case "blaze" -> openHellion(com.sbcs.anim.HellionTimeline.Drop.valueOf(name), true);
             case "nucleus" -> openVault(com.sbcs.anim.VaultTimeline.Prize.test(name), true);
+            case "dungeon" -> {
+                // "F7:jackpot" - a floor and an outcome, rolled on a Bedrock chest of that floor.
+                String[] p = name.split(":", 2);
+                com.sbcs.detect.dungeon.DungeonFloor floor = com.sbcs.detect.dungeon.DungeonFloor.fromLabel(p[0]);
+                if (floor != null && p.length == 2) com.sbcs.gui.OssuaryTestScreen.open(floor, com.sbcs.detect.dungeon.ChestTier.BEDROCK, p[1]);
+            }
             case "seraph" -> {
                 // Under maintenance: only the developers may see it, from the menu or the commands.
                 if (!Maintenance.SERAPH || Dev.allowed()) openSeraph(com.sbcs.anim.SeraphTimeline.Drop.valueOf(name), true);
@@ -2400,6 +2442,7 @@ public class SbcsClient implements ClientModInitializer {
         quietly(com.sbcs.render.FinPopup::stop);
         quietly(com.sbcs.render.GhostPopup::stop);
         quietly(com.sbcs.render.StampPopup::stop);
+        quietly(com.sbcs.detect.dungeon.DungeonRolls::stop);
         quietly(com.sbcs.audio.SbcsAudio::silence);
         com.sbcs.render.CutsceneHud.clear();
         currentChop = null;
