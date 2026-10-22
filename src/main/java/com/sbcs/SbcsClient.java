@@ -533,6 +533,8 @@ public class SbcsClient implements ClientModInitializer {
         SbcsStats.get().ledger();
         SbcsStats.dianaShareAt = dianaWatcher::lastShareAt;
         SbcsStats.stamped = com.sbcs.render.StampPopup::queue;
+        // The black box over the Crystal Nucleus's loot bundle, in the world until it is picked up.
+        com.sbcs.render.BundleCover.register();
         skipKey = net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper.registerKeyMapping(new net.minecraft.client.KeyMapping(
                 "key.sbcs.skip", com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_BACKSPACE,
                 net.minecraft.client.KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD_ID, "main"))));

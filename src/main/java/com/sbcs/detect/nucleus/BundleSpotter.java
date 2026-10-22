@@ -41,6 +41,8 @@ public final class BundleSpotter {
 
     private static long armedAt;
     private static Vec3 spot;
+    /** The followed entity's box in the world, or null while only the vault spot is known. */
+    private static AABB box;
     private static int followed = -1;
     private static String followedName = "";
     private static final Set<Integer> recorded = new HashSet<>();
@@ -51,6 +53,7 @@ public final class BundleSpotter {
     public static void arm(LocalPlayer player) {
         armedAt = System.currentTimeMillis();
         spot = VAULT;
+        box = null;
         followed = -1;
         followedName = "";
         recorded.clear();
@@ -84,6 +87,7 @@ public final class BundleSpotter {
         if (log != null) log.note("§8Nucleus: the bundle's box is gone §8(" + why + ")");
         armedAt = 0;
         spot = null;
+        box = null;
         followed = -1;
         recorded.clear();
     }
@@ -92,6 +96,12 @@ public final class BundleSpotter {
     public static Vec3 spot() { return spot; }
 
     public static boolean armed() { return armedAt != 0; }
+
+    /**
+     * What the black box covers: the bundle's own bounding box once it is followed, null until
+     * then. Not the vault spot: a box at a guessed place would cover nothing and mark a wrong one.
+     */
+    public static AABB cover() { return box; }
 
     public static void tick(LocalPlayer player, DecisionLog log) {
         if (armedAt == 0) return;
@@ -123,6 +133,7 @@ public final class BundleSpotter {
         }
         if (best != null) {
             spot = best.position();
+            box = best.getBoundingBox();
             if (best.getId() != followed) {
                 followed = best.getId();
                 followedName = describe(best);
