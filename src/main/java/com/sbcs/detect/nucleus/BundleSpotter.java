@@ -22,8 +22,8 @@ import java.util.Set;
  * reference mod draws or describes the bundle itself, so what kind of entity it is has to come from
  * records: from the loot message on, every entity near the vault is recorded once as
  * {@code nucleus_bundle} (type, name, position, size, equipment and skins), and the likeliest one is
- * followed as {@link #spot()}. Until one is found the spot is the vault itself ({@link #VAULT},
- * Skyblocker's Nucleus waypoint).
+ * followed as {@link #spot()}. Until one is found the spot is where it lands ({@link #DROP}, from
+ * Matej's first run).
  *
  * Gone when the followed entity goes (picked up), the player leaves the Nucleus, or after
  * {@link #ARMED_MS}.
@@ -31,13 +31,18 @@ import java.util.Set;
 public final class BundleSpotter {
     private BundleSpotter() {}
 
-    /** Skyblocker's "Nucleus" waypoint (NucleusWaypoints, 2026-10-22): the vault. */
+    /** Skyblocker's "Nucleus" waypoint (NucleusWaypoints, 2026-10-22): the middle of the Nucleus. */
     public static final Vec3 VAULT = new Vec3(513.5, 106, 524.5);
+    /**
+     * Where the bundle really lands (Matej's first run, 2026-10-22: "approximately 513, 106, 551"), 26
+     * blocks south of the waypoint. The first version searched 16 blocks round the waypoint and never saw it.
+     */
+    public static final Vec3 DROP = new Vec3(513.5, 106, 551.5);
     /** The Crystal Nucleus zone, from Skyblocker's WishingCompassSolver. */
     public static final AABB NUCLEUS = new AABB(462, 63, 461, 564, 181, 565);
 
     private static final long ARMED_MS = 5 * 60_000;
-    private static final double SEARCH = 16;
+    private static final double SEARCH = 12;
 
     private static long armedAt;
     private static Vec3 spot;
@@ -52,7 +57,7 @@ public final class BundleSpotter {
     /** The loot message came: the bundle is about to appear. */
     public static void arm(LocalPlayer player) {
         armedAt = System.currentTimeMillis();
-        spot = VAULT;
+        spot = DROP;
         box = null;
         followed = -1;
         followedName = "";
@@ -60,7 +65,7 @@ public final class BundleSpotter {
         before.clear();
         ClientLevel level = Minecraft.getInstance().level;
         if (player != null && level != null) {
-            for (Entity e : level.getEntities(player, AABB.ofSize(VAULT, SEARCH * 2, SEARCH * 2, SEARCH * 2))) {
+            for (Entity e : level.getEntities(player, AABB.ofSize(DROP, SEARCH * 2, SEARCH * 2, SEARCH * 2))) {
                 before.add(e.getId());
             }
         }
@@ -118,22 +123,25 @@ public final class BundleSpotter {
             disarm("left the Nucleus", log, player);
             return;
         }
-        AABB near = AABB.ofSize(VAULT, SEARCH * 2, SEARCH * 2, SEARCH * 2);
+        AABB near = AABB.ofSize(DROP, SEARCH * 2, SEARCH * 2, SEARCH * 2);
         Entity best = null;
         int bestScore = 0;
+        double bestDist = Double.MAX_VALUE;
         for (Entity e : level.getEntities(player, near)) {
             if (e instanceof net.minecraft.world.entity.player.Player) continue;
             if (recorded.add(e.getId())) record(e);
             int score = score(e);
             if (score < 4 && before.contains(e.getId())) score = 0;
-            if (score > bestScore) {
+            double dist = e.position().distanceToSqr(DROP);
+            if (score > bestScore || (score == bestScore && score > 0 && dist < bestDist)) {
                 bestScore = score;
+                bestDist = dist;
                 best = e;
             }
         }
         if (best != null) {
             spot = best.position();
-            box = best.getBoundingBox();
+            box = coverOf(best);
             if (best.getId() != followed) {
                 followed = best.getId();
                 followedName = describe(best);
@@ -142,6 +150,31 @@ public final class BundleSpotter {
         } else if (followed >= 0) {
             disarm("the bundle went - picked up", log, player);
         }
+    }
+
+    /**
+     * The world box the black cover has to hide. An entity's own bounding box, except for an armour stand:
+     * Hypixel's are invisible markers with no size at all, and what shows is the head they hold, drawn at
+     * the hand - up to a block and a half above the feet and a third of a block to the side, either side
+     * as the stand turns. So the box takes in everything an arm could reach.
+     */
+    private static AABB coverOf(Entity e) {
+        if (e instanceof net.minecraft.world.entity.decoration.ArmorStand stand) {
+            double s = stand.isSmall() ? 0.5 : 1.0;
+            Vec3 p = stand.position();
+            double r = 0.75 * s;
+            return new AABB(p.x - r, p.y, p.z - r, p.x + r, p.y + 2.0 * s, p.z + r);
+        }
+        return e.getBoundingBox();
+    }
+
+    /** Whether any of a living entity's slots holds a player head - the bundle is one, held in a hand. */
+    private static boolean holdsHead(net.minecraft.world.entity.LivingEntity le) {
+        for (net.minecraft.world.entity.EquipmentSlot slot : net.minecraft.world.entity.EquipmentSlot.values()) {
+            net.minecraft.world.item.ItemStack it = le.getItemBySlot(slot);
+            if (it != null && it.is(net.minecraft.world.item.Items.PLAYER_HEAD)) return true;
+        }
+        return false;
     }
 
     /**
@@ -156,9 +189,8 @@ public final class BundleSpotter {
             String n = item.getItem().getHoverName().getString().toLowerCase(Locale.ROOT);
             return n.contains("bundle") || n.contains("loot") ? 5 : 2;
         }
-        if (e instanceof net.minecraft.world.entity.decoration.ArmorStand stand
-                && !stand.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty()) {
-            return 1;
+        if (e instanceof net.minecraft.world.entity.decoration.ArmorStand stand && holdsHead(stand)) {
+            return 2;
         }
         return 0;
     }
