@@ -10,6 +10,8 @@
  * (The scene sits on ChopScene, which reaches the game's classes at load time, as EruptionTest does.)
  */
 import com.sbcs.anim.OssuaryTimeline;
+import com.sbcs.audio.OssuarySound;
+import com.sbcs.audio.Voice;
 import com.sbcs.anim.OssuaryTimeline.Band;
 import com.sbcs.anim.OssuaryTimeline.Ending;
 import com.sbcs.detect.dungeon.*;
@@ -112,6 +114,16 @@ public class OssuaryTest {
                 reveal = tl.reveal();
                 break;
             }
+            // The sounds due since the last frame: what they are, never what they would say.
+            List<OssuarySound.Cue> cues = new ArrayList<>();
+            OssuarySound.between(tl, t - step, t, cues);
+            long sh = 17;
+            for (OssuarySound.Cue c : cues) {
+                sh = sh * 31 + (c.cut() ? 1 : 2);
+                for (Voice vo : c.voices()) sh = sh * 31 + vo.getClass().getName().hashCode();
+                sh = sh * 31 + c.voices().length;
+            }
+            hashes.add(sh);
             Hash h = new Hash();
             OssuaryScene.dragY = 0f;
             OssuaryScene.draw(h, (x, y, w, hh, argb) -> h.mix("px", x, y, w, hh, argb), tl, t, 640, 360);
@@ -284,6 +296,22 @@ public class OssuaryTest {
                     }
                 }
             }
+        }
+
+        // ---- the sounds after the reveal: cut at it, and every ending has its own
+        for (Object[] o : outcomes(DungeonFloor.fromLabel("F7"))) {
+            OssuaryTimeline tl = make(DungeonFloor.fromLabel("F7"), ChestTier.BEDROCK, false, 9);
+            tl.resolve(chest(DungeonFloor.fromLabel("F7"), ChestTier.BEDROCK, (String) o[0], (Long) o[1]), 1_000_000);
+            for (long t = 0; t < 60_000 && tl.reveal() < 0; t += 16) tl.update(t);
+            long r = tl.reveal();
+            List<OssuarySound.Cue> at = new ArrayList<>(), after = new ArrayList<>();
+            OssuarySound.between(tl, r - 1, r, at);
+            OssuarySound.between(tl, r, tl.total(), after);
+            check("sound: " + o[0] + " cuts at the reveal", !at.isEmpty() && at.get(0).cut(), at.size() + " cues");
+            check("sound: " + o[0] + " has an ending", tl.ending() == Ending.BUST || after.size() >= 2, after.size() + " cues after");
+            List<OssuarySound.Cue> whole = new ArrayList<>();
+            OssuarySound.between(tl, -1, tl.total(), whole);
+            check("sound: " + o[0] + " the whole roll sounds", whole.size() > 20, whole.size() + " cues");
         }
 
         System.out.printf("%n%d passed, %d failed%n", pass, fail);
