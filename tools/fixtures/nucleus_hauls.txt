@@ -1,0 +1,97 @@
+# Real Crystal Nucleus loot messages from the designer's game logs (latest.log [CHAT] lines),
+# 2026-10-08 .. 10-21, prefix stripped. One message per "=== <when>" block. The gemstones'
+# symbol was lost on the way into the log, which is why their lines have five spaces.
+=== 2026-10-08 19:47:21
+✦ You placed the Topaz Crystal!
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+  CRYSTAL NUCLEUS LOOT BUNDLE 
+
+  REWARDS
+    Pickonimbus 2000
+     Fine Amber Gemstone
+     Fine Amethyst Gemstone
+     Fine Jade Gemstone
+     Fine Jasper Gemstone
+     Fine Ruby Gemstone
+     Fine Sapphire Gemstone
+     Fine Topaz Gemstone
+     Flawed Amber Gemstone x6
+     Flawed Amethyst Gemstone x24
+     Flawed Jade Gemstone x36
+     Flawed Jasper Gemstone x6
+     Flawed Ruby Gemstone x42
+     Flawed Sapphire Gemstone x30
+     Flawed Topaz Gemstone x86
+    +800 HOTM Exp
+[SkyHanni] Profit for Crystal Nucleus Run§e: §c-829k
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+Pick it up near the Nucleus Vault!
+=== 2026-10-08 20:11:51
+  CRYSTAL NUCLEUS LOOT BUNDLE 
+
+  REWARDS
+    Bob-omb x20
+     Fine Amber Gemstone
+     Fine Amethyst Gemstone
+     Fine Jade Gemstone
+     Fine Jasper Gemstone
+     Fine Ruby Gemstone
+     Fine Sapphire Gemstone
+     Fine Topaz Gemstone
+     Flawed Amber Gemstone x36
+     Flawed Amethyst Gemstone x12
+     Flawed Jade Gemstone x42
+     Flawed Jasper Gemstone x6
+     Flawed Ruby Gemstone x36
+     Flawed Topaz Gemstone x6
+    +800 HOTM Exp
+    Enchanted Book (Lapidary I)
+    Prehistoric Egg
+[SkyHanni] Profit for Crystal Nucleus Run§e: §c-700k
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+=== 2026-10-09 15:35:39
+  CRYSTAL NUCLEUS LOOT BUNDLE 
+
+  REWARDS
+    Divan Fragment
+    Pickonimbus 2000
+    Treasurite x5
+     Fine Amber Gemstone x2
+     Fine Amethyst Gemstone
+     Fine Jade Gemstone
+     Fine Jasper Gemstone
+     Fine Ruby Gemstone
+     Fine Sapphire Gemstone
+     Fine Topaz Gemstone
+     Flawed Amber Gemstone x58
+     Flawed Amethyst Gemstone x6
+     Flawed Jade Gemstone x30
+     Flawed Ruby Gemstone x18
+     Flawed Sapphire Gemstone x6
+    +800 HOTM Exp
+    Enchanted Book (Lapidary I)
+[SkyHanni] Profit for Crystal Nucleus Run§e: §6517k
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+=== 2026-10-21 17:20:18
+  CRYSTAL NUCLEUS LOOT BUNDLE 
+
+  REWARDS
+    Pickonimbus 2000
+    Recall Potion
+     Fine Amber Gemstone
+     Fine Amethyst Gemstone
+     Fine Jade Gemstone
+     Fine Jasper Gemstone
+     Fine Ruby Gemstone
+     Fine Sapphire Gemstone
+     Fine Topaz Gemstone
+     Flawed Amber Gemstone x12
+     Flawed Amethyst Gemstone x58
+     Flawed Jasper Gemstone x32
+     Flawed Ruby Gemstone x72
+     Flawed Sapphire Gemstone x48
+    Oil Barrel x2
+    Ruby Crystal
+    +800 HOTM Exp
+[SkyHanni] Profit for Crystal Nucleus Run§e: §c-239k
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

@@ -449,6 +449,14 @@ public class SbcsClient implements ClientModInitializer {
         }
     });
 
+    /**
+     * The Crystal Nucleus's loot bundle, printed whole the moment the fifth crystal goes in. Detection
+     * and records only for now; the Vault cutscene and the black box come next.
+     */
+    public static final com.sbcs.detect.nucleus.NucleusWatcher nucleusWatcher =
+            new com.sbcs.detect.nucleus.NucleusWatcher(decisions, SbcsClient::onNucleusHaul,
+                    () -> com.sbcs.detect.nucleus.BundleSpotter.arm(Minecraft.getInstance().player));
+
     private static final ScathaWormTracker wormTracker = new ScathaWormTracker(decisions);
     private static final HotbarDropWatcher dropWatcher = new HotbarDropWatcher(decisions);
 
@@ -675,6 +683,8 @@ public class SbcsClient implements ClientModInitializer {
             // Outside the player check: a half-read loot message has to be able to time
             // out even if the player went away mid-message.
             Safety.run("vanguard", vanguardWatcher::tick);
+            Safety.run("nucleus", nucleusWatcher::tick);
+            if (live) Safety.run("nucleus", () -> com.sbcs.detect.nucleus.BundleSpotter.tick(client.player, decisions));
 
             if (live && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.tick(client.player, config.dianaHidePct));
             if (live && config.fishingAnnounce) Safety.run("shark", () -> sharkWatcher.tick(client.player));
@@ -1738,6 +1748,8 @@ public class SbcsClient implements ClientModInitializer {
                 com.sbcs.render.GhostPopup.show(ghost);
             }
         }
+        // Read, not hidden yet: with no cutscene to reveal it, the message stays in chat.
+        if (game) Safety.run("nucleus", () -> nucleusWatcher.onChatLine(text));
         if (config != null && config.vanguardAnimation && Safety.onHypixel() && Safety.on("vanguard")) {
             boolean corpse;
             try {
@@ -1763,6 +1775,25 @@ public class SbcsClient implements ClientModInitializer {
      */
     public static boolean chatHeld() {
         return isAnimationPlaying() || shouldHidePreKill() || profitShowing();
+    }
+
+    /** A Nucleus bundle has been read: recorded for now, so the Vault can be built against real hauls. */
+    private static void onNucleusHaul(com.sbcs.detect.nucleus.NucleusHaul haul) {
+        com.google.gson.JsonObject rec = new com.google.gson.JsonObject();
+        com.google.gson.JsonArray drops = new com.google.gson.JsonArray();
+        for (com.sbcs.detect.nucleus.NucleusHaul.Drop drop : haul.drops()) {
+            com.google.gson.JsonObject d = new com.google.gson.JsonObject();
+            d.addProperty("name", drop.name());
+            d.addProperty("amount", drop.amount());
+            d.addProperty("tier", haul.tierOf(drop).name());
+            if (drop.unknown()) d.addProperty("unknown", true);
+            drops.add(d);
+        }
+        rec.add("drops", drops);
+        rec.addProperty("best", haul.best().name());
+        rec.add("chat", com.sbcs.detect.DropRecorder.chatSince(10_000));
+        rec.add("decisions", com.sbcs.detect.DropRecorder.decisions(10));
+        com.sbcs.detect.DropRecorder.record("nucleus_haul", rec);
     }
 
     /** The Shattered Locket's item ID on the auction house - it is still called a pendant there. */
