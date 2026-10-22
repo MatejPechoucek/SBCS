@@ -707,6 +707,15 @@ public class SbcsClient implements ClientModInitializer {
                 com.sbcs.render.HeadSkins.LAVA.prewarmPixels();
                 // A head we could not find in any repo, taken from whatever menu shows it (the bazaar).
                 com.sbcs.detect.HeadCapture.tick(client);
+                // Dungeon reward chests and Croesus, for the Ossuary: recorded only, nothing plays yet.
+                if (config.recordDrops) {
+                    try {
+                        com.sbcs.detect.dungeon.DungeonRecorder.tick(client);
+                        com.sbcs.detect.dungeon.DungeonRecorder.sidebarTick(client);
+                    } catch (Exception e) {
+                        LOGGER.warn("[SBCS] dungeon recorder", e);
+                    }
+                }
             }
             // Out of the world (disconnected, or back at the title screen): nothing waiting from the old
             // server may play or pour its chat into the next one.
