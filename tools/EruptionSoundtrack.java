@@ -1,9 +1,9 @@
-import com.butcher.anim.EruptionTimeline;
-import com.butcher.anim.EruptionTimeline.Creature;
-import com.butcher.anim.EruptionTimeline.Drop;
-import com.butcher.audio.EruptionSound;
-import com.butcher.audio.SynthEngine;
-import com.butcher.audio.Voice;
+import com.sbcs.anim.EruptionTimeline;
+import com.sbcs.anim.EruptionTimeline.Creature;
+import com.sbcs.anim.EruptionTimeline.Drop;
+import com.sbcs.audio.EruptionSound;
+import com.sbcs.audio.SynthEngine;
+import com.sbcs.audio.Voice;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Renders Eruption's soundtrack for a drop to a WAV - the exact cue list the game plays
  * (EruptionSound.schedule), mixed offline. A cut silences everything already sounding, as
- * ButcherAudio.silence() does in game. The price's coin ticks are not in it.
+ * SbcsAudio.silence() does in game. The price's coin ticks are not in it.
  *
  *   java -cp "out;src/main/resources" EruptionSoundtrack <outdir> <seed> CREATURE DROP...
  */

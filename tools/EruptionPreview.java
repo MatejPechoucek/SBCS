@@ -1,9 +1,9 @@
-import com.butcher.anim.EruptionTimeline;
-import com.butcher.anim.EruptionTimeline.Creature;
-import com.butcher.anim.EruptionTimeline.Drop;
-import com.butcher.render.EruptionScene;
-import com.butcher.render.art.ChopArt;
-import com.butcher.render.art.LavaArt;
+import com.sbcs.anim.EruptionTimeline;
+import com.sbcs.anim.EruptionTimeline.Creature;
+import com.sbcs.anim.EruptionTimeline.Drop;
+import com.sbcs.render.EruptionScene;
+import com.sbcs.render.art.ChopArt;
+import com.sbcs.render.art.LavaArt;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -39,7 +39,7 @@ public final class EruptionPreview {
         tex.put(EruptionScene.TEX_BLACKSTONE, argb(ImageIO.read(new File(van, "blackstone.png"))));
         tex.put(EruptionScene.TEX_BASALT_SIDE, argb(ImageIO.read(new File(van, "basalt_side.png"))));
         tex.put(EruptionScene.TEX_BASALT_TOP, argb(ImageIO.read(new File(van, "basalt_top.png"))));
-        EruptionScene.rigs = new com.butcher.render.LavaRigs();
+        EruptionScene.rigs = new com.sbcs.render.LavaRigs();
         BufferedImage magma = argb(ImageIO.read(new File(van, "magma.png")));
         EruptionScene.RASTER.texture(EruptionScene.SLOT_MAGMA, magma);
         EruptionScene.RASTER.texture(EruptionScene.SLOT_CRACKS, LavaArt.crackMask(magma));

@@ -1,0 +1,25 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.sbcs.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"ItemInHandRendererMixin",
+		"SoundEngineMixin",
+		"GuiScreenMixin",
+		"ChatComponentMixin",
+		"ChatComponentInvoker",
+		"GameRendererMixin",
+		"GuiRenderStateFadeMixin",
+		"GuiTextRenderStateAccessor",
+		"HudFadeMixin",
+		"GuiFadeMixin",
+		"HudHiddenMixin",
+		"DroppedItemHideMixin",
+		"PickupHideMixin",
+		"HudInvoker"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

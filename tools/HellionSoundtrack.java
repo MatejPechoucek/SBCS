@@ -1,8 +1,8 @@
-import com.butcher.anim.HellionTimeline;
-import com.butcher.anim.HellionTimeline.Drop;
-import com.butcher.audio.HellionSound;
-import com.butcher.audio.SynthEngine;
-import com.butcher.audio.Voice;
+import com.sbcs.anim.HellionTimeline;
+import com.sbcs.anim.HellionTimeline.Drop;
+import com.sbcs.audio.HellionSound;
+import com.sbcs.audio.SynthEngine;
+import com.sbcs.audio.Voice;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Renders Hellion's soundtrack for a drop to a WAV - the exact cue list the game plays
  * (HellionSound.schedule), mixed offline. A cut silences everything already sounding, as
- * ButcherAudio.silence() does in game. The price's coin ticks are not in it.
+ * SbcsAudio.silence() does in game. The price's coin ticks are not in it.
  *
  *   java -cp "out;src/main/resources" HellionSoundtrack <outdir> <seed> DROP...
  */

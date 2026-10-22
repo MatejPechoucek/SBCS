@@ -1,9 +1,9 @@
-import com.butcher.anim.ChopTimeline;
-import com.butcher.anim.ChopTimeline.Creature;
-import com.butcher.anim.ChopTimeline.Verdict;
-import com.butcher.render.ChopScene;
-import com.butcher.render.art.ChopArt;
-import com.butcher.render.art.PropArt;
+import com.sbcs.anim.ChopTimeline;
+import com.sbcs.anim.ChopTimeline.Creature;
+import com.sbcs.anim.ChopTimeline.Verdict;
+import com.sbcs.render.ChopScene;
+import com.sbcs.render.art.ChopArt;
+import com.sbcs.render.art.PropArt;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -41,7 +41,7 @@ public final class ChopPreview {
 
     static int W = Integer.getInteger("w", 640), H = Integer.getInteger("h", 360), S = Integer.getInteger("scale", 3);
 
-    static final com.butcher.render.model.Mesh HEAD = com.butcher.render.model.PlayerHeadMesh.head();
+    static final com.sbcs.render.model.Mesh HEAD = com.sbcs.render.model.PlayerHeadMesh.head();
 
     static final Map<Verdict, String> NAMES = Map.of(
             Verdict.RELIC, "Minos Relic", Verdict.BRAIN_FOOD, "Brain Food", Verdict.CHIMERA, "Chimera I",
@@ -91,7 +91,7 @@ public final class ChopPreview {
         tex.put(ChopArt.TEX_WING, ChopArt.wing());
         tex.put(ChopArt.TEX_PIXDROP, ChopArt.pixDrop());
         tex.put(ChopArt.TEX_PIXSPLAT, ChopArt.pixSplat());
-        tex.put(com.butcher.render.art.ThawArt.TEX_COIN, com.butcher.render.art.ThawArt.coin());
+        tex.put(com.sbcs.render.art.ThawArt.TEX_COIN, com.sbcs.render.art.ThawArt.coin());
         BufferedImage armor = read(System.getProperty("vanilla"), "humanoid_gold.png");
         if (armor != null) tex.put(ChopArt.TEX_ARMOR, armor);
         tex.put(PropArt.TEX_CLEAVER, PropArt.cleaver());
@@ -106,7 +106,7 @@ public final class ChopPreview {
             if (img != null) tex.put("creature_" + c.name(), img);
         }
         // The whole bestiary, for the Dye's parade.
-        for (String key : com.butcher.anim.HuntEnding.BESTIARY) {
+        for (String key : com.sbcs.anim.HuntEnding.BESTIARY) {
             BufferedImage img = read(skins, key + "_skin.png");
             if (img != null) tex.put("bestiary_" + key, img);
         }
@@ -284,14 +284,14 @@ public final class ChopPreview {
 
         /** A player-head item, as DianaItems draws it: PlayerHeadMesh through the real projection. */
         void head(BufferedImage skin, float cx, float cy, float size, float yaw, float alpha) {
-            java.util.List<com.butcher.render.model.ModelProjection.Face> faces = new java.util.ArrayList<>();
-            float span = com.butcher.render.model.PlayerHeadMesh.HEAD + 2 * com.butcher.render.model.PlayerHeadMesh.HAT_INFLATE;
-            com.butcher.render.model.ModelProjection.project(HEAD, com.butcher.render.model.ModelProjection.Camera.of(yaw, -22f, size / (span * 1.4f)),
-                    0f, 0, 0, 0, false, true, faces, new com.butcher.render.model.ModelProjection.FacePool());
-            com.butcher.render.model.ModelProjection.sortByDepth(faces);
+            java.util.List<com.sbcs.render.model.ModelProjection.Face> faces = new java.util.ArrayList<>();
+            float span = com.sbcs.render.model.PlayerHeadMesh.HEAD + 2 * com.sbcs.render.model.PlayerHeadMesh.HAT_INFLATE;
+            com.sbcs.render.model.ModelProjection.project(HEAD, com.sbcs.render.model.ModelProjection.Camera.of(yaw, -22f, size / (span * 1.4f)),
+                    0f, 0, 0, 0, false, true, faces, new com.sbcs.render.model.ModelProjection.FacePool());
+            com.sbcs.render.model.ModelProjection.sortByDepth(faces);
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
             int a8 = Math.round(255 * Math.max(0f, Math.min(1f, alpha)));
-            for (com.butcher.render.model.ModelProjection.Face f : faces) {
+            for (com.sbcs.render.model.ModelProjection.Face f : faces) {
                 if (f.uw <= 0 || f.vh <= 0) continue;
                 BufferedImage lit = new BufferedImage(f.uw, f.vh, BufferedImage.TYPE_INT_ARGB);
                 for (int y = 0; y < f.vh; y++) for (int x = 0; x < f.uw; x++) {

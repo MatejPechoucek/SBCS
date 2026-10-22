@@ -3,10 +3,10 @@
 One entry per jar that was actually handed out for testing. The version number bumps on
 every build, so the gaps between entries are builds nobody ran - not missing notes.
 
-## Unreleased - The Butcher's Ledger (since 0.3.5-alpha)
+## Unreleased - The SBCS Ledger (since 0.3.5-alpha)
 
-### The Butcher's Ledger
-- **A book of achievements.** A new Ledger tab opens The Butcher's Ledger, a leather-bound book of ink stamps. The
+### The SBCS Ledger
+- **A book of achievements.** A new Ledger tab opens The SBCS Ledger, a leather-bound book of ink stamps. The
   menu steps aside and the book drops in on its own, a little crooked on the desk, and swings open - its cover stays
   visible as it opens and shuts.
 - **A chapter for every animation**, each behind its own coloured divider tab, with a title page (your numbers and
@@ -29,14 +29,14 @@ every build, so the gaps between entries are builds nobody ran - not missing not
   day's first kill of an animation) and Nobody Expects It (a drop within the day's first 5 Inquisitors) reset at
   midnight, so they are never out of reach.
 - Pencil notes, doodles, tally marks and the odd coffee ring on the pages.
-- Stamps outlive every stats reset. `/butcher ledger recheck` stamps anything your stats prove that the book is
+- Stamps outlive every stats reset. `/sbcs ledger recheck` stamps anything your stats prove that the book is
   missing.
 
 ### Safety nets
-- **`/butcher stop`**: ends any cutscene or pop-up at once, gives back the HUD, chat and sound, and keeps the
+- **`/sbcs stop`**: ends any cutscene or pop-up at once, gives back the HUD, chat and sound, and keeps the
   pre-kill hide off for 15 seconds.
 - **An animation that hits an error stops** instead of taking the game with it: the screen is handed back, the error
-  goes to the log and `/butcher log`, and chat says so once. Three errors and that animation is off until restart.
+  goes to the log and `/sbcs log`, and chat says so once. Three errors and that animation is off until restart.
 - **A watchdog**: a cutscene still up after 90 seconds is ended, and a pre-kill hide stuck on for 45 seconds with
   nothing playing gives the HUD back for a minute.
 - **Hypixel only**: nothing is detected on other servers or in singleplayer. The menu and "Try it" work anywhere.
@@ -44,7 +44,7 @@ every build, so the gaps between entries are builds nobody ran - not missing not
   more than 20 kills in a second is treated as a detection bug - logged and ignored, not played or counted.
 - **Slow frames**: a cutscene running under ~20 FPS switches to calm effects and drops the gameplay window.
 - The hooks that hide dropped items and tell other mods the HUD is hidden can no longer stop the game from starting
-  if a game update moves them; `/butcher log` says whether each is active.
+  if a game update moves them; `/sbcs log` says whether each is active.
 - **Stats backups**: a copy of `stats.json` per day (the newest three are kept), and one from before the Ledger,
   kept for good.
 - The Ledger ignores anything time-based while your computer's clock is behind its last drop, and cleans up a
@@ -78,11 +78,11 @@ every build, so the gaps between entries are builds nobody ran - not missing not
 - **A Speed setting for every animation** (50-200%): the Chopping Block, Hellion, Eruption, Fin and Wisp join the
   Thaw's Speed and the Scatha's Full run. The whole animation - picture, sound cues, skip target - runs on one clock
   at that pace; what it shows never changes.
-- **Mod Menu support** (optional): its Configure button opens the Butcher menu, and Esc goes back to the mod list.
+- **Mod Menu support** (optional): its Configure button opens the SBCS menu, and Esc goes back to the mod list.
   Opened from the title screen, "Try it" says to join a world first instead of playing into nothing.
 
 ### Changed
-- **`/butcher test` and `/butcher debug` are developer-only.** They exist only for the accounts in `Dev.java` (and
+- **`/sbcs test` and `/sbcs debug` are developer-only.** They exist only for the accounts in `Dev.java` (and
   in a development run). For everyone else they are gone, tab completion included. Players use the menu instead.
 - **Every animation has "Try it" in the menu**, the Scatha and the Thaw included (they had none). Outcomes show
   their real names ("High Class Archfiend Dice", not "High class dice"). Right-click steps back through outcomes,
@@ -103,7 +103,7 @@ every build, so the gaps between entries are builds nobody ran - not missing not
 - The Vanguard profit window no longer opens over a chest or your inventory (that closed it on the client only). It
   waits until no screen is open, and gives up after 20 seconds.
 - Stats and settings are written atomically, so a crash mid-save can't leave a half-written file. An unreadable
-  `butcher.json` or `stats.json` is kept as `.broken` instead of being overwritten with defaults.
+  `sbcs.json` or `stats.json` is kept as `.broken` instead of being overwritten with defaults.
 - Hand-edited settings out of range (a negative volume, a misspelt mode) are put back in range instead of crashing.
 - On a brand-new install, setting the Chopping Block to 100% in the first session moved it to 130% on the next launch.
 - Testing the Scatha with its cutscene switched off played nothing; testing it during a real kill could hand the
@@ -202,7 +202,7 @@ The polish pass: the last tier of the animation review.
 - **Wisp - Dwarven Mines Ghosts**: when a Ghost drops **Sorrow** or **Plasma**, a quick pop-up like Fin's.
   A Ghost (a pale charged creeper, its charge crawling round it) rises out of a strip of mist, comes
   apart into wisps with a crackle, and the drop pops out with its name and bazaar price. Nothing is
-  hidden. Menu: "Dwarven Mines Ghosts - Wisp" (on/off, price, volume, Try it); `/butcher test ghost`.
+  hidden. Menu: "Dwarven Mines Ghosts - Wisp" (on/off, price, volume, Try it); `/sbcs test ghost`.
   Drop records keep every Ghost line, so the real drop message can be checked.
 
 ## 0.2.89-beta — 2026-10-12
@@ -283,7 +283,7 @@ The polish pass: the last tier of the animation review.
 ## 0.2.84-beta — 2026-10-11
 
 ### Added
-- **Hold Backspace to skip a cutscene** (rebind it under Controls, "Butcher"). A win jumps straight to its
+- **Hold Backspace to skip a cutscene** (rebind it under Controls, "SBCS"). A win jumps straight to its
   showcase with the price already counted; a bust ends.
 - **Keep health and hotbar** (menu, on by default): while the HUD is hidden your hotbar, hearts, hunger,
   armour and XP stay on screen, drawn over the cutscene.
@@ -434,17 +434,17 @@ The polish pass: the last tier of the animation review.
   - Its own soundtrack.
 - **A Lava Fishing group in the menu**: Eruption on or off, each creature on or off, loot-shared kills, hide
   the HUD when your creature gets low (default 4% of its health), the banner, the price and the volume.
-- `/butcher test lava` plays any ending (`/butcher test lava bust thunder`, `/butcher test lava carmine jawbus`).
+- `/sbcs test lava` plays any ending (`/sbcs test lava bust thunder`, `/sbcs test lava carmine jawbus`).
 
 ### Note
 - Detection is written from your chat logs but no nametag has been seen yet. Fish with drop records on and
-  send the file - `/butcher log` says why each kill did or did not play.
+  send the file - `/sbcs log` says why each kill did or did not play.
 
 ## 0.2.72-beta — 2026-10-05
 
 ### Fixed
-- **Butcher now reads every chat line before other mods can hide it.** Feesh replaces Hypixel's sea
-  creature catch lines with its own, and could hide the original before Butcher saw it, depending on which
+- **SBCS now reads every chat line before other mods can hide it.** Feesh replaces Hypixel's sea
+  creature catch lines with its own, and could hide the original before SBCS saw it, depending on which
   mod loaded first. Nothing changes for what you see in chat.
 
 ## 0.2.71-beta — 2026-10-05
@@ -568,7 +568,7 @@ The polish pass: the last tier of the animation review.
     cracks open onto the End, a beam of judgement dissolves it, and the drop descends with a choir.
   - Its own sound throughout: the teleport "vwoop", a glass clink per hit in the beacon's colour, and
     the beacon powering up or down at the reveal.
-  - Try it with `/butcher test slayer enderman <drop>`. It doesn't play on real kills yet.
+  - Try it with `/sbcs test slayer enderman <drop>`. It doesn't play on real kills yet.
 - Slayer bosses' nametags are now recorded with Drop records on, so their detection can be written.
 
 ## 0.2.61-beta — 2026-10-02
@@ -607,8 +607,8 @@ The polish pass: the last tier of the animation review.
 - **Fin has a bust.** When one of your own Great White Sharks dies and drops neither the Megalodon
   nor the tooth, the fin rises and the cleaver comes down, but the shark ducks under at the last
   moment. The cleaver splashes into empty water and a few bubbles come up. It's short, about 1.6 s.
-  Try it with `/butcher test shark bust`. This is untested on real sharks: no Great White Shark had
-  been recorded yet, so `/butcher log` says why each kill did or didn't count.
+  Try it with `/sbcs test shark bust`. This is untested on real sharks: no Great White Shark had
+  been recorded yet, so `/sbcs log` says why each kill did or didn't count.
 
 ### Changed
 - **The Megalodon's price is George's:** 2,500,000 coins for a legendary, 500,000 for an epic.
@@ -639,7 +639,7 @@ The polish pass: the last tier of the animation review.
     "PRAY TO RNGESUS DROP!" stamped over it.
   - **Flame Dye:** time stops just after the shield breaks and everything hangs cold. Then it all
     catches fire: a ring of flame, the pillars erupt and the dye rises out of the fire.
-  - Try them with `/butcher test slayer blaze dice`, `highclass` or `flamedye`.
+  - Try them with `/sbcs test slayer blaze dice`, `highclass` or `flamedye`.
 
 ### Changed
 - **The fire pillars are the fight's own:** four terracotta blocks with fire on top and the
@@ -667,7 +667,7 @@ The polish pass: the last tier of the animation review.
   the shield's colour. Then it lands. Grey (Ashen) is a bust: the fire dies, the rods fall, the head
   crumbles to ash, all in 2 s. Any other colour shatters the shield, blows the rods out and throws
   the drop from the core, with its name, odds and price. Try it with
-  `/butcher test slayer blaze <bust|duplex|crystal|subzero|wilsons|paragon|dice|highclass|flamedye>`.
+  `/sbcs test slayer blaze <bust|duplex|crystal|subzero|wilsons|paragon|dice|highclass|flamedye>`.
   It doesn't play on real kills yet; detection comes once Demonlord chat has been recorded.
 
 ## 0.2.53-beta — 2026-10-02
@@ -731,7 +731,7 @@ The polish pass: the last tier of the animation review.
 ## 0.2.43-beta — 2026-10-02
 
 ### Added
-- **Slayer chat lines are recorded** in `config/butcher-drops.jsonl` (with Drop records on): boss kills,
+- **Slayer chat lines are recorded** in `config/sbcs-drops.jsonl` (with Drop records on): boss kills,
   drops and the RNG meter. Nothing plays yet; it's so a Slayer animation can later be built on the
   real messages.
 
@@ -742,7 +742,7 @@ The polish pass: the last tier of the animation review.
   White Shark Tooth**: a pixel fin rises out of a strip of water, the cleaver chops it, and the drop
   pops out of the splash with its name and price. It lasts about 2.5 s. Nothing is dimmed or hidden,
   and you keep playing. Settings are in the menu under "Fishing Festival - Fin" (on/off, volume). Try
-  it with `/butcher test shark megalodon|legendary|tooth`.
+  it with `/sbcs test shark megalodon|legendary|tooth`.
 
 ### Fixed
 - **SBO's Diana loot tracker is hidden with the rest of the HUD.** It showed the drop before the
@@ -793,7 +793,7 @@ The polish pass: the last tier of the animation review.
   Inquisitor, Manticore or King Minos **you dug up** dies. It opens straight away, and the drop's
   RARE DROP! line fills in the ending before the split. A Minos Relic, a Mythological Dye (yours
   only) or a loot-shared drop starts it on its own.
-- Every step is in `/butcher log`, and each creature's name tag is saved to the drop records,
+- Every step is in `/sbcs log`, and each creature's name tag is saved to the drop records,
   so a miss can be traced.
 
 ## 0.2.31-beta — 2026-09-29
@@ -813,7 +813,7 @@ The polish pass: the last tier of the animation review.
   - **Looks:** the RARE DROP! banner, showing the price, and the size of the scene.
   - **Sound:** music on the big drops, and the win volume.
 - **Diana stats** (Stats tab): kills since a drop and the worst dry streak, every drop counted, and
-  kills per creature, with its own reset. Counted from real kills only - never from /butcher test.
+  kills per creature, with its own reset. Counted from real kills only - never from /sbcs test.
 - An ending's second line now says which one it is ("Your 3rd Minos Relic"), from those stats.
 
 ### Changed
@@ -857,7 +857,7 @@ pixel-art style: no more smooth, shaded blobs, thick bars or grey washes.
 ## 0.2.27-beta — 2026-09-29
 
 ### Added
-Every Diana drop now has its own ending. Try each with `/butcher test diana <outcome>`.
+Every Diana drop now has its own ending. Try each with `/sbcs test diana <outcome>`.
 - **Fateful Stinger, "The Fatal Sting"** (`stinger`): a scorpion's tail rises out of the Manticore's
   head plate by plate, arches over, and sways like a cobra, venom beading on its barb. Then it
   turns on you and strikes: the screen cracks and venom splashes across the glass. The cracks heal,
@@ -898,7 +898,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
 ### Changed
 - **Diana's cutscene is now "The Chopping Block"**, replacing the Labyrinth. The head of what you
   killed (the Sphinx, Minos Inquisitor, Manticore or King Minos, and the Minos Champion for a Relic)
-  thuds onto a butcher's block over your dimmed game. The Butcher's cleaver chops it three times,
+  thuds onto a sbcs's block over your dimmed game. The SBCS's cleaver chops it three times,
   each blow harder, cracking it and throwing chips, with light leaking out. On the last wind-up the
   cracks cycle colours. Then the cleaver comes down through it and the head splits. The heads are
   the creatures' real skins.
@@ -917,7 +917,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
   then they crash together, and what is left is the real enchanted book, named in enchantment pink.
 - New sounds for the chopping: the thud of the head landing, a swish before each blow, a crunch and
   a ringing blade that build with each blow, and a heavy split.
-- Test with `/butcher test diana <outcome>`.
+- Test with `/sbcs test diana <outcome>`.
 
 ## 0.2.24-beta — 2026-09-28
 
@@ -930,7 +930,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
 ## 0.2.23-beta — 2026-09-28
 
 ### Added
-- **Chimera I's own ending, "Three Heads"** (`/butcher test diana chimera`). A great enchanted
+- **Chimera I's own ending, "Three Heads"** (`/sbcs test diana chimera`). A great enchanted
   book rises over the altar, opens, pages flipping and runes drifting off it; then the chimera's
   three heads - a golden lion, a white goat and a teal serpent, each with its own voice - burst out
   and race through the maze's corridors, carving glowing runes into the walls. They braid into one
@@ -940,7 +940,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
 ## 0.2.21-beta — 2026-09-28
 
 ### Added
-- **Brain Food's own ending, "Every Path at Once"** (`/butcher test diana brainfood`). The maze
+- **Brain Food's own ending, "Every Path at Once"** (`/sbcs test diana brainfood`). The maze
   thinks: a wisteria flood races out from the chamber through every corridor at once, dead ends
   flashing, walls jolting as it passes; brain waves pulse through the lit network while sparks race
   home; it all drains into the chamber and bursts, and the Brain Food rises, throbbing, inside a
@@ -1007,7 +1007,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
 ## 0.2.16-beta — 2026-09-28
 
 ### Added
-- **The Minos Relic's own ending, "The Maze Unmade"** (`/butcher test diana relic`). Everything
+- **The Minos Relic's own ending, "The Maze Unmade"** (`/sbcs test diana relic`). Everything
   up to the gate is the same as any other run. Then black bars close in and the Labyrinth takes
   itself apart: the walls lift away ring by ring from the outside in and crumble into moonstone
   dust, until only the chamber stands on the bare slab with the thread still glowing where the
@@ -1032,7 +1032,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
   wrong turns and the braziers all change from run to run. Nothing before the gate depends on
   what is in the chamber.
 - The Mythological Dye's colour is now its real in-game olive.
-- `/butcher test diana` outcomes are unchanged: `bust`, `relic`, `brainfood`, `chimera`, `dye`,
+- `/sbcs test diana` outcomes are unchanged: `bust`, `relic`, `brainfood`, `chimera`, `dye`,
   `stinger`, `manticore`, `crown`, `wool`, `unknown`.
 
 ## 0.2.14-beta — 2026-09-27
@@ -1045,13 +1045,13 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
   thread lies cut in the dirt, frayed, nothing on it, over in just over a second. A win:
   the line hums in the drop's colour and something slides down it out of the dark, arriving
   in the middle of the screen with its name.
-- `/butcher test diana` outcomes: `bust`, `relic`, `brainfood`, `chimera`, `dye`,
+- `/sbcs test diana` outcomes: `bust`, `relic`, `brainfood`, `chimera`, `dye`,
   `stinger`, `manticore`, `crown`, `wool`, `unknown`.
 
 ## 0.2.12-beta — 2026-09-27
 
 ### Added
-- **The Judgement** - Diana's cutscene, playable with `/butcher test diana <outcome>`. The
+- **The Judgement** - Diana's cutscene, playable with `/sbcs test diana <outcome>`. The
   camera falls into a burrow; below is a marble chamber lit by braziers, a colossal judge in
   the shadow above, and bronze scales. The offering drops onto a pan, the scales sway towards
   balance three times, the light snaps out - and when it comes back, the verdict. A bust is
@@ -1067,10 +1067,10 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
 
 ### Added
 - **Drop records.** Every real Scatha kill and Vanguard corpse, and every chat line that
-  looks like Diana's Mythological Ritual, is written to `config/butcher-drops.jsonl` with
+  looks like Diana's Mythological Ritual, is written to `config/sbcs-drops.jsonl` with
   the chat and the mod's reasoning around it. It stays on your computer. The point: a rare
   drop happens once, and if the mod ever gets one wrong, the exact inputs are on disk to fix
-  it against. `/butcher records` shows how many there are; **Drop records** in the menu
+  it against. `/sbcs records` shows how many there are; **Drop records** in the menu
   turns it off.
 
 ## 0.2.7-beta — 2026-09-24
@@ -1091,7 +1091,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
   the moment the cutscene ends. The profit window no longer holds chat back at all.
 
 ### Changed
-- `/butcher test` runs are no longer counted in the stats - no test corpse, pet, gemstone
+- `/sbcs test` runs are no longer counted in the stats - no test corpse, pet, gemstone
   or cut adds to the numbers or moves a dry streak. (Numbers already counted from tests stay
   until you reset that section in the menu.)
 
@@ -1105,7 +1105,7 @@ Every Diana drop now has its own ending. Try each with `/butcher test diana <out
   count as 0. Any key or click closes it. **Profit window after the Thaw** in the menu turns
   it off; **Live prices** (was "Live Locket price") turns off all price fetching.
 - Glacite Powder is recognised as a drop, with its own icon: a heap of light blue powder like
-  the old light blue dye. Drop a 16x16 `glacite_powder.png` into `config/butcher/textures/`
+  the old light blue dye. Drop a 16x16 `glacite_powder.png` into `config/sbcs/textures/`
   to use any texture you like for it.
 
 ## 0.2.3-beta — 2026-09-24
@@ -1182,7 +1182,7 @@ Locket's and the Dye's big endings, the colour cycle - plus:
   sparkles drift upwards for the rest of the ending.
 - Both special endings show how rare the drop is ("1 in ~540 corpses") and which one this
   is for you ("Your first ever Frostbitten Dye!"), and keep a shimmer on their tray slot.
-- `/butcher test vanguard locket`.
+- `/sbcs test vanguard locket`.
 - **Live Locket price** switch in the Vanguard menu group.
 
 ### Changed
@@ -1229,19 +1229,19 @@ Locket's and the Dye's big endings, the colour cycle - plus:
 ## 0.1.28-beta — 2026-09-23
 
 ### Changed
-- `/butcher test` is split in two: **`/butcher test scatha …`** and
-  **`/butcher test vanguard …`**. Typing any level on its own - `/butcher test`,
-  `/butcher test scatha`, `/butcher test scatha pet` - lists what is under it. Each option
+- `/sbcs test` is split in two: **`/sbcs test scatha …`** and
+  **`/sbcs test vanguard …`**. Typing any level on its own - `/sbcs test`,
+  `/sbcs test scatha`, `/sbcs test scatha pet` - lists what is under it. Each option
   is clickable and puts the full command in the chat box.
-- A rolled Vanguard corpse is now `/butcher test vanguard random`; the Scatha's is
-  `/butcher test scatha random`. The firework and the pre-kill hide moved under `scatha`.
+- A rolled Vanguard corpse is now `/sbcs test vanguard random`; the Scatha's is
+  `/sbcs test scatha random`. The firework and the pre-kill hide moved under `scatha`.
 
 ## 0.1.26-beta — 2026-09-23
 
 ### Changed
-- `/butcher test vanguard explode` ends on a random legendary - Shattered Locket, Caged
+- `/sbcs test vanguard explode` ends on a random legendary - Shattered Locket, Caged
   Wisp, Frozen Scute or Skeleton Key - instead of always the Skeleton Key.
-  `/butcher test vanguard reveal` likewise picks a random uncommon instead of always an
+  `/sbcs test vanguard reveal` likewise picks a random uncommon instead of always an
   Umber Plate. Picked evenly, so every item turns up about as often as the others.
 
 ## 0.1.25-beta — 2026-09-23
@@ -1263,8 +1263,8 @@ Locket's and the Dye's big endings, the colour cycle - plus:
   - The haul is printed to chat when the cutscene ends (or is skipped), since the loot
     message is hidden while it plays. Two corpses opened back to back play one after the
     other.
-- `/butcher test vanguard` rolls a corpse against the real loot table;
-  `/butcher test vanguard crash | reveal | explode | dye` plays a chosen ending.
+- `/sbcs test vanguard` rolls a corpse against the real loot table;
+  `/sbcs test vanguard crash | reveal | explode | dye` plays a chosen ending.
 - **Vanguard Thaw** group in the menu's gambling tab: on/off, and hide the loot message.
 
 ## 0.1.0-beta — 2026-09-21

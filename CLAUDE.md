@@ -1,4 +1,4 @@
-# Butcher
+# SBCS
 
 Fabric client mod for **Minecraft 26.2** (Hypixel SkyBlock, Crystal Hollows). Plays a
 cutscene when a Scatha gives up its loot.
@@ -10,7 +10,7 @@ Build: `.\gradlew.bat build` — Java 25 toolchain, Fabric Loom.
 ## Design direction (the user, 2026-10-02)
 
 **The cleaver is the Scatha's, not the mod's signature.** It fits Diana's Chopping Block by
-coincidence. New animations do not need a cleaver, a kill or a "butcher" theme - each source gets
+coincidence. New animations do not need a cleaver, a kill or a "sbcs" theme - each source gets
 whatever suits it. (Fin used the cleaver until 0.3.0, when it got a fishing hook.)
 
 ## Verify code before handing it over
@@ -59,7 +59,7 @@ signatures cannot be copied verbatim:
 | `renderBuffers().bufferSource().endBatch()` | `renderBuffers().endFrame()` |
 | `Minecraft.setScreen` | `Gui.setScreen` (`Minecraft` keeps only `setScreenAndShow`) |
 
-`butcher.mixins.json` used to carry `"defaultRequire": 0`, which makes a mixin
+`sbcs.mixins.json` used to carry `"defaultRequire": 0`, which makes a mixin
 whose target name does not resolve **fail silently** rather than crash — it just never
 runs. That hid a broken `ItemInHandRendererMixin` for a long time. It is now **1**, so
 the same mistake crashes on load instead; check every target with `javap` before writing
@@ -127,7 +127,7 @@ Scatha-Pro's `ScathaDropsDetector` avoids this by keeping the two apart, and so 
 this: every tick the inventory is diffed and anything new goes into `cachedDrops`
 stamped with the time. A cached drop stays claimable for `KILL_WINDOW_MS`; a kill
 then claims whatever is in the cache. That covers a drop landing up to a window
-early as well as late. `ButcherClient` therefore calls `dropWatcher.tick(...)`
+early as well as late. `SbcsClient` therefore calls `dropWatcher.tick(...)`
 on **every** tick without exception — only the `mayResolve` flag is conditional.
 Skipping a tick hides whatever changed across the gap.
 
@@ -147,7 +147,7 @@ middle) for a pet, SINK on a missed last swing.
 The fix — do not undo it: the cleaver cutscene **opens the instant the kill is
 detected**, outcome unknown, and `ScopeMinigameScreen.resolve()` fills it in during
 the fade-in. `openScope` assigns `currentScope` synchronously (only `setScreen` is
-ever deferred, and only for `/butcher test`): a drop already sitting in the cache
+ever deferred, and only for `/sbcs test`): a drop already sitting in the cache
 resolves later in the *same* tick, and `trigger()` has to find the screen waiting
 rather than open a second one over it.
 
@@ -159,7 +159,7 @@ handles that the same way, since the armor stand vanishes either way.
 Neither half of detection can be summoned on demand — a pet is roughly a 1-in-2000
 drop, and a kill means going and mining one. So both detectors narrate themselves
 into `DecisionLog`: every kill accepted, every kill refused *and why*, every item
-matched or ignored, and every gemstone inferred. Read it back with `/butcher log`.
+matched or ignored, and every gemstone inferred. Read it back with `/sbcs log`.
 
 When changing anything in `detect/`, add the narration at the same time. A refusal
 that says nothing is indistinguishable from a bug, and that is the whole reason this
@@ -221,14 +221,14 @@ Two consequences, both of which cost a rewrite to learn:
   worm: armour stands near a tracked Scatha are checked for a head item with a `PROFILE`
   component, and the skin the game already resolved for it is kept. Head and body are told
   apart by frequency — the skin seen many times per worm is the body, the one seen once is
-  the head. Cached to `config/butcher/skins.json`; a PNG in
-  `config/butcher/skins/` overrides it. `ScathaArt` is a placeholder for before the
+  the head. Cached to `config/sbcs/skins.json`; a PNG in
+  `config/sbcs/skins/` overrides it. `ScathaArt` is a placeholder for before the
   first capture and nothing more — resist making it "better".
 
 ## Art
 
 **Players can replace any of it.** Every generated texture is written to
-`config/butcher/textures/` on first use, and `render/ArtOverrides` prefers an
+`config/sbcs/textures/` on first use, and `render/ArtOverrides` prefers an
 edited file over the generated one. The trick is a SHA-256 manifest
 (`generated.properties`): a file whose hash still matches is ours and gets replaced when
 the art changes, a file whose hash does not is the player's and is never touched. To go
@@ -239,7 +239,7 @@ There are two generations of art here, and it matters which one you are looking 
 
 **Generated at runtime — the live path.** `render/art/` draws with `Graphics2D` into a
 `BufferedImage` when the texture is first asked for, and `TextureBank` uploads it.
-Nothing is shipped in the jar, so `/butcher reload` is the whole edit loop: change the
+Nothing is shipped in the jar, so `/sbcs reload` is the whole edit loop: change the
 Java, reload, look.
 
 | class | produces |
@@ -254,14 +254,14 @@ or the next regeneration wipes the change:
 
 | script | produces | still drawn? |
 | --- | --- | --- |
-| `gen_sparks.py` | `butcher/spark_0..5.png` | yes, the impact sparks |
+| `gen_sparks.py` | `sbcs/spark_0..5.png` | yes, the impact sparks |
 | `gen_veil.py` | `prekill_veil.png` | no - the pre-kill veil was removed (0.2.31) |
 | `gen_misc.py` | `spark.png` (+ dormant placeholder art) | yes |
 | `gen_icon.py` | `icon.png` | yes - the mod icon (since 2026-10-15) |
 | `IconGen.java` | `icon.png` | no - the old rendered cleaver; running it overwrites the current icon |
 | `gen_cave.py` | `cave/cave_wide.png` | no — `CaveArt.backdrop()` replaced it |
 | `gen_gems.py` | `cave/gem_*`, `rock_*`, `rock_glow_*`, `sparkle.png` | no — `CaveArt` replaced them |
-| `gen_cleaver.py` | `butcher/cleaver_00..13.png` | no — the cleaver is a real mesh now |
+| `gen_cleaver.py` | `sbcs/cleaver_00..13.png` | no — the cleaver is a real mesh now |
 
 The three superseded scripts are kept because they are the only copy of that art's
 source; their outputs have been removed from `src/main/resources/`, so re-running one
@@ -271,7 +271,7 @@ puts files back that nothing loads.
 top-left corner chopped off along x + y = const (the cut keeps clear of the counters, so the B always reads), the
 piece pushed a pixel up-left, both cut faces white-hot, sparks along the line. The user picked it from a sheet; a cut
 through the middle split both counters and read as "F3". The menu draws it at its native 32 GUI pixels
-(`MenuView.ICON_SIZE`; `MenuIcon` halves 256 -> 32 exactly), beside "BUTCHER" with the subtitle under the name.
+(`MenuView.ICON_SIZE`; `MenuIcon` halves 256 -> 32 exactly), beside "SBCS" with the subtitle under the name.
 
 `IconGen.java` is the odd one out: it is Java, not Python, because it renders the icon
 from the **real** `CleaverMesh` through the **real** `ModelProjection` with the **real**
@@ -286,10 +286,10 @@ drawn by the guillotine mode (`AnimationMode.GUILLOTINE`), which the menu no lon
 offers but a config file can still select. Do not delete them casually; there is no
 script to bring them back.
 
-`scatha_head*.png`, the `butcher/seg_*` set and everything under `scope/` were the same
-kind of art but nothing loaded them any more, so the rename to `butcher` took them out.
+`scatha_head*.png`, the `sbcs/seg_*` set and everything under `scope/` were the same
+kind of art but nothing loaded them any more, so the rename to `sbcs` took them out.
 They are in git history at the `0.1.0-beta` tag if one is ever wanted back:
-`git show 0.1.0-beta:src/main/resources/assets/scathabutcher/textures/gui/scope/scope_mask.png > scope_mask.png`.
+`git show 0.1.0-beta:src/main/resources/assets/scathasbcs/textures/gui/scope/scope_mask.png > scope_mask.png`.
 
 Values that are duplicated between a script and Java, and must move together:
 
@@ -351,7 +351,7 @@ case that matters.
 ## Chat during a cutscene is held, not dropped
 
 While chat is covered - a cutscene, the Scatha pre-kill hide, or the profit window
-(`ButcherClient.chatHeld()`) - new chat lines are **held** by `ChatHold` and put back, oldest
+(`SbcsClient.chatHeld()`) - new chat lines are **held** by `ChatHold` and put back, oldest
 first, on the first tick nothing covers the chat. Three versions were needed, each fixing
 what the user saw in game:
 
@@ -374,14 +374,14 @@ log reached the chat box; the user's live profile is `SkyBlock Enhanced Modern E
 
 ## Drop records
 
-`detect/DropRecorder` appends every real event to `config/butcher-drops.jsonl`, one JSON
+`detect/DropRecorder` appends every real event to `config/sbcs-drops.jsonl`, one JSON
 object per line, append-only and never pruned: `scatha_kill` (verdict, the last 15 s of chat,
 the last 25 decisions), `vanguard_corpse` (the parsed haul, 10 s of chat), and `diana_line` -
 any chat line matching a broad Diana keyword pattern, captured **before** Diana is detected at
 all, because her detection must be written against real strings. Every incoming line passes
 through `DropRecorder.chatLine` in `allowChatLine` before anything hides it. Also `fishing_line` (0.2.42, Fin) and `slayer_line` (0.2.43: boss names, quest lines, RNG meter,
 the drop tiers) - capture only, for animations not built yet. Tests are never
-recorded. Written on its own thread. `recordDrops` (menu: Drop records), `/butcher records`.
+recorded. Written on its own thread. `recordDrops` (menu: Drop records), `/sbcs records`.
 
 ## Diana - decisions made against docs/diana.md (2026-09-27)
 
@@ -433,12 +433,12 @@ the preview, said it was what they had wanted in the first place. The Thread's f
 
 **The Chopping Block replaced The Labyrinth** (0.2.25, 2026-09-28). The user liked the drop
 endings (the Relic most, then Brain Food) but found the maze did not match Diana's vibe and needed a
-whole black-screen cutscene; they asked for something simpler and exciting, on the Butcher theme -
+whole black-screen cutscene; they asked for something simpler and exciting, on the SBCS theme -
 killing the mob - over the **dimmed** game, not black. Of the options pitched they took this one, and
 option (b) for Chimera. The Labyrinth's seven files were moved out of the repo, uncommitted, to
 `E:\mod\labyrinth-archive\` - its `box()`, moon head, orbiting stars and screen were ported from there.
 
-**How The Chopping Block is built** (playable only through `/butcher test diana <outcome>` until
+**How The Chopping Block is built** (playable only through `/sbcs test diana <outcome>` until
 detection exists):
 
 - `anim/ChopTimeline` - pure, per verdict, **creature** and seed. The head drops onto the block
@@ -455,7 +455,7 @@ detection exists):
   `tools/ChopTest` hashes every draw call before the split for all ten verdicts, **per creature**,
   five seeds.
 - **The heads are real skins** from the NEU repo's `constants/bestiary.json` (keyed by the mob's
-  display name, field `texture`), bundled in `assets/butcher/creature_heads.json` and loaded by
+  display name, field `texture`), bundled in `assets/sbcs/creature_heads.json` and loaded by
   `HeadSkins.CREATURES`. Only the Chimera's lion, goat and serpent have no skin anywhere and are
   painted (`ChopArt.head`). **For any head texture, check the NEU repo first** - the user's rule.
 - `render/ChopScene` - one drawing routine for game (`gui/ChopScreen`) and preview
@@ -557,7 +557,7 @@ detection exists):
   `ARROW` threads every head in `hitOrder` (King Minos last) where each head is at its hit, `SUCK`, `SHOCK` (the
   board blown away - `blockFall`), the dye in a column at `ITEM_Y`. Heads behind the block draw in `beforeBlock`.
   The camera looks down on the ring as it fills (from the side it was a heap) and up for the moon. Sounds are a cue
-  list, `audio/HuntSound` (`Voices.hunt*`, G dorian; `ButcherAudio.playDiana` on the win volume);
+  list, `audio/HuntSound` (`Voices.hunt*`, G dorian; `SbcsAudio.playDiana` on the win volume);
   `tools/HuntSoundtrack` renders it. ChopFill's rays and motes now play for it, from the dye. ChopTest checks it.
 - **Manti-core** (`HeartEnding`): 26 cells fly in and fuse (`cell`); each wing is three jointed panels
   (`bend`, `ChopSpecials.wingPanels`, texture split at `JOINTS`); the cocoon is the wings swung across
@@ -578,10 +578,10 @@ detection exists):
   time); lights (`ChopScene.light`, set per frame by `ChopSpecials.lights` plus the split's own) tint
   faces facing them towards their colour.
 - **Settings and stats (0.2.30).** The menu's Diana section: creature switches (checked in
-  `ButcherClient.openChop` for real runs only - tests always play), every drop's own ending (off:
+  `SbcsClient.openChop` for real runs only - tests always play), every drop's own ending (off:
   `ChopTimeline.options(simple, ...)` gives every drop the plain ending - ChopTest checks the
   pre-split frames are unchanged by it), the banner, the price, the size (`ChopTimeline.scale`), the
-  music, the win volume. `ButcherStats.onDiana(creature, drop)` counts a real run before its screen
+  music, the win volume. `SbcsStats.onDiana(creature, drop)` counts a real run before its screen
   is made, so the screen's second line reads "Your Nth X" from `dianaDropCount`; a test says so.
   The Stats tab has a Diana group with its own reset.
 - **Detection (0.2.32)** - `detect/DianaWatcher`, written against the user's 500+ captured lines
@@ -638,7 +638,7 @@ detection exists):
   colour rising across the width), `ash` (a bust's, short). No rays or motes for the Relic or the
   Dye. Everything on a one-head-texel grid. The rays come in at the drop's showcase (`arrive() - 150`),
   not at the split - the user's call in 0.2.51.
-- Next: UNKNOWN from detection, replay/simulate, fixtures, `/butcher dump`.
+- Next: UNKNOWN from detection, replay/simulate, fixtures, `/sbcs dump`.
 
 **What SBO knows about Diana's messages** (SBO 0.5.2 for 26.2, a Diana mod the user supplied,
 read from its class files 2026-09-28 - use as the starting point for detection, then confirm
@@ -662,7 +662,7 @@ against our own `diana_line` records; `§` codes as SBO matches them):
 
 ## Test runs are not counted
 
-`/butcher test` plays the real cutscenes but touches no stats: Scatha tests go through
+`/sbcs test` plays the real cutscenes but touches no stats: Scatha tests go through
 `triggerTest` and a `ScopeMinigameScreen` built with `test = true` (the cutscene is counted in
 its constructor, so the flag has to be a constructor argument); Vanguard tests go through
 `injectTest`, which sets `testingCorpse` around the watcher's `inject`.
@@ -692,9 +692,9 @@ SkyHanni draws in `Gui.extractRenderState` just *around* the `Hud.extractRenderS
   (as Fabric elements under `HudFade.untouched`, or directly when the pass was skipped) and the user
   heard every sound and saw nothing - the cause was never pinned down offline. Now `GuiFadeMixin`
   draws them where the fade window closes, fade off, after `graphics.nextStratum()`
-  (`ButcherClient.drawOwnHud`): after the HUD, before screens. `HudFade.added` counts states; a
+  (`SbcsClient.drawOwnHud`): after the HUD, before screens. `HudFade.added` counts states; a
   cutscene that adds none logs "A cutscene drew nothing" to the DecisionLog once, so a repeat shows
-  in `/butcher log`. Confirmed in game 2026-10-01: `/butcher test diana` shows again.
+  in `/sbcs log`. Confirmed in game 2026-10-01: `/sbcs test diana` shows again.
 - Camera overlays (vignette, pumpkin) now go too; SkyMaxx does the same. A side effect: a cutscene
   also draws under F1 while it hides the HUD. Unverified in game.
 
@@ -707,7 +707,7 @@ read with javap: toasts, LivingEntityRenderer / ItemFrameRenderer name tags, the
 `GameRenderer.shouldRenderBlockOutline` - so those go for the length of the hide, as under F1. The HUD
 pass reads the field, so it is unaffected.
 
-**`GuiScreenMixin` now only keeps the chat box shut** (`ButcherClient.chatShut()`: a cutscene or
+**`GuiScreenMixin` now only keeps the chat box shut** (`SbcsClient.chatShut()`: a cutscene or
 the pre-kill hide) - its history is where a drop gives itself away (SkyMaxx's `chatShut`). Every
 other screen opens over a cutscene that keeps playing underneath. Unlike SkyMaxx, the pause menu
 does **not** skip it: the game opens that by itself when the window loses focus, and the user
@@ -716,14 +716,14 @@ about not losing messages, not about hiding the chat.
 
 Known gap: with the GUI hidden (F1) the HUD elements, ours included, are not drawn.
 
-**The review's Tier 1 (0.2.84)** - the doc "Butcher animation review" (claude.ai/code/artifact/6e0782c3-c97e-430b-b957-1111c4f1af38)
+**The review's Tier 1 (0.2.84)** - the doc "SBCS animation review" (claude.ai/code/artifact/6e0782c3-c97e-430b-b957-1111c4f1af38)
 holds the full priority list; Tier 1 is built and **confirmed working in game (the user, 2026-10-12)**:
-- `gui/Cutscene` (Chop, Hellion, Seraph, Eruption screens): `showsWin`, `skip`, `interrupt`. `ButcherClient.makeRoom` lets
+- `gui/Cutscene` (Chop, Hellion, Seraph, Eruption screens): `showsWin`, `skip`, `interrupt`. `SbcsClient.makeRoom` lets
   a known win interrupt a bust or a pending kill; anything else goes to `waitForTurn` (a bust is dropped after 5 s, a win
   always waits). Each watcher listener's `resolve` falls back to `killKnown` when its pending screen is gone, so a win
   whose kill never opened still plays. Thaw and the Scatha are never interrupted.
-- Skip: KeyMapping `key.butcher.skip` (Backspace, held 400 ms, `skipTick`). A win's `openedAt` moves back to
-  max(arrive, countStart + COUNT_MS) and the jumped-over cues run inside `ButcherAudio.muted` so flags, counters and the
+- Skip: KeyMapping `key.sbcs.skip` (Backspace, held 400 ms, `skipTick`). A win's `openedAt` moves back to
+  max(arrive, countStart + COUNT_MS) and the jumped-over cues run inside `SbcsAudio.muted` so flags, counters and the
   price are set without sound. Scatha and Thaw skip by `onClose`.
 - `mixin/DroppedItemHideMixin` (EntityRenderDispatcher.shouldRender) + `PickupHideMixin` (ItemPickupParticleGroup):
   no ItemEntity drawn while `hideDroppedItems()` - a slayer cutscene or its pre-kill hide. Only slayer drops land on
@@ -742,8 +742,8 @@ holds the full priority list; Tier 1 is built and **confirmed working in game (t
   the reveal, so SeraphTest's honesty holds).
 
 **Tier 2 (0.2.85)**, confirmed in game 2026-10-12:
-- `ButcherStats.Source` per key ("blaze", "seraph", "lava", "shark"): kills, drops by title, dry streak;
-  `onSource` from each screen's `count()` once the outcome is known (never tests), Fin from ButcherClient. Menu
+- `SbcsStats.Source` per key ("blaze", "seraph", "lava", "shark"): kills, drops by title, dry streak;
+  `onSource` from each screen's `count()` once the outcome is known (never tests), Fin from SbcsClient. Menu
   `sourceGroup`. Scenes show `nthNote` ("your 3rd") after the odds. Diana's bust: `ChopScreen.bustLine`.
 - Banners: `HellionDrops.freshTier()` (the last drop line's tier word, 10 s) -> `HellionScene/SeraphScene.bannerWord`,
   coloured by `tierColour` (rare gold, very rare blue, crazy rare pink, RNGesus dark purple - only RARE DROP!'s
@@ -754,25 +754,25 @@ holds the full priority list; Tier 1 is built and **confirmed working in game (t
 - `ChopArt.glow` is 32 texels in six alpha steps and `ring` 40 texels: every `ChopScene.glow` is pixel art.
 - Hides in percent: `dianaHidePct`, `blazeHidePct`, `seraphHidePct` (the Seraph's against 210M - its nametag has no
   max); `PatternConfig.migrateHides` converts the old million fields once (`hidesInPercent`).
-- Sound: `Voices.gained` (pure - the offline tools reach HuntSound/SeraphSound, which must not touch ButcherAudio),
-  Hunt x1.41, Seraph bust x1.78, Vial boom 0.91, `ButcherAudio.onSkip` (seraphStutter) on skip and interrupt.
+- Sound: `Voices.gained` (pure - the offline tools reach HuntSound/SeraphSound, which must not touch SbcsAudio),
+  Hunt x1.41, Seraph bust x1.78, Vial boom 0.91, `SbcsAudio.onSkip` (seraphStutter) on skip and interrupt.
 - Scatha pet: `petRays` (TEX_RAYS in the rarity colour), name stamped 45 ms a letter, price counted over 900 ms.
 
 **The menu review and half of Tier 3 (0.2.86)**, confirmed in game 2026-10-12:
-- Busts per source (`dianaBusts`, `blazeBusts`, `seraphBusts`, `lavaBusts`; `ButcherClient.bustStyle`): 2 = none -
+- Busts per source (`dianaBusts`, `blazeBusts`, `seraphBusts`, `lavaBusts`; `SbcsClient.bustStyle`): 2 = none -
   `bustsOff` stops the kill opening, and the win still plays through each listener's resolve fallback; 1 = short -
   each screen's `shortBust()` (called wherever `count()` is, i.e. once the outcome is settled) jumps silently to
   REVEAL - 450 (Chop SPLIT - 450). Honest cost, said in the menu: a cutscene that keeps going is a win.
 - `minWorth` (index into `PatternConfig.MIN_WORTH`): `underFloor(priceId)` turns a win under it into a bust in the
   listeners; an unknown price always plays. `floorPrices()` asks for every animated drop's price every 10 min.
-- `chatSummary`: each screen's `summary()` on its natural end or a skip (`ButcherClient.summary`), and the Scatha's
+- `chatSummary`: each screen's `summary()` on its natural end or a skip (`SbcsClient.summary`), and the Scatha's
   close. `calmEffects`: `ChopScene.calm` (set per frame by the screens) zeroes every scene shake and takes glows to
   55%; the Scatha's shake knob reads it too. `vanguardQuick`: ThawScreen jumps a CRASH corpse from the intro to
-  finaleStart - 1500, events fired muted. `ButcherClient.resetSettings` (stats untouched). `playTest` for the
+  finaleStart - 1500, events fired muted. `SbcsClient.resetSettings` (stats untouched). `playTest` for the
   menu's "Try it" rows.
-- **"Try it" follows the bust setting (2026-10-16, the user)**: `playTest` sets `ButcherClient.tryingIt` while it opens
+- **"Try it" follows the bust setting (2026-10-16, the user)**: `playTest` sets `SbcsClient.tryingIt` while it opens
   a screen, which the screen keeps as `followsBusts`, so `shortBust` applies to it; with busts off a bust "Try it"
-  plays nothing and says so in chat (`testWins`). `/butcher test` still plays everything in full.
+  plays nothing and says so in chat (`testWins`). `/sbcs test` still plays everything in full.
 - Menu: tab "Animations"; Live prices + the floor under General > Prices; every volume also on the Sound tab
   (`snd_*` slider ids); `bustsRow`, `tryRows`.
 - Tier 3: Kuudra's carmine capped at 105 units and End Times' terracotta at 30 + 75*terra (both were floor washes);
@@ -793,7 +793,7 @@ shockwave is four rings of touching squares plus dust, the stem 300 squares, the
 horizontal and then spread (`LavaRigs.golem`: zRot 0.45 and head back 0.35 per radian over 1), the vial in his chest
 at 1.05. Kuudra pulls back to 0.68 and stays (it used to come back in); its dye's `worthScale` is 1.25; Eruption's
 banner clears the item by `half * 1.45` (1.2 for a head). **Our own chat lines are skipped in `allowChatLine`**: the
-chat summary ("[Butcher] ...") was being recorded as `slayer_line`. **The dragon (0.2.89)**: `SeraphDragon.pos` scales
+chat summary ("[SBCS] ...") was being recorded as `slayer_line`. **The dragon (0.2.89)**: `SeraphDragon.pos` scales
 x < 0 by `WEST_PULL` 0.6 - the loop round the beacon's left reached x -9 and left the screen; done in code over the
 baked track (start, landing and heading checks unchanged), so a re-bake should fold it into the control points. The
 rear: `REAR_BACK` 9, `REAR_LIFT` 4.6, `REAR_ZOOM` 0.24 (the camera pulls back), `REAR_RISE` 6 - wings above the banner,
@@ -840,10 +840,10 @@ so the words clear the bottom; the Dye's `showScale` is 1.3 (at 1.45 with the 13
 ## Publishing pass (2026-10-15)
 
 - **Developer commands are whitelisted** (`Dev.allowed()`: the UUIDs in `Dev.WHITELIST`, or a development run).
-  `/butcher test` and `/butcher debug` carry `.requires(src -> Dev.allowed())`, so for anyone else they do not exist.
-  Everything a player needs is in the menu: every group ends in "Try it" (`tryRows` + `ButcherClient.playTest`,
-  which covers "scatha" and "vanguard" too). Menu text must not point players at `/butcher test`.
-- `ButcherAudio.tick()` runs every client tick, outside the Scatha's check - inside it, the cleaver switched off left
+  `/sbcs test` and `/sbcs debug` carry `.requires(src -> Dev.allowed())`, so for anyone else they do not exist.
+  Everything a player needs is in the menu: every group ends in "Try it" (`tryRows` + `SbcsClient.playTest`,
+  which covers "scatha" and "vanguard" too). Menu text must not point players at `/sbcs test`.
+- `SbcsAudio.tick()` runs every client tick, outside the Scatha's check - inside it, the cleaver switched off left
   the synth unstarted and every other animation silent.
 - Config: `PatternConfig.sanitize()` clamps every value to the menu's range on load (keep it in step with new
   sliders); `fresh()` is the defaults with the one-off migrations marked done; `writeAtomically` is used by both
@@ -871,7 +871,7 @@ so the words clear the bottom; the Dye's `showScale` is 1.3 (at 1.45 with the 13
 dependencies) and the release notes; the project description is the README. The Stats rework the user asked for next
 became the Ledger (below).
 
-## The Butcher's Ledger (2026-10-16)
+## The SBCS Ledger (2026-10-16)
 
 The user's achievement system: local only, a new "Ledger" tab beside Stats, "like an openable book ... with stamps,
 maybe like a binder", a chapter per animation, old stats backfilled. They edited the stamp list as a spreadsheet.
@@ -883,15 +883,15 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   20; Vanguard 5/25/50/100, Ice Cold 25 (without a legendary - what the stats count), In the Black 30M; Thermal
   Runaway 50; Spirit Level 100/250/500 Ghost drops. Fin's Big Fish is any Megalodon (the stats never kept the pet's
   rarity; both are titled "Megalodon"); Bigger Fish, the legendary, is an event from the update on.
-- **`com.butcher.ledger` is pure** (no Minecraft, no files): `Chapter` (colour for the tab, a darker `ink` for the
+- **`com.sbcs.ledger` is pure** (no Minecraft, no files): `Chapter` (colour for the tab, a darker `ink` for the
   page), `Grade` (Select, Choice, Prime, A5 Wagyu and their ring colours), `Stamp`, `Facts` (what the stats say -
-  `ButcherStats.facts()` fills it), `LedgerData` (saved inside stats.json as `ledger`: entries {grade, at, value},
+  `SbcsStats.facts()` fills it), `LedgerData` (saved inside stats.json as `ledger`: entries {grade, at, value},
   event `flags` {id -> kill}, `seen`, the House's own counters, the last 60 drops), `Ledger` (value, gradeFor,
   refresh, award, run, drop, corpseWorth). `tools/LedgerTest` (219 checks) also reads the drop enums' source to
   check every name a stamp looks for is spelled as the stats write it.
-- **Counted in ButcherStats**: every `on*` ends in `Ledger.run` (the House's cutscenes and bust run), `Ledger.drop`
+- **Counted in SbcsStats**: every `on*` ends in `Ledger.run` (the House's cutscenes and bust run), `Ledger.drop`
   for a win (hot streak, night shift 3-5 AM local, the 777th kill of a source, Scatha back to back, the first pet's
-  kill) and `stampCheck()` (refresh, then `ButcherStats.stamped` -> `StampPopup.queue`). `ledger()` backfills once
+  kill) and `stampCheck()` (refresh, then `SbcsStats.stamped` -> `StampPopup.queue`). `ledger()` backfills once
   (`backfilled`): the House's cutscene count from every source, `firstPetKill` as an upper bound, then a refresh with
   `pre` - undated, not announced. Resets never touch the Ledger. Events fed from outside: `onSkip` (skipTick, never a
   test), `onCoins` (the Chop/Hellion/Seraph/Eruption `summary()`, a real win's price), `onCorpseWorth`
@@ -899,7 +899,7 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   a Jawbus win (EruptionScreen.count) and a legendary Megalodon; Diana's loot share is `DianaWatcher.lastShareAt`
   within 10 s of the win.
 - **The book is `gui/menu/LedgerView`**, laid out at 360 x 228 and scaled into the tab (mouse turned back the same
-  way): shut, a leather cover (gold border, the icon, "THE BUTCHER'S LEDGER", stamps and new ones, a strap); open,
+  way): shut, a leather cover (gold border, the icon, "THE SBCS LEDGER", stamps and new ones, a strap); open,
   the cover swings to the left (the front narrows to the spine, then the left page grows out of it), divider tabs
   down the right edge (a red dot for unseen stamps; the Seraph's taped), ruled pages with a red margin, a red ribbon
   that shuts it. Left page: the chapter's title page (stamps, grades, its numbers, the closest stamp with a bar) or a
@@ -917,7 +917,7 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   draws its icon alone.
 - **The book is shown on its own (2026-10-16, the user)**: the Ledger tab sets `MenuView.ledgerMode` (static, so the
   menu reopens in it); the menu fades out over 180 ms and the book drops in (`LedgerView.enter`, `backOut`), shut, and
-  swings open. Esc (`MenuView.escape` from `ButcherMenuScreen.onClose`) and the ribbon (`shutByRibbon` -> `wantsLeave`) put it away (`leave`, `gone`). `tab`
+  swings open. Esc (`MenuView.escape` from `SbcsMenuScreen.onClose`) and the ribbon (`shutByRibbon` -> `wantsLeave`) put it away (`leave`, `gone`). `tab`
   never becomes `TAB_LEDGER` any more. The book is 412 x 250, scaled to the screen in quarter steps (2.0 at a 960 x 540
   GUI; 10 px kept clear above and below - the user had the "Back to the menu" and hint lines removed, 2026-10-17),
   resting at `TILT` -0.02 rad with more while it lands, leaves, opens and turns; `toBook` undoes the transform for
@@ -932,11 +932,11 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
 - **92 stamps (2026-10-16, the user: "10 per page at least")**: 12 a chapter, 10 for Fin and Wisp (the Seraph's
   chapter stays taped, with none). The 33 added are marked in the sheet's notes column. They count from `Facts`
   fields added for them (`dwarvenOs`, `corpseRolls`, `corpseItems` by name, `dianaKillsBy` by creature,
-  `allDrops()`, `dropSources()`), except the events: Big Ticket (`ButcherStats.onCoins`, one drop >= 10M), and Fin's
+  `allDrops()`, `dropSources()`), except the events: Big Ticket (`SbcsStats.onCoins`, one drop >= 10M), and Fin's
   Feeding Frenzy and Wisp's Double Haunting, Poltergeist, Matched Pair and Witching Hour, which `Ledger.timed` reads
   from the source's own recent drops (only when the clock is sane). LedgerTest checks every chapter has 10+.
 - **The user's sheet edits (2026-10-16)**: Beginner's Luck is a pet within the **day's** first 10 Scatha kills
-  (`LedgerData.scathaDay`/`scathaDayKills`, counted by `Ledger.scathaKill` from `ButcherStats.onKill`, local midnight)
+  (`LedgerData.scathaDay`/`scathaDayKills`, counted by `Ledger.scathaKill` from `SbcsStats.onKill`, local midnight)
   - an event, not backfilled. Dentist 25/50/200/500. The Ghosts' windows are `HAUNT_MS` 30 s (Double Haunting) and
   `GHOST_RUN_MS` 60 s (Poltergeist, Matched Pair). **An awarded event reads as its own number** (`need(grades)`):
   read as 1, Back to Back (50) and In the Black (30M) were flagged but never stamped. LedgerTest 409.
@@ -965,35 +965,35 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   PLAYER_HEAD with a resolved profile (`GuiDraw.head`); the ones still vanilla are listed in `docs/TODO.md`.
 - Saving the sheet with openpyxl drops Excel's extension-form dropdowns (the Chapter list): re-add it as a plain
   `DataValidation` (`=Chapters!$A$2:$A$10`, B2:B140) after any scripted edit.
-- **`/butcher test ledger`** (developers only - it hangs off `test`, so `Dev.allowed()`; `ButcherClient.ledgerTestNode`):
+- **`/sbcs test ledger`** (developers only - it hangs off `test`, so `Dev.allowed()`; `SbcsClient.ledgerTestNode`):
   `popup <id> [grade]` (only the pop-up, `StampPopup.queueTest`, shown even with pop-ups off; `popup burst` queues
   six to see the cap), `give <id> [grade]` / `take <id>`, `info <id>` (what `Ledger.value` counts now, the grade it
   earns, what is in the book), `fill` (every stamp at its top, the Seraph's left out), `unseen` (fresh ink) and
   `wipe confirm` (empty, then the backfill again). Every stamp id is its own literal, so tab completes them. All but
-  popup and info change the real Ledger (`ButcherStats.test*`).
+  popup and info change the real Ledger (`SbcsStats.test*`).
 
 ## Fail-safes (2026-10-16)
 
-The user asked for fail-safes across the mod; these are the fifteen they approved. `com.butcher.Safety` holds most:
+The user asked for fail-safes across the mod; these are the fifteen they approved. `com.sbcs.Safety` holds most:
 - **Errors**: every animation draw (`drawOwnHud`), watcher tick and watcher chat call runs in `Safety.run(key, ...)`
   (keys are the stats' source keys plus "ledger"). A throw goes to `Safety.failed`: logged, `stopAll(false)`, one chat
   line; `STRIKES` (3) and `Safety.on(key)` is false for the session - its watcher stops and `mayOpen` refuses it.
-- **`ButcherClient.stopAll(byPlayer)`**: interrupts the newer cutscene, closes the Scope/Thaw (an unresolved Scope goes
+- **`SbcsClient.stopAll(byPlayer)`**: interrupts the newer cutscene, closes the Scope/Thaw (an unresolved Scope goes
   to `skippedScope` like a skip), stops the guillotine, Fin, Wisp and the stamp pop-up, silences the synth,
   `CutsceneHud.clear()`, nulls every `current*`, clears `waiting`, and holds the pre-kill hide off
-  (`hideSuppressedUntil`, 15 s for `/butcher stop`, 5 s otherwise). Each step in its own try.
+  (`hideSuppressedUntil`, 15 s for `/sbcs stop`, 5 s otherwise). Each step in its own try.
 - **`watchdog()`** every tick: the same thing up for `WATCHDOG_MS` 90 s (per screen - back-to-back Thaws each start
   afresh) is stopped; the pre-kill hide on with nothing playing for `HIDE_STUCK_MS` 45 s is held off 60 s.
 - **Hypixel only**: `Safety.onHypixel()` (`getCurrentServer().ip` contains hypixel.net, read with SkyMaxx's bytecode;
   a development run always passes) gates every watcher tick and chat line. Tests and the menu are unaffected.
-- **Bursts**: `Safety.allowOpen` - a fourth real open of one source in 10 s is refused. Stats: `ButcherStats.refused`
+- **Bursts**: `Safety.allowOpen` - a fourth real open of one source in 10 s is refused. Stats: `SbcsStats.refused`
   drops the same (source, drop) win within 2 s (never for corpses) and anything past 20 counted events a second.
 - **Slow frames**: `CutsceneHud.draw` is timed; averaging over 50 ms for a second sets `Safety.slow()` until the next
   cutscene, which `ChopScene.calm` and `GameplayView.corner()` read.
 - **Optional hooks**: `DroppedItemHideMixin`, `PickupHideMixin`, `HudHiddenMixin` are `require = 0` and call
-  `Safety.hook(i)` (one array read on the hot path); `/butcher log` ends with which ran, what is off, and off-Hypixel.
+  `Safety.hook(i)` (one array read on the hot path); `/sbcs log` ends with which ran, what is off, and off-Hypixel.
 - **Stats**: `load()` copies `stats.json.YYYY-MM-DD.bak` once a day (newest `BACKUPS` 3 kept) and
-  `stats.json.pre-ledger` once. `/butcher ledger recheck` = `ButcherStats.recheck()` (refresh with pre, count added).
+  `stats.json.pre-ledger` once. `/sbcs ledger recheck` = `SbcsStats.recheck()` (refresh with pre, count added).
 - **Ledger**: `Ledger.drop` runs the clock-based awards (`timed`: hot streak, night shift) only when now is past the
   last recent drop; `LedgerData.fix()` caps grades at the stamp's, drops empty entries, zeroes negatives, caps
   `recent`, keeps unknown ids. `StampPopup.CAP` 3 in a row, then `StampCard.paintMore` "+N more stamps".
@@ -1002,9 +1002,9 @@ The user asked for fail-safes across the mod; these are the fifteen they approve
 ## Under maintenance: the Seraph (2026-10-15)
 
 The user is reworking the Seraph's Glyph before players see it. `Maintenance.SERAPH` (pure, no Minecraft) is the
-switch. While it is true, `ButcherClient.seraphOn()` is false whatever `seraphAnimation` says, and every Seraph path
+switch. While it is true, `SbcsClient.seraphOn()` is false whatever `seraphAnimation` says, and every Seraph path
 goes through it: the watcher's tick and chat lines, the pre-kill hide, `hideDroppedItems`. "Try it" for "seraph" only
-plays for `Dev.allowed()`, and `/butcher test slayer enderman ...` (developer-only already) still plays it. The menu
+plays for `Dev.allowed()`, and `/sbcs test slayer enderman ...` (developer-only already) still plays it. The menu
 draws a `TapedRow` in place of its card (hazard tape across, "UNDER MAINTENANCE", no switch, does not open), drops
 the Sound tab's slider and the Stats card, and the Slayers subtitle says it is on its way. `Draw.rotate` exists for
 the tape. To bring it back, set `SERAPH` to false; the README's table and fabric.mod.json's description name it as
@@ -1025,7 +1025,7 @@ Fin and Wisp sit at `h - LIFT` (82): at `h - 64` they covered the action bar (va
 
 ## Mod Menu
 
-`gui/ModMenuIntegration` (the "modmenu" entrypoint, `suggests` in fabric.mod.json) returns `ButcherMenuScreen::new`
+`gui/ModMenuIntegration` (the "modmenu" entrypoint, `suggests` in fabric.mod.json) returns `SbcsMenuScreen::new`
 with Mod Menu's screen as `parent`; `onClose` goes back to it. Mod Menu's maven is not used:
 `src/main/java/com/terraformersmc/modmenu/api/` holds compile-time copies of `ModMenuApi` and `ConfigScreenFactory`
 (signatures read from SkyMaxx's compiled integration: `create(Screen)Screen` erased), and `build.gradle` excludes
@@ -1036,14 +1036,14 @@ with Mod Menu's screen as `parent`; `onClose` goes back to it. Mod Menu's maven 
 
 `gui/menu/MenuView` is the whole menu - rows, layout, drawing, mouse - with **no Minecraft in it**: it draws through
 `gui/menu/Draw` (fill, text, width, item, modIcon, clip, push/translate/scale/pop) and asks a `Host` for the config,
-"Try it", reset, Diana's drop names and the version. `gui/ButcherMenuScreen` is a thin Screen that implements `Draw`
+"Try it", reset, Diana's drop names and the version. `gui/SbcsMenuScreen` is a thin Screen that implements `Draw`
 over `GuiGraphicsExtractor` (only calls the codebase already uses in game) and forwards the mouse. That split is so the
 real menu can be rendered offline: a Java2D `Draw` with the game font's character advances, plus stubs for
-`FabricLoader`, Gson and `ButcherClient.LOGGER` (the session's scratchpad `menu/` held one). Keep `MenuView` free of
+`FabricLoader`, Gson and `SbcsClient.LOGGER` (the session's scratchpad `menu/` held one). Keep `MenuView` free of
 Minecraft, Fabric (beyond config/stats) and the market classes, or that stops working.
 
 The look: embers rising over a vignette; the title with the mod icon (`TEX_ICON`, the 32 px pixel art at its own size,
-registered in `ButcherClient`); a gradient panel with a gold trim and a glint along its top, as tall as its
+registered in `SbcsClient`); a gradient panel with a gold trim and a glint along its top, as tall as its
 content (`shownH` eases); tabs with 7x7 pixel icons and a sliding gold underline; each animation a card in its own
 colour (`SCATHA`, `VANGUARD`, `DIANA`...) with a vanilla item icon, a subtitle (what it plays on; on the Stats tab the
 live dry streak), and its **on/off switch on the card itself** (`HeaderRow.onSwitch`) - so the in-card master toggles
@@ -1080,8 +1080,8 @@ physics: the dice tumble) - their call.
   landing colour, rods blown out, the head implodes into a flash, the drop rises with name / odds /
   price.
 - `gui/HellionScreen` - the canvas for the game, sounds (reused Chopping Block/Thaw voices for now),
-  the price (bazaar instant sell, else lowest BIN). `ButcherClient.openHellion`; tests via
-  `/butcher test slayer blaze <drop>`.
+  the price (bazaar instant sell, else lowest BIN). `SbcsClient.openHellion`; tests via
+  `/sbcs test slayer blaze <drop>`.
 - **0.2.55, from the user's first look:** "way too fast" - the build-up is 4.8 s (`REVEAL`; the user:
   the rods can take 4.5-5 s, this one is not rushed), the shield four rounds from 700 ms, 420 ms a
   step shrinking 9% each (`STEPS` computed), `HANG` at the last step's end (4335). The rods no longer
@@ -1098,7 +1098,7 @@ physics: the dice tumble) - their call.
 - **The rare drop endings (0.2.57).** Per ending, `HellionTimeline.arrive()` is when the drop is shown
   (name, odds, price all follow it).
   - **Dice** (`anim/HellionDice`): Blender 5.2 rigid body (a 2 m cube thrown from the core with spin,
-    floor at mod y -8, 60 fps, settles at frame 124), baked to `assets/butcher/hellion_dice.json`:
+    floor at mod y -8, 60 fps, settles at frame 124), baked to `assets/sbcs/hellion_dice.json`:
     per frame x y z + the 3x3 rotation, row-major, columns = the die's own axes. One throw, two tracks:
     the rotation is turned so each die's **6** ends up: the Archfiend Dice's 6 is its back face (-Z),
     the High Class one's its right side (-X) - pips read off the NEU skins. HellionTest checks it.
@@ -1130,7 +1130,7 @@ physics: the dice tumble) - their call.
 - **0.2.60: the fire in game was streaks.** Adopting `textures/block/fire_0.png` by its Identifier
   gives only its first 16x16 frame, not the 16x512 strip. The frame rects then sampled half a texel
   and stretched it. The preview loaded the strip from a file, so it never showed. **An animated block
-  texture cannot be adopted by name.** Now `ButcherClient.readGameTexture` reads the PNG through the
+  texture cannot be adopted by name.** Now `SbcsClient.readGameTexture` reads the PNG through the
   resource manager (a pack's fire too). `HellionArt.fireStrip` normalises any strip to 32 frames of
   16 px, and `greyFire` makes a grey copy. The fire is that grey copy tinted with the shield's colour
   (`HellionScene.fireTint`; Ashen lifted to #8E8E8E), the user's ask. The Dye's eruption uses the real
@@ -1195,7 +1195,7 @@ physics: the dice tumble) - their call.
   - Menu (0.2.70): a "Slayers" group with Hellion and the Seraph as indented sub-groups (`HeaderRow` takes an
     indent). Hellion: `blazeAnimation`, `blazeHideBelowM` (the pre-kill hide - `HellionWatcher.armed()`, Diana's
     rule on our own boss, feeds `shouldHidePreKill`; default 10M of 150M), `blazeBanner`
-    (`HellionScene.showBanner`), `blazePrice`, `blazeVolume` (`ButcherAudio.playHellion` applies it; the Seraph
+    (`HellionScene.showBanner`), `blazePrice`, `blazeVolume` (`SbcsAudio.playHellion` applies it; the Seraph
     has `playSeraph` and `seraph*` of its own). Menu groups no longer hand on to each other (2026-10-15):
     `buildRows` calls each group's builder in turn - chained, a closed group's early return hid the next (Diana hid
     Fin and the slayers; later Fin hid Wisp).
@@ -1325,7 +1325,7 @@ architecture.
     (`render/DragonRaster`, pure Java: exact row spans, cutout texels, the eyes layer on the body's own
     surface, the outline as the covered area grown by the ink width) and drawn as one image
     (`Canvas.image`; `render/RasterImage` in game - a DynamicTexture that only grows - and Java2D in the
-    preview). Textures come from `ButcherClient.readGameTexture`, so a resource pack's dragon is used.
+    preview). Textures come from `SbcsClient.readGameTexture`, so a resource pack's dragon is used.
     Scale: 2 image px a GUI px (`rasterScale`, the screen caps the GUI scale at 2) and at most
     `BUDGET` 600k px; ~2-4 ms a frame offline, plus the upload in game. Back faces are still culled
     (wings excepted) only to save work. Any other big model: rasterise it the same way rather than sorting.
@@ -1333,7 +1333,7 @@ architecture.
     its focus (`fx`, `fy`, `fz`, `sx0`, `sy0`) onto `showTarget()`, where the drop comes to rest, and puts
     the block - banner above, name, odds and price below - in the middle of the screen. The sway turns
     about the focus, so it no longer carries the drop off. Earlier fixes only stopped the sideways pan.
-  - **The flight is Blender's** (`assets/butcher/seraph_dragon.json`, `anim/SeraphDragon`): a Bezier path
+  - **The flight is Blender's** (`assets/sbcs/seraph_dragon.json`, `anim/SeraphDragon`): a Bezier path
     with auto handles, an empty on Follow Path, offset keyed 0 / .34 @22 / .86 @70 / 1 @92, sampled per
     tick, Blender (x, -z, y) = ours. The control points are in the JSON's note; re-bake there rather than
     editing frames. Heading comes from the path's direction, settling to `LAND_YAW` over the last second.
@@ -1371,7 +1371,7 @@ architecture.
     first win, a bust at QUEST COMPLETE or after 3 s; the nametag going at 5% or less, close, also counts (the
     records missed one 0); QUEST COMPLETE with no kill seen opens it known.
   - **The 500k floor** for the four small endings (`SeraphDrops.floored`): their prices are asked for when our boss
-    appears; at the kill one worth less, or of unknown worth, plays as a bust (`ButcherClient.seraphFloor`).
+    appears; at the kill one worth less, or of unknown worth, plays as a bust (`SbcsClient.seraphFloor`).
   - `seraphHideBelowM` (default 15M of 210M) feeds the pre-kill hide.
   - `tools/SeraphDetectTest` (13 checks; `-Drecords= -Dself=` replays a file through the real watcher - compile
     against `build/classes/java/main`): the friend's file opens and resolves exactly their three kills.
@@ -1425,9 +1425,9 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
   strips normalised to 16 px frames (`LavaArt.strip` - an animated block texture cannot be adopted by name),
   the crack mask and grey lava made from them, the golem, elder guardian, squid, skeleton horse, its saddle
   and the magma cube (64 x 64). Ragnarok's and the Scuttler's skins and every head drop are SkyBlock heads
-  from the NEU repo (`assets/butcher/lava_heads.json`); the raster needs pixels, so `HeadSkins.pixels`
+  from the NEU repo (`assets/sbcs/lava_heads.json`); the raster needs pixels, so `HeadSkins.pixels`
   fetches the skin PNG from the blob's own textures.minecraft.net URL on a daemon thread and caches it in
-  `config/butcher/skin_cache/`. The Brimstone Handle is a stick in vanilla (a custom model in Hypixel's pack).
+  `config/sbcs/skin_cache/`. The Brimstone Handle is a stick in vanilla (a custom model in Hypixel's pack).
 - `audio/EruptionSound` + `Voices.eruption*` - D phrygian, D major for a win: the rumble, the sink, the crust
   creaking, the vent, a bubble per breath pitched by its heat, the build, the flicker; cut at the reveal.
   Then the boom (`eruptionBoom` takes an amplitude - with the End Times' bolt it peaked at 1.36), the quench,
@@ -1461,7 +1461,7 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
   - `tools/LavaDetectTest` (32 checks). The user's whole 2026-10-05 session replayed through the watcher (records
     sample nametags once a second, so it misses some 0s the game saw) opens exactly their own 3 Ragnaroks (one
     Burnt Texts) and 7 Thunders, no one else's.
-- Menu "Lava Fishing - Eruption" (`lava*` config); `/butcher test lava <drop> [creature]`.
+- Menu "Lava Fishing - Eruption" (`lava*` config); `/sbcs test lava <drop> [creature]`.
 - **0.2.75-0.2.78, from the user's screenshots:** GPU quads wound the wrong way vanish in game (fixed in
   `drawGpu`); the far shore/cliff never looked right (0.2.76-0.2.77) and is gone - **the floor image covers the whole
   view** (to +-700/900 units) and fades to near-black with distance (`fog`, from 70 units back), so nothing of the
@@ -1498,7 +1498,7 @@ instant sell for the tooth, Coflnet `PET_MEGALODON` lowest BIN for the pet, any 
 `END` 2500. Shapes are character maps (`FIN`, `CLEAVER`) drawn as 2-GUI-pixel squares with a dark
 outline. Sounds: `onFinRise` (blup), `onFinChop` (chop + splash), `onFinReveal` (3-note chime, 4 for a
 legendary), on `fishingVolume`. Config `fishingAnnounce`, menu "Fishing Festival - Fin",
-`/butcher test shark megalodon|legendary|tooth`.
+`/sbcs test shark megalodon|legendary|tooth`.
 
 0.2.51, from the user's test: the fin waits half a second longer before the chop (`FALL` 800,
 `CHOP` 920, `POP` 1020, `END` 3000). The Megalodon looked "weirdly put" because `PlayerHeadMesh`
@@ -1524,7 +1524,7 @@ a 9 degree sway, no spin: its skin wraps round the cube, eyes on the sides).
 - The animation is `FinPopup.showBust()`: the fin ducks at `DUCK`, `missedCleaver` goes on into the
   water (clipped at the surface), splash and bubbles, gone at `BUST_END` 1650. It never interrupts a
   drop that is showing. Sounds are `onFinMiss`: `Voices.miss` plus `finPlunge`.
-  `/butcher test shark bust`.
+  `/sbcs test shark bust`.
 
 ## Wisp (Dwarven Mines Ghosts, 0.2.90) - works in game (the user, 2026-10-12)
 
@@ -1538,7 +1538,7 @@ as diagonal blue stripes crawling in a ring two squares out (`GHOST`, `dist`) - 
 wisps (`BURST` 1180, every square drifting up), the drop pops (`POP`) with name and bazaar instant sell. The icon is
 Hypixel's pack's (`hypixel_skyblock:textures/item/uncategorized/<id>.png`) when present, else the ghast tear for
 Sorrow and a pixel orb (`ORB`) for Plasma (paper in vanilla). Sounds `Voices.ghostWail/ghostBurst`, a chime at 220 Hz,
-on `ghostVolume`. Config `ghostAnnounce`, `ghostPrice`; `/butcher test ghost sorrow|plasma`; menu group after Fin.
+on `ghostVolume`. Config `ghostAnnounce`, `ghostPrice`; `/sbcs test ghost sorrow|plasma`; menu group after Fin.
 
 ## The Thaw (Vanguard corpses)
 
@@ -1599,7 +1599,7 @@ runs at quarter speed for `SLOW_MOTION`, then the Locket's resumes and the Dye's
 until the paint bursts. Only physical things (chips, pick, jolt, shake) use it; sounds and the
 ending's own beats stay on real time. Both endings stamp the name out letter by letter, then
 "1 in ~N corpses" (from the table and the player's average rolls) and "Your Nth X" from
-`ButcherStats.corpseItems`, under black letterbox bars (7% - more covers the tray).
+`SbcsStats.corpseItems`, under black letterbox bars (7% - more covers the tray).
 The Dye's grey is a fill drawn *over* the tray; the pink crack is drawn after it, so it is the
 only colour on screen. The Locket's price comes from `market/LivePrice` - Coflnet's
 `/api/item/price/SHATTERED_PENDANT/bin`, requested when the loot message is read, read
@@ -1652,7 +1652,7 @@ real projection - the IconGen trick. Things the previews settled that reasoning 
   passes are exactly right.
 
 **Items** (`render/VanguardItems`): 21 are player heads drawn as real 3D heads with their
-SkyBlock skins, from base64 blobs bundled in `assets/butcher/vanguard_heads.json` (NEU
+SkyBlock skins, from base64 blobs bundled in `assets/sbcs/vanguard_heads.json` (NEU
 repo). The other 5 are vanilla items through `g.item`, which captures the pose, so scaling
 works. A skin lookup returns Steve until it downloads; `path.startsWith("skins/")` is how a
 real skin is told apart, and an unready one draws as a tinted crystal instead.
@@ -1689,7 +1689,7 @@ static layer per purpose. Do not `close()` the old texture when the size changes
 made of many grid squares should draw through a PixelLayer, not through `fill`.
 
 **Profit window** (`gui/ProfitScreen`, `market/`). Opens when a Thaw ends, finished or
-skipped (`ThawScreen.announce` -> `ButcherClient.onThawFinished`); the next queued corpse waits
+skipped (`ThawScreen.announce` -> `SbcsClient.onThawFinished`); the next queued corpse waits
 for it (`profitShowing`), and chat is held until it closes (see above). Every drop priced, most valuable
 first, minus the Skeleton Key:
 
@@ -1707,10 +1707,10 @@ first, minus the Skeleton Key:
 so it is never rolled and sorts first. Drawn as a flat sprite (`VanguardItems.sprite`,
 `ThawArt.glacitePowder`) in the manner of the pre-1.14 light blue dye the user wanted.
 **Mojang's own sprite is deliberately not in the jar**; it lives in the user's
-`config/butcher/textures/glacite_powder.png`, copied from their own 1.12.2 install, and
+`config/sbcs/textures/glacite_powder.png`, copied from their own 1.12.2 install, and
 `ArtOverrides` prefers it. Do not bundle it.
 
-**The menu is on the vanilla font again.** `render/ButcherFont` and `assets/butcher/font/`
+**The menu is on the vanilla font again.** `render/SbcsFont` and `assets/sbcs/font/`
 are unused for now and kept on purpose: the user is choosing a replacement, and swapping
 it in is `ui.json` plus the `.ttf`.
 
@@ -1720,16 +1720,16 @@ including all three real messages) and `tools/ThawTest.java` (timeline, flare an
 ## Layout
 
 ```
-ButcherClient       entrypoint: events, commands, texture registration
+SbcsClient       entrypoint: events, commands, texture registration
 gui/ScopeMinigameScreen   the cleaver cutscene - the Scatha's
 gui/ThawScreen            the Thaw - the Vanguard corpse's
-gui/ButcherMenuScreen     /butcher - a thin Screen over gui/menu/MenuView (the whole menu, no Minecraft)
-anim/ButcherHudRenderer   the older guillotine cutscene, drawn as a HUD overlay
+gui/SbcsMenuScreen     /sbcs - a thin Screen over gui/menu/MenuView (the whole menu, no Minecraft)
+anim/SbcsHudRenderer   the older guillotine cutscene, drawn as a HUD overlay
 anim/AnimationManager     that cutscene's phase clock
 anim/PetHeadPopup         the pet reveal = vanilla's totem animation with a skinned player head
 anim/PetDropFirework      the fireworks that go up behind a pet reveal
 detect/                   tracker + watcher + decision log (above); DropDetector is the result type
-config/PatternConfig      JSON at config/butcher.json; /butcher reload re-reads it
+config/PatternConfig      JSON at config/sbcs.json; /sbcs reload re-reads it
 mixin/                    hand, sound, screen ownership, HUD hiding - see above
 render/TextureBank        registry of runtime-generated textures, drawn lazily, dropped on reload
 render/MeshRenderer       queues models, one global depth sort, screen-space outline
@@ -1744,7 +1744,7 @@ anim/SwingCurve           Hermite spline + judder + spring, for the cleaver swin
 anim/ThawTimeline         the Thaw's whole schedule, from the haul; pure, tested offline
 detect/vanguard/          corpse loot parser, the loot table, the parsed haul
 market/LivePrice          an item's lowest BIN from Coflnet, async, cached, never waited on
-detect/DropRecorder       every real drop event, verbatim, to config/butcher-drops.jsonl
+detect/DropRecorder       every real drop event, verbatim, to config/sbcs-drops.jsonl
 anim/ChopTimeline         Diana's cutscene, per verdict, creature and seed; pure, tested offline
 anim/StingEnding ...      the later endings (Sting, Hunt, Fleece, Heart, Midas, Glint), one class each
 render/ChopSpecials       draws those five, with ChopScene's machinery

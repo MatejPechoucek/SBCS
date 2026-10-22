@@ -102,9 +102,9 @@ tasks.named("build") {
 			int next = matcher.group(3).toInteger() + 1
 			def tag = matcher.group(4)
 			propsFile.text = matcher.replaceFirst("mod_version=${major}.${minor}.${next}-${tag}")
-			logger.lifecycle("Butcher: build succeeded as ${project.version} - next build will be ${major}.${minor}.${next}-${tag}")
+			logger.lifecycle("SBCS: build succeeded as ${project.version} - next build will be ${major}.${minor}.${next}-${tag}")
 		} else {
-			logger.warn("Butcher: mod_version in gradle.properties isn't in the expected \"x.y.z-alpha|beta\" shape, skipping auto-bump")
+			logger.warn("SBCS: mod_version in gradle.properties isn't in the expected \"x.y.z-alpha|beta\" shape, skipping auto-bump")
 		}
 	}
 }

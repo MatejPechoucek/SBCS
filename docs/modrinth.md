@@ -6,10 +6,10 @@ Everything the Modrinth project page and the first version upload ask for, ready
 
 | Field | Value |
 | --- | --- |
-| Name | Butcher |
-| Slug | `butcher` (or `butcher-skyblock` if taken) |
+| Name | SBCS |
+| Slug | `sbcs` (or `sbcs-skyblock` if taken) |
 | Summary | Cutscenes for Hypixel SkyBlock's rare drops. Your loot stays hidden until the reveal, so every kill is a little gamble. |
-| Icon | `src/main/resources/assets/butcher/icon.png` (256 x 256) |
+| Icon | `src/main/resources/assets/sbcs/icon.png` (256 x 256) |
 | Categories | Utility, Decoration |
 | Client side | Required |
 | Server side | Unsupported |
@@ -27,9 +27,9 @@ the menu. The Thaw's Dye, Diana's Relic and Hellion's High Class dice are the sh
 
 | Field | Value |
 | --- | --- |
-| File | `build/libs/butcher-0.3.3-alpha.jar` (not the `-sources` jar) |
+| File | `build/libs/sbcs-0.3.3-alpha.jar` (not the `-sources` jar) |
 | Version number | `0.3.3-alpha` |
-| Version name | Butcher 0.3.3 (alpha) |
+| Version name | SBCS 0.3.3 (alpha) |
 | Release channel | Alpha |
 | Loader | Fabric |
 | Game version | 26.2 |
@@ -49,7 +49,7 @@ The first public release.
 - The drop stays hidden (chat, HUD, loot sound, floor loot) until the reveal, and nothing before the reveal
   depends on what dropped.
 - You keep control while it plays. Chat that arrives in the meantime is held and put back afterwards.
-- Settings with `/butcher` or Mod Menu: per-animation switches, speed, volume, size, how busts play, and a
+- Settings with `/sbcs` or Mod Menu: per-animation switches, speed, volume, size, how busts play, and a
   "Try it" button for every outcome.
 - Stats: dry streaks and drops per source.
 - Hold Backspace to skip.

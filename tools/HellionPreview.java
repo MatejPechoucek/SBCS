@@ -1,7 +1,7 @@
-import com.butcher.anim.HellionTimeline;
-import com.butcher.anim.HellionTimeline.Drop;
-import com.butcher.render.HellionScene;
-import com.butcher.render.art.ChopArt;
+import com.sbcs.anim.HellionTimeline;
+import com.sbcs.anim.HellionTimeline.Drop;
+import com.sbcs.render.HellionScene;
+import com.sbcs.render.art.ChopArt;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -33,9 +33,9 @@ public final class HellionPreview {
         tex.put(ChopArt.TEX_GLOW, ChopArt.glow());
         for (int i = 0; i < 4; i++) tex.put(HellionScene.TERRACOTTA[i], argb(ImageIO.read(new File(van, HellionScene.TERRACOTTA_VANILLA[i] + ".png"))));
         // The same path as the game: the strip normalised, and the grey copy the shield tints.
-        BufferedImage fire = com.butcher.render.art.HellionArt.fireStrip(argb(ImageIO.read(new File(van, "fire_0.png"))));
+        BufferedImage fire = com.sbcs.render.art.HellionArt.fireStrip(argb(ImageIO.read(new File(van, "fire_0.png"))));
         tex.put(HellionScene.TEX_FIRE, fire);
-        tex.put(HellionScene.TEX_FIRE_GREY, com.butcher.render.art.HellionArt.greyFire(fire));
+        tex.put(HellionScene.TEX_FIRE_GREY, com.sbcs.render.art.HellionArt.greyFire(fire));
         BufferedImage bg = System.getProperty("bg") == null ? null : ImageIO.read(new File(System.getProperty("bg")));
         int W = ChopPreview.W, H = ChopPreview.H, S = ChopPreview.S;
         for (int i = 2; i < args.length; i++) {

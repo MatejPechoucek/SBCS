@@ -1,8 +1,8 @@
-import com.butcher.anim.SeraphTimeline;
-import com.butcher.anim.SeraphTimeline.Drop;
-import com.butcher.audio.SeraphSound;
-import com.butcher.audio.SynthEngine;
-import com.butcher.audio.Voice;
+import com.sbcs.anim.SeraphTimeline;
+import com.sbcs.anim.SeraphTimeline.Drop;
+import com.sbcs.audio.SeraphSound;
+import com.sbcs.audio.SynthEngine;
+import com.sbcs.audio.Voice;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Renders the Seraph's soundtrack for a drop to a WAV - the exact cue list the game plays
  * (SeraphSound.schedule), mixed offline. A cut silences everything already sounding, as
- * ButcherAudio.silence() does in game. The price's coin ticks are not in it.
+ * SbcsAudio.silence() does in game. The price's coin ticks are not in it.
  *
  *   java -cp "out;src/main/resources" SeraphSoundtrack <outdir> <seed> DROP...
  */

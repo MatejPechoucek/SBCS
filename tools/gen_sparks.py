@@ -11,10 +11,10 @@ import math, os, os, random
 
 # Repo-relative, so this runs from a clone anywhere.
 ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir,
-                     "src", "main", "resources", "assets", "butcher", "textures", "gui")
+                     "src", "main", "resources", "assets", "sbcs", "textures", "gui")
 
 
-OUT = os.path.join(ASSETS, "butcher")
+OUT = os.path.join(ASSETS, "sbcs")
 S = 256
 FRAMES = 6
 N = 30

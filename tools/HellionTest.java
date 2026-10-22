@@ -1,9 +1,9 @@
-import com.butcher.anim.ChopTimeline;
-import com.butcher.anim.HellionDice;
-import com.butcher.anim.HellionTimeline;
-import com.butcher.anim.HellionTimeline.Drop;
-import com.butcher.render.ChopScene;
-import com.butcher.render.HellionScene;
+import com.sbcs.anim.ChopTimeline;
+import com.sbcs.anim.HellionDice;
+import com.sbcs.anim.HellionTimeline;
+import com.sbcs.anim.HellionTimeline.Drop;
+import com.sbcs.render.ChopScene;
+import com.sbcs.render.HellionScene;
 
 /**
  * Offline checks for "Hellion" (the blaze slayer's animation). The one that matters: nothing drawn
@@ -113,8 +113,8 @@ public final class HellionTest {
         for (long seed : new long[]{3, 77}) {
             float[] base = null;
             for (Drop d : Drop.values()) {
-                java.util.List<com.butcher.audio.HellionSound.Cue> before = new java.util.ArrayList<>();
-                for (com.butcher.audio.HellionSound.Cue c : com.butcher.audio.HellionSound.schedule(new HellionTimeline(d, seed))) {
+                java.util.List<com.sbcs.audio.HellionSound.Cue> before = new java.util.ArrayList<>();
+                for (com.sbcs.audio.HellionSound.Cue c : com.sbcs.audio.HellionSound.schedule(new HellionTimeline(d, seed))) {
                     if (c.at < HellionTimeline.REVEAL) before.add(c);
                 }
                 float[] pcm = HellionSoundtrack.render(before, HellionTimeline.REVEAL / 1000f);
@@ -123,7 +123,7 @@ public final class HellionTest {
             }
         }
         for (Drop d : Drop.values()) {
-            java.util.List<com.butcher.audio.HellionSound.Cue> cues = com.butcher.audio.HellionSound.schedule(new HellionTimeline(d, 5));
+            java.util.List<com.sbcs.audio.HellionSound.Cue> cues = com.sbcs.audio.HellionSound.schedule(new HellionTimeline(d, 5));
             boolean cutAtReveal = false, inOrder = true;
             for (int i = 0; i < cues.size(); i++) {
                 if (cues.get(i).at == HellionTimeline.REVEAL && cues.get(i).cut) cutAtReveal = true;

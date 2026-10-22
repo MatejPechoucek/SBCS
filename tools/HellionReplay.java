@@ -1,6 +1,6 @@
-import com.butcher.anim.HellionTimeline.Drop;
-import com.butcher.detect.DecisionLog;
-import com.butcher.detect.HellionWatcher;
+import com.sbcs.anim.HellionTimeline.Drop;
+import com.sbcs.detect.DecisionLog;
+import com.sbcs.detect.HellionWatcher;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * Needs the game's classes on the classpath (the watcher names them), as SeraphPreview does.
  *
- *   java -cp "<mc classpath>;out" HellionReplay butcher-drops.jsonl
+ *   java -cp "<mc classpath>;out" HellionReplay sbcs-drops.jsonl
  */
 public final class HellionReplay {
 

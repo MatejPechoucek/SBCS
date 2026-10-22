@@ -1,8 +1,8 @@
-import com.butcher.anim.EruptionTimeline.Creature;
-import com.butcher.anim.EruptionTimeline.Drop;
-import com.butcher.detect.DecisionLog;
-import com.butcher.detect.LavaDrops;
-import com.butcher.detect.LavaWatcher;
+import com.sbcs.anim.EruptionTimeline.Creature;
+import com.sbcs.anim.EruptionTimeline.Drop;
+import com.sbcs.detect.DecisionLog;
+import com.sbcs.detect.LavaDrops;
+import com.sbcs.detect.LavaWatcher;
 
 import java.util.ArrayList;
 import java.util.List;

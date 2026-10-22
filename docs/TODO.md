@@ -16,7 +16,7 @@ Stamps whose drop has a bundled SkyBlock skin now draw that item (`StampArt.ITEM
 | `wisp_sorrowful`, `wisp_plasma`, `wisp_high_voltage` | Sorrow, Plasma | Hypixel pack icons, as GhostPopup draws them |
 | `diana_wool` | Shimmering Wool | check NEU - yellow wool is the stand-in |
 
-For heads: add the NEU blob to the matching `assets/butcher/*_heads.json` and point the stamp at `head:<set>:<name>`.
+For heads: add the NEU blob to the matching `assets/sbcs/*_heads.json` and point the stamp at `head:<set>:<name>`.
 For pack icons: `Draw.item` would need a third kind ("pack:<path>", drawn only when the resource exists, else the
 vanilla fallback) - GhostPopup already has that lookup.
 

@@ -3,7 +3,7 @@
     python3 tools/gen_ledger.py
 
 Reads docs/ledger_stamps.xlsx (sheet "Stamps": ID, Chapter, Stamp name, What earns it, Kind, four tier columns,
-Hidden?, Backfill, Keep?, notes, Hint) and writes src/main/java/com/butcher/ledger/StampTable.java. Rows with Keep? = No
+Hidden?, Backfill, Keep?, notes, Hint) and writes src/main/java/com/sbcs/ledger/StampTable.java. Rows with Keep? = No
 are left out. Edit the sheet and re-run this rather than editing StampTable.java, or the next run wipes the change.
 
 What each stamp *counts* is code, keyed by its ID, in Ledger.value - a new ID needs a line there too, or it can
@@ -16,7 +16,7 @@ from openpyxl import load_workbook
 HERE = os.path.dirname(os.path.abspath(__file__))
 SHEET = os.path.join(HERE, "..", "docs", "ledger_stamps.xlsx")
 HINT = "Hint (secret stamps)"
-OUT = os.path.join(HERE, "..", "src", "main", "java", "com", "butcher", "ledger", "StampTable.java")
+OUT = os.path.join(HERE, "..", "src", "main", "java", "com", "sbcs", "ledger", "StampTable.java")
 
 
 def jstr(s):
@@ -42,7 +42,7 @@ def main():
                      tiers, str(r[col["Hidden?"]] or "No").strip().lower() == "yes",
                      r[col[HINT]] if HINT in col else None))
     lines = [
-        "package com.butcher.ledger;",
+        "package com.sbcs.ledger;",
         "",
         "import java.util.List;",
         "",

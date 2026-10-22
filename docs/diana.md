@@ -228,7 +228,7 @@ Through the synthesiser in `audio/`:
 
 ## 8. Integration
 
-- **Menu.** Add a **Diana** section to `/butcher` alongside Scatha Gambling and Lava
+- **Menu.** Add a **Diana** section to `/sbcs` alongside Scatha Gambling and Lava
   Fishing: on/off, duration slider, per-creature toggles. Hand-drawn rows rebuilt from
   config every frame, as the menu already works. No vanilla widgets.
 - **Config.** New fields on `PatternConfig`. Do not rename existing ones —
@@ -236,8 +236,8 @@ Through the synthesiser in `audio/`:
   file on disk.
 - **Pre-kill hide.** Reuse `PreKillHider` against the creature's nametag HP. Do not
   write a second hider.
-- **Test commands.** `/butcher test diana <outcome>` for the animation, and
-  `/butcher simulate diana <outcome>` for the whole detection chain. See §10.
+- **Test commands.** `/sbcs test diana <outcome>` for the animation, and
+  `/sbcs simulate diana <outcome>` for the whole detection chain. See §10.
 
 ---
 
@@ -257,7 +257,7 @@ one is not, propose one and show me before it is load-bearing.
    curves the Java will use and writes a contact sheet and an animated GIF. Because the
    whole cutscene is two numbers, the previewer is nearly exact — **iterate there until
    it looks right**, then port the curves. Do not write the Java first.
-2. **An in-game frame dump.** `/butcher dump diana <outcome>` writes every Nth frame to
+2. **An in-game frame dump.** `/sbcs dump diana <outcome>` writes every Nth frame to
    `screenshots/`. I will run it once per outcome and hand you the PNGs. That is the
    ground truth; the previewer is how you get close to it.
 
@@ -288,12 +288,12 @@ is a disappointment; a confident wrong one is a betrayal.
 
 **2. Record every kill, starting now.** Build this before the animation so it captures
 real events while everything else is being written. One record per kill appended to
-`config/butcher-drops.jsonl`: timestamp, every chat line in the window verbatim,
+`config/sbcs-drops.jsonl`: timestamp, every chat line in the window verbatim,
 inventory NBT before and after, creature identity, chain position, the verdict, and
 which signal reached it. Append-only, never pruned. **A 0.02% drop happens once** — when
 it does, its exact inputs are on disk forever.
 
-**3. Replay them.** `/butcher replay <n>` re-feeds a recorded event through the live
+**3. Replay them.** `/sbcs replay <n>` re-feeds a recorded event through the live
 detector and prints what it decides now and why, plus a JUnit test that replays the
 whole corpus against stored expectations. The next real Relic becomes a permanent
 regression test.
@@ -302,8 +302,8 @@ regression test.
 eight drops above from the real message formats and run them through the same replay
 path, so every branch is tested on day one.
 
-**5. Two test commands, kept separate.** `/butcher test ...` forces the animation and
-bypasses detection — that is for art. `/butcher simulate ...` injects at the
+**5. Two test commands, kept separate.** `/sbcs test ...` forces the animation and
+bypasses detection — that is for art. `/sbcs simulate ...` injects at the
 **detector's** input and runs the whole chain. The old command only ever tested the
 second half, which is exactly why the bug survived to meet a real pet.
 

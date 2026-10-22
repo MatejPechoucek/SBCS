@@ -1,7 +1,7 @@
-import com.butcher.anim.ChopTimeline;
-import com.butcher.anim.ChopTimeline.Creature;
-import com.butcher.anim.ChopTimeline.Verdict;
-import com.butcher.render.ChopScene;
+import com.sbcs.anim.ChopTimeline;
+import com.sbcs.anim.ChopTimeline.Creature;
+import com.sbcs.anim.ChopTimeline.Verdict;
+import com.sbcs.render.ChopScene;
 
 /**
  * Offline checks for "The Chopping Block", and above all that nothing before the split depends
@@ -165,26 +165,26 @@ public final class ChopTest {
     static void sting() {
         for (long seed : new long[]{1, 2, 3, 99}) {
             ChopTimeline tl = new ChopTimeline(Verdict.FATEFUL_STINGER, Creature.MANTICORE, seed);
-            com.butcher.anim.StingEnding e = tl.sting();
+            com.sbcs.anim.StingEnding e = tl.sting();
             float worst = 0f;
             float[] prev = null;
-            for (long t = com.butcher.anim.StingEnding.RISE; t < com.butcher.anim.StingEnding.TURN; t += 8) {
+            for (long t = com.sbcs.anim.StingEnding.RISE; t < com.sbcs.anim.StingEnding.TURN; t += 8) {
                 float[] p = e.tip(t);
-                boolean stab = t > com.butcher.anim.StingEnding.STAB - 8 && t <= com.butcher.anim.StingEnding.IMPACT + 8;
-                boolean rise = t < com.butcher.anim.StingEnding.RISE + 120;
+                boolean stab = t > com.sbcs.anim.StingEnding.STAB - 8 && t <= com.sbcs.anim.StingEnding.IMPACT + 8;
+                boolean rise = t < com.sbcs.anim.StingEnding.RISE + 120;
                 if (prev != null && !stab && !rise) worst = Math.max(worst, Math.abs(p[1] - prev[1]));
                 prev = p;
             }
             check(worst < 0.9f, "seed " + seed + ": the barb never jumps outside the stab (" + worst + ")");
-            check(e.tip(com.butcher.anim.StingEnding.IMPACT)[1] < 0.01f, "seed " + seed + ": the stab reaches the board");
-            check(e.bead(com.butcher.anim.StingEnding.IMPACT) == 0f, "seed " + seed + ": the bead is gone when it stabs");
+            check(e.tip(com.sbcs.anim.StingEnding.IMPACT)[1] < 0.01f, "seed " + seed + ": the stab reaches the board");
+            check(e.bead(com.sbcs.anim.StingEnding.IMPACT) == 0f, "seed " + seed + ": the bead is gone when it stabs");
             int landed = 0;
-            for (int k = 0; k < com.butcher.anim.StingEnding.SPLASH; k++) {
-                float[] q = e.splash(k, com.butcher.anim.StingEnding.IMPACT + 800);
+            for (int k = 0; k < com.sbcs.anim.StingEnding.SPLASH; k++) {
+                float[] q = e.splash(k, com.sbcs.anim.StingEnding.IMPACT + 800);
                 if (q == null || q[5] > 0f) landed++;
             }
-            check(landed == com.butcher.anim.StingEnding.SPLASH, "seed " + seed + ": every splash pixel has landed or fallen away within 0.8 s");
-            check(Math.abs(e.tip(com.butcher.anim.StingEnding.TURN)[1] - com.butcher.anim.StingEnding.HERO_Y) < 0.01f,
+            check(landed == com.sbcs.anim.StingEnding.SPLASH, "seed " + seed + ": every splash pixel has landed or fallen away within 0.8 s");
+            check(Math.abs(e.tip(com.sbcs.anim.StingEnding.TURN)[1] - com.sbcs.anim.StingEnding.HERO_Y) < 0.01f,
                     "seed " + seed + ": the barb is up where the drop will be when it turns");
         }
         check(new ChopTimeline(Verdict.FATEFUL_STINGER, Creature.MANTICORE, 1).total() < 11000, "a cheap drop's ending is under 11 s");
@@ -195,13 +195,13 @@ public final class ChopTest {
     static void hunt() {
         for (long seed : new long[]{1, 5, 42}) {
             ChopTimeline tl = new ChopTimeline(Verdict.DYE, Creature.of(Verdict.DYE, seed), seed);
-            com.butcher.anim.HuntEnding e = tl.hunt();
-            int heads = com.butcher.anim.HuntEnding.HEADS, king = com.butcher.anim.HuntEnding.KING;
+            com.sbcs.anim.HuntEnding e = tl.hunt();
+            int heads = com.sbcs.anim.HuntEnding.HEADS, king = com.sbcs.anim.HuntEnding.KING;
             // The split goes wrong: shut, glowing, the cleaver wrenched away before the geyser.
-            check(Math.abs(tl.halves(com.butcher.anim.HuntEnding.GEYSER - 1)[0]) < 0.05f, "seed " + seed + ": the halves stay shut until the geyser");
-            check(tl.halves(com.butcher.anim.HuntEnding.GEYSER + 600)[0] > 1.2f, "seed " + seed + ": the geyser throws them open");
-            check(tl.cleaver(com.butcher.anim.HuntEnding.GEYSER) == null, "seed " + seed + ": the cleaver is gone before the geyser");
-            check(e.geyser(com.butcher.anim.HuntEnding.HUSH + 100) == 0f && e.geyser(com.butcher.anim.HuntEnding.GEYSER + 400) > 20f,
+            check(Math.abs(tl.halves(com.sbcs.anim.HuntEnding.GEYSER - 1)[0]) < 0.05f, "seed " + seed + ": the halves stay shut until the geyser");
+            check(tl.halves(com.sbcs.anim.HuntEnding.GEYSER + 600)[0] > 1.2f, "seed " + seed + ": the geyser throws them open");
+            check(tl.cleaver(com.sbcs.anim.HuntEnding.GEYSER) == null, "seed " + seed + ": the cleaver is gone before the geyser");
+            check(e.geyser(com.sbcs.anim.HuntEnding.HUSH + 100) == 0f && e.geyser(com.sbcs.anim.HuntEnding.GEYSER + 400) > 20f,
                     "seed " + seed + ": nothing in the hush, then the geyser stands");
             // The parade: each head lands in its own place round the ring, one after another, King Minos last.
             java.util.Set<Long> places = new java.util.HashSet<>();
@@ -213,7 +213,7 @@ public final class ChopTest {
                 prevLand = land;
                 float[] p = e.ringPlace(k, land);
                 float r = (float) Math.hypot(p[0], p[2]);
-                onRing &= r > com.butcher.anim.HuntEnding.RING_R - 0.1f && r < com.butcher.anim.HuntEnding.RING_R + 2f;
+                onRing &= r > com.sbcs.anim.HuntEnding.RING_R - 0.1f && r < com.sbcs.anim.HuntEnding.RING_R + 2f;
                 places.add(Math.round(Math.atan2(p[2], p[0]) * 100) * 1000L);
                 float[] q = e.head(k, land + 50);
                 check(q != null && Math.abs(q[0] - p[0]) < 0.05f && Math.abs(q[2] - p[2]) < 0.05f, "seed " + seed + ": head " + k + " is in its place once it lands");
@@ -221,7 +221,7 @@ public final class ChopTest {
             check(ordered, "seed " + seed + ": the heads land one after another, King Minos last");
             check(onRing, "seed " + seed + ": every head lands on the ring");
             check(places.size() == heads, "seed " + seed + ": no two heads share a place");
-            check(e.landing(king) < com.butcher.anim.HuntEnding.SPIN, "seed " + seed + ": all have landed before the ring turns");
+            check(e.landing(king) < com.sbcs.anim.HuntEnding.SPIN, "seed " + seed + ": all have landed before the ring turns");
             // Diana's shot: every head hit once, in turn, King Minos last; the arrow is where each head is as it hits.
             long prevHit = -1;
             boolean inTurn = true, through = true;
@@ -239,25 +239,25 @@ public final class ChopTest {
             check(through, "seed " + seed + ": the arrow goes through each head where it is");
             float worst = 0f;
             float[] prev = null;
-            for (long t = com.butcher.anim.HuntEnding.ARROW; t < com.butcher.anim.HuntEnding.SUCK; t += 8) {
+            for (long t = com.sbcs.anim.HuntEnding.ARROW; t < com.sbcs.anim.HuntEnding.SUCK; t += 8) {
                 float[] a = e.arrow(t);
                 if (prev != null && a != null) worst = Math.max(worst, (float) Math.hypot(a[0] - prev[0], Math.hypot(a[1] - prev[1], a[2] - prev[2])));
                 prev = a;
             }
             check(worst < 3f, "seed " + seed + ": the arrow flies without jumping (" + worst + " texels in 8 ms at most)");
-            check(prevHit < com.butcher.anim.HuntEnding.SUCK, "seed " + seed + ": every head is hit before the pull");
+            check(prevHit < com.sbcs.anim.HuntEnding.SUCK, "seed " + seed + ": every head is hit before the pull");
             // The reveal.
-            float[] it = e.item(com.butcher.anim.HuntEnding.ARRIVE);
-            check(Math.abs(it[0] - com.butcher.anim.HuntEnding.ITEM_Y) < 0.01f && it[1] > 0.99f, "seed " + seed + ": the dye is up in the column when it is shown");
-            check(tl.blockFall(com.butcher.anim.HuntEnding.SHOCK + 400)[1] < 0.01f, "seed " + seed + ": the shockwave has blown the board away");
+            float[] it = e.item(com.sbcs.anim.HuntEnding.ARRIVE);
+            check(Math.abs(it[0] - com.sbcs.anim.HuntEnding.ITEM_Y) < 0.01f && it[1] > 0.99f, "seed " + seed + ": the dye is up in the column when it is shown");
+            check(tl.blockFall(com.sbcs.anim.HuntEnding.SHOCK + 400)[1] < 0.01f, "seed " + seed + ": the shockwave has blown the board away");
             // The sound: in order, silent in the hush, cut for the geyser and the shockwave.
-            java.util.List<com.butcher.audio.HuntSound.Cue> cues = com.butcher.audio.HuntSound.schedule(tl);
+            java.util.List<com.sbcs.audio.HuntSound.Cue> cues = com.sbcs.audio.HuntSound.schedule(tl);
             boolean cueOrder = true;
             int cuts = 0;
             for (int i = 0; i < cues.size(); i++) {
                 if (i > 0 && cues.get(i).at < cues.get(i - 1).at) cueOrder = false;
                 if (cues.get(i).cut) cuts++;
-                check(cues.get(i).voices.length == 0 || cues.get(i).at < com.butcher.anim.HuntEnding.HUSH || cues.get(i).at >= com.butcher.anim.HuntEnding.GEYSER,
+                check(cues.get(i).voices.length == 0 || cues.get(i).at < com.sbcs.anim.HuntEnding.HUSH || cues.get(i).at >= com.sbcs.anim.HuntEnding.GEYSER,
                         "seed " + seed + ": nothing sounds in the hush (" + cues.get(i).at + ")");
             }
             check(cueOrder && cuts == 3, "seed " + seed + ": its cues are in order, cut at the hush, the geyser and the shockwave");
@@ -272,11 +272,11 @@ public final class ChopTest {
     static void fleece() {
         for (long seed : new long[]{1, 2, 3, 99}) {
             ChopTimeline tl = new ChopTimeline(Verdict.SHIMMERING_WOOL, Creature.KING_MINOS, seed);
-            com.butcher.anim.FleeceEnding e = tl.fleece();
+            com.sbcs.anim.FleeceEnding e = tl.fleece();
             float worst = 0f;
-            for (int k = 0; k < com.butcher.anim.FleeceEnding.FIBRES; k++) {
+            for (int k = 0; k < com.sbcs.anim.FleeceEnding.FIBRES; k++) {
                 float[][] prev = null;
-                for (long t = com.butcher.anim.FleeceEnding.UNRAVEL; t < com.butcher.anim.FleeceEnding.SQUARE; t += 8) {
+                for (long t = com.sbcs.anim.FleeceEnding.UNRAVEL; t < com.sbcs.anim.FleeceEnding.SQUARE; t += 8) {
                     float[][] p = e.fibre(k, t);
                     if (p != null && prev != null) {
                         for (int j = 0; j < p.length; j++) {
@@ -288,41 +288,41 @@ public final class ChopTest {
             }
             check(worst < 1.0f, "seed " + seed + ": no fibre jumps (" + worst + " texels in 8 ms at most)");
             boolean wound = true;
-            for (int k = 0; k < com.butcher.anim.FleeceEnding.FIBRES; k++) {
-                for (float[] q : e.fibre(k, com.butcher.anim.FleeceEnding.SQUARE)) {
-                    float d = (float) Math.sqrt(sq(q[0]) + sq(q[1] - com.butcher.anim.FleeceEnding.SPIN_Y) + sq(q[2]));
-                    wound &= d < com.butcher.anim.FleeceEnding.BALL * 1.35f;
+            for (int k = 0; k < com.sbcs.anim.FleeceEnding.FIBRES; k++) {
+                for (float[] q : e.fibre(k, com.sbcs.anim.FleeceEnding.SQUARE)) {
+                    float d = (float) Math.sqrt(sq(q[0]) + sq(q[1] - com.sbcs.anim.FleeceEnding.SPIN_Y) + sq(q[2]));
+                    wound &= d < com.sbcs.anim.FleeceEnding.BALL * 1.35f;
                 }
             }
             check(wound, "seed " + seed + ": every fibre is wound onto the ball when it squares off");
         }
         ChopTimeline tl = new ChopTimeline(Verdict.SHIMMERING_WOOL, Creature.KING_MINOS, 4);
-        com.butcher.anim.FleeceEnding e = tl.fleece();
-        check(e.halves(com.butcher.anim.FleeceEnding.WIND) < 0.01f, "the halves have unravelled away before the winding");
-        check(Math.abs(e.cubeY(com.butcher.anim.FleeceEnding.ARRIVE) - com.butcher.anim.FleeceEnding.SPIN_Y) < 0.01f, "the wool settles on the spindle");
+        com.sbcs.anim.FleeceEnding e = tl.fleece();
+        check(e.halves(com.sbcs.anim.FleeceEnding.WIND) < 0.01f, "the halves have unravelled away before the winding");
+        check(Math.abs(e.cubeY(com.sbcs.anim.FleeceEnding.ARRIVE) - com.sbcs.anim.FleeceEnding.SPIN_Y) < 0.01f, "the wool settles on the spindle");
     }
 
     // ------------------------------------------------------------------ the Manti-core
 
     static void heart() {
         ChopTimeline tl = new ChopTimeline(Verdict.MANTI_CORE, Creature.MANTICORE, 6);
-        com.butcher.anim.HeartEnding e = tl.heart();
-        long[] b = com.butcher.anim.HeartEnding.BEATS;
+        com.sbcs.anim.HeartEnding e = tl.heart();
+        long[] b = com.sbcs.anim.HeartEnding.BEATS;
         boolean quicker = true;
         for (int i = 2; i < b.length; i++) quicker &= b[i] - b[i - 1] < b[i - 1] - b[i - 2];
         check(quicker, "the heart beats faster and faster");
-        check(b[b.length - 1] < com.butcher.anim.HeartEnding.FLAP, "the last beat comes before the flap");
+        check(b[b.length - 1] < com.sbcs.anim.HeartEnding.FLAP, "the last beat comes before the flap");
         // The wings move smoothly through everything but the fling open, which is meant to snap.
         float worst = 0f;
         float[] prev = null;
-        for (long t = com.butcher.anim.HeartEnding.UNFOLD; t < com.butcher.anim.HeartEnding.ARRIVE; t += 8) {
+        for (long t = com.sbcs.anim.HeartEnding.UNFOLD; t < com.sbcs.anim.HeartEnding.ARRIVE; t += 8) {
             float[] w = e.wing(t);
             if (prev != null) for (int k = 0; k < w.length; k++) worst = Math.max(worst, Math.abs(w[k] - prev[k]));
             prev = w;
         }
         check(worst < 0.2f, "the wings never jump before they are flung open (" + worst + " per 8 ms at most)");
-        check(e.wing(com.butcher.anim.HeartEnding.WRAPPED)[0] > Math.PI / 2, "folded, each wing has crossed in front of the heart");
-        check(e.blow(com.butcher.anim.HeartEnding.FLAPPED + 400)[3] < 0.01f, "the gust has blown the halves away");
+        check(e.wing(com.sbcs.anim.HeartEnding.WRAPPED)[0] > Math.PI / 2, "folded, each wing has crossed in front of the heart");
+        check(e.blow(com.sbcs.anim.HeartEnding.FLAPPED + 400)[3] < 0.01f, "the gust has blown the halves away");
         check(e.wingAlpha(tl.total() - 1) < 0.01f, "the wings have gone to smoke by the end");
     }
 
@@ -330,19 +330,19 @@ public final class ChopTest {
 
     static void midas() {
         ChopTimeline tl = new ChopTimeline(Verdict.CROWN_OF_GREED, Creature.KING_MINOS, 8);
-        com.butcher.anim.MidasEnding e = tl.midas();
+        com.sbcs.anim.MidasEnding e = tl.midas();
         // Every point of the open halves is gold before they burst.
         long latest = 0;
         for (float x = -8f; x <= 8f; x += 0.5f)
             for (float z = -4f; z <= 4f; z += 0.5f)
                 for (float y = 0f; y <= 4f; y += 1f)
                     latest = Math.max(latest, e.gilded(x, y, z, (int) (x * 131 + z * 17 + y)));
-        check(latest < com.butcher.anim.MidasEnding.SHINE, "the halves are all gold before the shine (" + latest + ")");
-        check(e.standing(com.butcher.anim.MidasEnding.COLLAPSE - 1) && !e.standing(com.butcher.anim.MidasEnding.COLLAPSE), "the halves go to coins all at once");
-        check(Math.abs(e.crown(com.butcher.anim.MidasEnding.ARRIVE)[0] - com.butcher.anim.MidasEnding.HERO_Y) < 0.05f, "the crown is up in the middle when it is presented");
+        check(latest < com.sbcs.anim.MidasEnding.SHINE, "the halves are all gold before the shine (" + latest + ")");
+        check(e.standing(com.sbcs.anim.MidasEnding.COLLAPSE - 1) && !e.standing(com.sbcs.anim.MidasEnding.COLLAPSE), "the halves go to coins all at once");
+        check(Math.abs(e.crown(com.sbcs.anim.MidasEnding.ARRIVE)[0] - com.sbcs.anim.MidasEnding.HERO_Y) < 0.05f, "the crown is up in the middle when it is presented");
         int gone = 0;
-        for (int k = 0; k < com.butcher.anim.MidasEnding.COINS; k++) if (e.coin(k, com.butcher.anim.MidasEnding.ARRIVE + 1500) == null) gone++;
-        check(gone == com.butcher.anim.MidasEnding.COINS, "every coin has fallen away before the price is read (" + gone + ")");
+        for (int k = 0; k < com.sbcs.anim.MidasEnding.COINS; k++) if (e.coin(k, com.sbcs.anim.MidasEnding.ARRIVE + 1500) == null) gone++;
+        check(gone == com.sbcs.anim.MidasEnding.COINS, "every coin has fallen away before the price is read (" + gone + ")");
         check(tl.total() < 11000, "a cheap drop's ending is under 11 s");
     }
 
@@ -350,17 +350,17 @@ public final class ChopTest {
 
     static void glint() {
         ChopTimeline tl = new ChopTimeline(Verdict.CHIMERA, Creature.INQUISITOR, 11);
-        com.butcher.anim.GlintEnding e = tl.glint();
+        com.sbcs.anim.GlintEnding e = tl.glint();
         float worst = 0f;
         int alive = 0;
-        for (int k = 0; k < com.butcher.anim.GlintEnding.GLYPHS; k++) {
-            float[] q = e.glyph(k, com.butcher.anim.GlintEnding.CONVERGE - 1);
+        for (int k = 0; k < com.sbcs.anim.GlintEnding.GLYPHS; k++) {
+            float[] q = e.glyph(k, com.sbcs.anim.GlintEnding.CONVERGE - 1);
             if (q == null) continue;
             alive++;
-            worst = Math.max(worst, (float) Math.sqrt(sq(q[0]) + sq(q[1] - com.butcher.anim.GlintEnding.POINT_Y) + sq(q[2])));
+            worst = Math.max(worst, (float) Math.sqrt(sq(q[0]) + sq(q[1] - com.sbcs.anim.GlintEnding.POINT_Y) + sq(q[2])));
         }
         check(alive > 0 && worst < 0.3f, "every glyph has spiralled into the point when they meet (" + worst + ")");
-        check(e.drain(com.butcher.anim.GlintEnding.CONVERGE) < 0.01f, "the glint has drained out of the world by then");
+        check(e.drain(com.sbcs.anim.GlintEnding.CONVERGE) < 0.01f, "the glint has drained out of the world by then");
         check(e.glint(0f, 2f, 0f, ChopTimeline.SPLIT) == 0f, "nothing glints before the split");
     }
 

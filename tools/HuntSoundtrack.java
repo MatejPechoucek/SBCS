@@ -1,7 +1,7 @@
-import com.butcher.anim.ChopTimeline;
-import com.butcher.audio.HuntSound;
-import com.butcher.audio.SynthEngine;
-import com.butcher.audio.Voice;
+import com.sbcs.anim.ChopTimeline;
+import com.sbcs.audio.HuntSound;
+import com.sbcs.audio.SynthEngine;
+import com.sbcs.audio.Voice;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Renders the Mythological Dye's ending ("The Whole Hunt") after the split for a drop to a WAV - the exact cue list the game plays
  * (HuntSound.schedule), mixed offline. A cut silences everything already sounding, as
- * ButcherAudio.silence() does in game. The price's coin ticks are not in it.
+ * SbcsAudio.silence() does in game. The price's coin ticks are not in it.
  *
  *   java -cp "out;src/main/resources" HuntSoundtrack <outdir> <seed>
  */

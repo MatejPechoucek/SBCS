@@ -1,6 +1,6 @@
 """The mod icon: a gold pixel-art B on a dark badge, its top-left corner chopped off by a cleaver.
 
-32 x 32 pixel art, written 8x up (256 x 256, nearest neighbour) to src/main/resources/assets/butcher/icon.png.
+32 x 32 pixel art, written 8x up (256 x 256, nearest neighbour) to src/main/resources/assets/sbcs/icon.png.
 The menu shows it at its native 32 (MenuIcon halves it back down exactly), Mod Menu and Modrinth at whatever size.
 
     python3 tools/gen_icon.py
@@ -124,6 +124,6 @@ def icon():
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    dest = os.path.join(here, "..", "src", "main", "resources", "assets", "butcher", "icon.png")
+    dest = os.path.join(here, "..", "src", "main", "resources", "assets", "sbcs", "icon.png")
     icon().resize((N * 8, N * 8), Image.NEAREST).save(dest)
     print("wrote", os.path.normpath(dest))

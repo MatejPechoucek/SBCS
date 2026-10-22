@@ -1,7 +1,7 @@
-import com.butcher.anim.SeraphTimeline;
-import com.butcher.anim.SeraphTimeline.Drop;
-import com.butcher.render.SeraphScene;
-import com.butcher.render.art.ChopArt;
+import com.sbcs.anim.SeraphTimeline;
+import com.sbcs.anim.SeraphTimeline.Drop;
+import com.sbcs.render.SeraphScene;
+import com.sbcs.render.art.ChopArt;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -41,7 +41,7 @@ public final class SeraphPreview {
         // The real dragon, posed by the game's own model (the client jar is on this tool's classpath).
         tex.put(SeraphScene.TEX_DRAGON, argb(ImageIO.read(new File(van, "dragon.png"))));
         tex.put(SeraphScene.TEX_DRAGON_EYES, argb(ImageIO.read(new File(van, "dragon_eyes.png"))));
-        SeraphScene.dragon = new com.butcher.render.DragonRig();
+        SeraphScene.dragon = new com.sbcs.render.DragonRig();
         SeraphScene.RASTER.texture(0, tex.get(SeraphScene.TEX_DRAGON));
         SeraphScene.RASTER.texture(1, tex.get(SeraphScene.TEX_DRAGON_EYES));
         // The dragon is rasterised at 2 image pixels a GUI pixel, as the game caps it.

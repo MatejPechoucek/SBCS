@@ -1,11 +1,11 @@
-import com.butcher.anim.ChopTimeline;
-import com.butcher.anim.SeraphTimeline;
-import com.butcher.anim.SeraphTimeline.Drop;
-import com.butcher.anim.SeraphTimeline.Ending;
-import com.butcher.anim.SeraphTimeline.Glass;
-import com.butcher.audio.SeraphSound;
-import com.butcher.render.ChopScene;
-import com.butcher.render.SeraphScene;
+import com.sbcs.anim.ChopTimeline;
+import com.sbcs.anim.SeraphTimeline;
+import com.sbcs.anim.SeraphTimeline.Drop;
+import com.sbcs.anim.SeraphTimeline.Ending;
+import com.sbcs.anim.SeraphTimeline.Glass;
+import com.sbcs.audio.SeraphSound;
+import com.sbcs.render.ChopScene;
+import com.sbcs.render.SeraphScene;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -139,13 +139,13 @@ public final class SeraphTest {
                         && SeraphTimeline.D_LAND < SeraphTimeline.D_BREATH && SeraphTimeline.D_BREATH < SeraphTimeline.D_POOL
                         && SeraphTimeline.D_BREATH_END < SeraphTimeline.D_BURST && SeraphTimeline.D_BURST < SeraphTimeline.D_RISE
                         && SeraphTimeline.D_RISE < dr.arrive());
-        check("the dragon's flight is the whole baked track", SeraphTimeline.D_LAND - SeraphTimeline.D_IN == com.butcher.anim.SeraphDragon.flightMs());
-        float[] land = com.butcher.anim.SeraphDragon.pos(com.butcher.anim.SeraphDragon.flightMs());
+        check("the dragon's flight is the whole baked track", SeraphTimeline.D_LAND - SeraphTimeline.D_IN == com.sbcs.anim.SeraphDragon.flightMs());
+        float[] land = com.sbcs.anim.SeraphDragon.pos(com.sbcs.anim.SeraphDragon.flightMs());
         check("the dragon lands behind the beacon, at (6.09, 0, -2.48)",
                 Math.abs(land[0] - 6.09f) < 0.05f && Math.abs(land[1]) < 0.05f && Math.abs(land[2] + 2.48f) < 0.05f);
-        float[] start = com.butcher.anim.SeraphDragon.pos(0);
+        float[] start = com.sbcs.anim.SeraphDragon.pos(0);
         check("the dragon comes from far behind the pillars", start[2] < -60f && start[1] > 10f);
-        check("the dragon turns three-quarters to the camera once down", Math.abs(((com.butcher.anim.SeraphDragon.yaw(com.butcher.anim.SeraphDragon.flightMs()) % 360f) + 360f) % 360f - com.butcher.anim.SeraphDragon.LAND_YAW) < 1f);
+        check("the dragon turns three-quarters to the camera once down", Math.abs(((com.sbcs.anim.SeraphDragon.yaw(com.sbcs.anim.SeraphDragon.flightMs()) % 360f) + 360f) % 360f - com.sbcs.anim.SeraphDragon.LAND_YAW) < 1f);
         check("the paint is down before the burst and spread by the dye's rise",
                 dr.paint(SeraphTimeline.D_POOL - 1) < 0.01f && dr.paint(SeraphTimeline.D_RISE) > 0.99f);
         check("everything greys when time stops", dr.grey(SeraphTimeline.D_FREEZE - 1) < 0.01f && dr.grey(SeraphTimeline.D_IN) > 0.99f);

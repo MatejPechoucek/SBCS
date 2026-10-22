@@ -1,11 +1,11 @@
-import com.butcher.anim.ChopTimeline;
-import com.butcher.anim.EruptionTimeline;
-import com.butcher.anim.EruptionTimeline.Creature;
-import com.butcher.anim.EruptionTimeline.Drop;
-import com.butcher.anim.EruptionTimeline.Ending;
-import com.butcher.audio.EruptionSound;
-import com.butcher.render.ChopScene;
-import com.butcher.render.EruptionScene;
+import com.sbcs.anim.ChopTimeline;
+import com.sbcs.anim.EruptionTimeline;
+import com.sbcs.anim.EruptionTimeline.Creature;
+import com.sbcs.anim.EruptionTimeline.Drop;
+import com.sbcs.anim.EruptionTimeline.Ending;
+import com.sbcs.audio.EruptionSound;
+import com.sbcs.render.ChopScene;
+import com.sbcs.render.EruptionScene;
 
 /**
  * Offline checks for "Eruption" (lava fishing's animation). The one that matters: nothing drawn or heard before
@@ -81,7 +81,7 @@ public final class EruptionTest {
     }
 
     public static void main(String[] a) {
-        EruptionScene.rigs = new com.butcher.render.LavaRigs();
+        EruptionScene.rigs = new com.sbcs.render.LavaRigs();
         for (int slot = 0; slot < 8; slot++) EruptionScene.RASTER.texture(slot, pattern(64, 64, 100 + slot), 64, 64);
         EruptionScene.rasterScale = 1f;
         EruptionScene.lavaPixels = pattern(16, 320, 77);
@@ -202,7 +202,7 @@ public final class EruptionTest {
             tl.price(1_000_000);
             for (long t = 0; t < tl.total(); t += 100) {
                 Hash hash = new Hash();
-                com.butcher.render.CrystalVeins.Fill layer = (x, y, w, h2, argb) -> hash.squares++;
+                com.sbcs.render.CrystalVeins.Fill layer = (x, y, w, h2, argb) -> hash.squares++;
                 EruptionScene.draw(hash, layer, layer, tl, t, 640, 360);
                 sum += hash.calls;
                 n++;

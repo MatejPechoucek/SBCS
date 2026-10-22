@@ -2,15 +2,15 @@
  * Offline checks for the Thaw's schedule. Nothing in anim/ThawTimeline or detect/vanguard/
  * touches Minecraft, so every haul shape can be timed without the game.
  *
- *   javac -d out src/main/java/com/butcher/detect/vanguard/{VanguardLoot,CorpseHaul}.java \
- *         src/main/java/com/butcher/anim/ThawTimeline.java \
- *         src/main/java/com/butcher/render/model/{ThawMeshes,Mesh,BoxMesh}.java tools/ThawTest.java
+ *   javac -d out src/main/java/com/sbcs/detect/vanguard/{VanguardLoot,CorpseHaul}.java \
+ *         src/main/java/com/sbcs/anim/ThawTimeline.java \
+ *         src/main/java/com/sbcs/render/model/{ThawMeshes,Mesh,BoxMesh}.java tools/ThawTest.java
  *   java -cp out ThawTest
  */
-import com.butcher.anim.ThawTimeline;
-import com.butcher.anim.ThawTimeline.*;
-import com.butcher.detect.vanguard.*;
-import com.butcher.render.model.ThawMeshes;
+import com.sbcs.anim.ThawTimeline;
+import com.sbcs.anim.ThawTimeline.*;
+import com.sbcs.detect.vanguard.*;
+import com.sbcs.render.model.ThawMeshes;
 import java.util.*;
 
 public class ThawTest {

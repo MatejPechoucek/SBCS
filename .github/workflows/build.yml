@@ -18,7 +18,7 @@ jobs:
       - run: ./gradlew build --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: butcher-jar
+          name: sbcs-jar
           path: |
             build/libs/*.jar
             !build/libs/*-sources.jar

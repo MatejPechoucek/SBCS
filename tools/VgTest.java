@@ -5,22 +5,22 @@
  * which matters, because the alternative way to test it is to find a Glacite Mineshaft,
  * find a Fairy variant, and spend a Skeleton Key.
  *
- * DecisionLog does import ButcherClient, but only for its logger, so a four-line stub
+ * DecisionLog does import SbcsClient, but only for its logger, so a four-line stub
  * stands in for it.
  *
- *   mkdir -p out/stub/com/butcher && cat > out/stub/com/butcher/ButcherClient.java <<'EOF'
- *   package com.butcher;
+ *   mkdir -p out/stub/com/sbcs && cat > out/stub/com/sbcs/SbcsClient.java <<'EOF'
+ *   package com.sbcs;
  *   import org.slf4j.Logger; import org.slf4j.LoggerFactory;
- *   public class ButcherClient { public static final Logger LOGGER = LoggerFactory.getLogger("butcher"); }
+ *   public class SbcsClient { public static final Logger LOGGER = LoggerFactory.getLogger("sbcs"); }
  *   EOF
  *   SLF=$(find ~/.gradle/caches/modules-2 -name 'slf4j-api-*.jar' ! -name '*sources*' | head -1)
- *   javac -d out/vg -cp "$SLF" out/stub/com/butcher/ButcherClient.java  *         src/main/java/com/butcher/detect/DecisionLog.java  *         src/main/java/com/butcher/detect/vanguard/*.java
+ *   javac -d out/vg -cp "$SLF" out/stub/com/sbcs/SbcsClient.java  *         src/main/java/com/sbcs/detect/DecisionLog.java  *         src/main/java/com/sbcs/detect/vanguard/*.java
  *   javac -d out/vg -cp "out/vg;$SLF" tools/VgTest.java && java -cp "out/vg;$SLF" VgTest
  *
  * (";" between classpath entries on Windows, ":" elsewhere.)
  */
-import com.butcher.detect.DecisionLog;
-import com.butcher.detect.vanguard.*;
+import com.sbcs.detect.DecisionLog;
+import com.sbcs.detect.vanguard.*;
 import java.util.*;
 
 public class VgTest {

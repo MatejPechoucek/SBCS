@@ -1,7 +1,7 @@
-import com.butcher.anim.SeraphTimeline.Drop;
-import com.butcher.detect.DecisionLog;
-import com.butcher.detect.SeraphDrops;
-import com.butcher.detect.SeraphWatcher;
+import com.sbcs.anim.SeraphTimeline.Drop;
+import com.sbcs.detect.DecisionLog;
+import com.sbcs.detect.SeraphDrops;
+import com.sbcs.detect.SeraphWatcher;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Offline checks for the Voidgloom Seraph's detection, and a replay of a real records file through the real watcher.
  *
- *   java -Drecords=<butcher-drops.jsonl> -Dself=<the recorder's name> -cp "<mc classpath>;build/classes/java/main;out" SeraphDetectTest
+ *   java -Drecords=<sbcs-drops.jsonl> -Dself=<the recorder's name> -cp "<mc classpath>;build/classes/java/main;out" SeraphDetectTest
  *
  * Settled against a friend's session (2026-10-05): their three tier IV kills among other players' bosses.
  */

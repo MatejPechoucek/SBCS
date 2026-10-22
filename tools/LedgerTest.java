@@ -1,8 +1,8 @@
-import com.butcher.ledger.Chapter;
-import com.butcher.ledger.Facts;
-import com.butcher.ledger.Ledger;
-import com.butcher.ledger.LedgerData;
-import com.butcher.ledger.Stamp;
+import com.sbcs.ledger.Chapter;
+import com.sbcs.ledger.Facts;
+import com.sbcs.ledger.Ledger;
+import com.sbcs.ledger.LedgerData;
+import com.sbcs.ledger.Stamp;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Offline checks for the Ledger's rules (com.butcher.ledger is pure Java).
+ * Offline checks for the Ledger's rules (com.sbcs.ledger is pure Java).
  *
- *   javac -d out/ledger src/main/java/com/butcher/ledger/*.java tools/LedgerTest.java
+ *   javac -d out/ledger src/main/java/com/sbcs/ledger/*.java tools/LedgerTest.java
  *   java -cp out/ledger LedgerTest
  *
  * Run from the repository root: it reads the game's drop enums as source text, to check every name a stamp looks for
@@ -93,21 +93,21 @@ public class LedgerTest {
         }
 
         // ---- the names stamps look for are the game's own
-        String hellion = Files.readString(Path.of("src/main/java/com/butcher/anim/HellionTimeline.java"));
-        String eruption = Files.readString(Path.of("src/main/java/com/butcher/anim/EruptionTimeline.java"));
-        String shark = Files.readString(Path.of("src/main/java/com/butcher/detect/SharkDrops.java"));
-        String ghost = Files.readString(Path.of("src/main/java/com/butcher/detect/GhostDrops.java"));
-        String diana = Files.readString(Path.of("src/main/java/com/butcher/render/DianaItems.java"));
+        String hellion = Files.readString(Path.of("src/main/java/com/sbcs/anim/HellionTimeline.java"));
+        String eruption = Files.readString(Path.of("src/main/java/com/sbcs/anim/EruptionTimeline.java"));
+        String shark = Files.readString(Path.of("src/main/java/com/sbcs/detect/SharkDrops.java"));
+        String ghost = Files.readString(Path.of("src/main/java/com/sbcs/detect/GhostDrops.java"));
+        String diana = Files.readString(Path.of("src/main/java/com/sbcs/render/DianaItems.java"));
         for (String n : HELLION) check("Hellion names " + n, hellion.contains("\"" + n + "\""));
         for (String n : ERUPTION) check("Eruption names " + n, eruption.contains("\"" + n + "\""));
-        String vanguard = Files.readString(Path.of("src/main/java/com/butcher/detect/vanguard/VanguardLoot.java"));
+        String vanguard = Files.readString(Path.of("src/main/java/com/sbcs/detect/vanguard/VanguardLoot.java"));
         for (String n : List.of("Caged Wisp", "Frozen Scute", "Skeleton Key")) {
             check("Vanguard names " + n, vanguard.contains("\"" + n + "\""));
         }
-        String chop = Files.readString(Path.of("src/main/java/com/butcher/anim/ChopTimeline.java"));
+        String chop = Files.readString(Path.of("src/main/java/com/sbcs/anim/ChopTimeline.java"));
         check("Diana creature INQUISITOR", chop.contains("INQUISITOR"));
-        for (com.butcher.ledger.Chapter c : com.butcher.ledger.Chapter.values()) {
-            if (c == com.butcher.ledger.Chapter.SERAPH) continue;
+        for (com.sbcs.ledger.Chapter c : com.sbcs.ledger.Chapter.values()) {
+            if (c == com.sbcs.ledger.Chapter.SERAPH) continue;
             check("10 or more stamps in " + c, Ledger.chapter(c).size() >= 10, Ledger.chapter(c).size() + "");
         }
         for (String n : List.of("Megalodon", "Great White Shark Tooth")) check("Fin names " + n, shark.contains("\"" + n + "\""));
