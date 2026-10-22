@@ -1504,7 +1504,10 @@ or vault". Never call anything "Butcher": the mod is SBCS.
   alpha - a tint only darkens, and the door face is dark), slumps into a molten pool (`MELT`, `POOLED`), the alloy rises
   out of it. The safe darkens (`shade`), never fades, behind the showcase - faded, its faces showed through each other.
 - Drop art: the Dye and the Quick Claw are NEU heads (`HeadSkins.NUCLEUS`, `nucleus_heads.json`); gems and the alloy are
-  Hypixel's pack icons when loaded (paths guessed from NEU's model ids - **unconfirmed**), else quartz tinted / a gold ingot.
+  Hypixel's pack icons when loaded (paths confirmed in Hypixel's pack, 2026-10-22), else quartz tinted / a gold ingot.
+  **The alloy's icon is an animated strip** (16 x 64, four frames, its .mcmeta has frametime 6, interpolate and a frame
+  list): `VaultScreen.strip` reads the PNG's size and the .mcmeta and draws one frame at a time, the next fading in.
+  Blitted whole as 16 x 16 it showed all four frames squeezed together.
 - `tools/VaultTest` (164: frame and sound honesty for every prize on five seeds, the tells, the clocks, the Meltdown's
   order), `tools/VaultPreview` (ChopPreview's canvas; `-Dvanilla` a folder of the block textures plus quartz and
   gold_ingot). Menu card "Crystal Nucleus - The Vault", stats key "nucleus", `/sbcs test nucleus <word>`.

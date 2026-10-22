@@ -238,6 +238,59 @@ public class VaultScreen extends Screen implements ChopScene.Canvas, Cutscene {
 
     /** Whether Hypixel's pack has the icon, asked once per path. */
     private static final java.util.Map<String, Boolean> PACK = new java.util.HashMap<>();
+    /**
+     * An icon's animation, read once per path: {frames, ms a frame, interpolate (0/1), then the frame order}.
+     * Hypixel's Divan's Alloy is a strip of four 16 x 16 frames stacked down the PNG (Matej, 2026-10-22: "all 4
+     * models stacked") - drawn as one 16 x 16 square, the whole strip was squeezed into it. Its .mcmeta: frametime 6, interpolate, frames 0 x6, 1 x3, 2 x2, 3 x3
+     * (read from Hypixel's pack, 2026-10-22). A still icon is {1, 0, 0}.
+     */
+    private static final java.util.Map<Identifier, int[]> STRIPS = new java.util.HashMap<>();
+
+    static int[] strip(Identifier id) {
+        return STRIPS.computeIfAbsent(id, VaultScreen::readStrip);
+    }
+
+    private static int[] readStrip(Identifier id) {
+        var rm = Minecraft.getInstance().getResourceManager();
+        int frames = 1;
+        try (java.io.InputStream in = rm.open(id)) {
+            byte[] head = in.readNBytes(24);
+            // A PNG's IHDR: width at 16, height at 20, big-endian.
+            int w = java.nio.ByteBuffer.wrap(head, 16, 4).getInt(), h = java.nio.ByteBuffer.wrap(head, 20, 4).getInt();
+            if (w > 0 && h > w && h % w == 0) frames = h / w;
+        } catch (Exception e) {
+            return new int[]{1, 0, 0};
+        }
+        if (frames == 1) return new int[]{1, 0, 0};
+        int ticks = 1;
+        boolean interp = false;
+        int[] order = null;
+        Identifier meta = Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath() + ".mcmeta");
+        try (java.io.InputStream in = rm.open(meta)) {
+            String json = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"frametime\"\\s*:\\s*(\\d+)").matcher(json);
+            if (m.find()) ticks = Math.max(1, Integer.parseInt(m.group(1)));
+            interp = json.matches("(?s).*\"interpolate\"\\s*:\\s*true.*");
+            // A "frames" list of plain indices; frames given as objects keep the default order.
+            java.util.regex.Matcher f = java.util.regex.Pattern.compile("\"frames\"\\s*:\\s*\\[([\\d,\\s]+)]").matcher(json);
+            if (f.find()) {
+                order = java.util.Arrays.stream(f.group(1).split(",")).map(String::trim).filter(x -> !x.isEmpty())
+                        .mapToInt(Integer::parseInt).filter(i -> i >= 0).toArray();
+            }
+        } catch (Exception ignored) {
+            // No .mcmeta: a frame a tick, in order, as the game would play it.
+        }
+        int n = frames;
+        if (order == null || order.length == 0) order = java.util.stream.IntStream.range(0, n).toArray();
+        order = java.util.Arrays.stream(order).filter(i -> i < n).toArray();
+        if (order.length == 0) return new int[]{1, 0, 0};
+        int[] out = new int[3 + order.length];
+        out[0] = frames;
+        out[1] = ticks * 50;
+        out[2] = interp ? 1 : 0;
+        System.arraycopy(order, 0, out, 3, order.length);
+        return out;
+    }
 
     /**
      * The drop: the Jade Dye and the Quick Claw as real 3D heads with their NEU skins; the gemstones and the alloy as
@@ -276,18 +329,35 @@ public class VaultScreen extends Screen implements ChopScene.Canvas, Cutscene {
         else tex = Identifier.withDefaultNamespace("textures/item/" + fallback + ".png");
         float s = size / 16f, ink = Math.max(1.5f, size / 16f);
         int x = Math.round(cx - size / 2f), y = Math.round(cy - size / 2f);
+        // An animated icon is a strip: show one 16 x 16 frame of it at a time, as the game does.
+        int[] st = inPack ? strip(tex) : new int[]{1, 0, 0};
+        int frame = 0, next = 0;
+        float blend = 0f;
+        if (st[0] > 1) {
+            long now = System.currentTimeMillis();
+            int n = st.length - 3;
+            int i = (int) ((now / st[1]) % n);
+            frame = st[3 + i];
+            next = st[3 + (i + 1) % n];
+            // Interpolated, as the game does it: the next frame fades in over this one.
+            if (st[2] == 1 && next != frame) blend = (now % st[1]) / (float) st[1];
+        }
+        float v0 = 16f * frame;
+        int texH = 16 * st[0];
         Matrix3x2fStack pose = g.pose();
         for (float[] o : INK) {
             pose.pushMatrix();
             pose.translate(x + o[0] * ink, y + o[1] * ink);
             pose.scale(s, s);
-            g.blit(RenderPipelines.GUI_TEXTURED, tex, 0, 0, 0f, 0f, 16, 16, 16, 16, a << 24);
+            g.blit(RenderPipelines.GUI_TEXTURED, tex, 0, 0, 0f, v0, 16, 16, 16, texH, a << 24);
             pose.popMatrix();
         }
         pose.pushMatrix();
         pose.translate(x, y);
         pose.scale(s, s);
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, 0, 0, 0f, 0f, 16, 16, 16, 16, (a << 24) | tint);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, 0, 0, 0f, v0, 16, 16, 16, texH, (a << 24) | tint);
+        int b = Math.round(a * blend);
+        if (b > 3) g.blit(RenderPipelines.GUI_TEXTURED, tex, 0, 0, 0f, 16f * next, 16, 16, 16, texH, (b << 24) | tint);
         pose.popMatrix();
     }
 
