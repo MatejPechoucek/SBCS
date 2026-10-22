@@ -119,7 +119,9 @@ public final class OssuaryScene {
         ChopScene.insideOut = false;
         ChopScene.yShift = 0f;
         ChopScene.inkWidth = 0f;
-        ChopScene.sceneAlpha = master;
+        // The 3D never fades: a translucent machine shows its faces through each other. It pops in (camera) and,
+        // going, darkens and shrinks away; only the 2D around it fades with the master.
+        ChopScene.sceneAlpha = 1f;
         ChopScene.screenH = h;
         unit = unitFor(h);
         pt = tl.phys(t);
@@ -147,6 +149,7 @@ public final class OssuaryScene {
             chain(c, layer, tl, t, w, h);
         }
         lantern(c, tl, t);
+        ChopScene.sceneAlpha = master;
         if (tl.livid()) livids(c, tl, t);
         effects(c, layer, tl, t, w, h);
         hints(c, tl, t, w, h);
@@ -155,6 +158,8 @@ public final class OssuaryScene {
         ChopScene.sceneAlpha = master;
         shade = 1f;
         if (flushLayer != null) flushLayer.run();
+        // Behind the showcase the machine goes back into the dark, so the drop and its words stand alone.
+        if (win) c.fill(0, 0, w, h, ChopScene.alpha(0.45f * retreat(tl, t) * master) | 0x07060A);
         if (r >= 0 && t >= r) {
             if (win) showcase(c, tl, t, w, h);
             else bustWords(c, tl, t, w, h);
@@ -183,9 +188,29 @@ public final class OssuaryScene {
         ChopScene.fx = tl.throne() ? -2.5f : 0.6f;
         ChopScene.fy = 1.8f;
         ChopScene.fz = 2f;
+        // Stepping back for the showcase and the strip, up and away from the row of items along the bottom.
+        float back = retreat(tl, t);
+        ChopScene.size *= 1f - 0.16f * back;
+        float gone = going(tl, t);
+        ChopScene.size *= 1f - 0.97f * gone * gone;
         float s = ChopScene.calm ? 0f : tl.shake(t) * h;
         ChopScene.sx0 = w / 2f + s * (float) Math.sin(t * 0.13);
-        ChopScene.sy0 = h * 0.5f + s * (float) Math.cos(t * 0.17);
+        ChopScene.sy0 = h * (0.5f - 0.07f * back) + s * (float) Math.cos(t * 0.17);
+    }
+
+    /** 0 -> 1 over the last FADE_MS: the machine going. */
+    static float going(OssuaryTimeline tl, long t) {
+        long end = tl.total();
+        if (end == Long.MAX_VALUE) return 0f;
+        return ease((t - (end - OssuaryTimeline.FADE_MS)) / (float) OssuaryTimeline.FADE_MS);
+    }
+
+    /** 0 -> 1 as the machine steps back: into a win's showcase, or for a bust's strip. */
+    static float retreat(OssuaryTimeline tl, long t) {
+        long r = tl.reveal();
+        if (r < 0 || t < r) return 0f;
+        long from = tl.ending() == Ending.BUST ? tl.stripAt() - 200 : tl.arrive() - 400;
+        return ease((t - from) / 600f);
     }
 
     // ================================================================== a housing: cheeks, back, drum, lintel, dealer
@@ -945,13 +970,13 @@ public final class OssuaryScene {
         }
         c.loot(v.bestItem(), cx, cy + (float) Math.sin(t / 420.0) * 2f * f, size, a);
         // The words come in under it once it has arrived.
-        float wa = ease((t - arrive - 150) / 300f) * a;
+        float wa = ease((t - arrive - 300) / 300f) * a;
         if (wa <= 0.02f) return;
         float scale = Math.min(1.35f, h / 300f);
         float y = cy + size * 0.62f + 8f * scale;
         int name = nameColour(tl);
         String title = v.bestItem().label();
-        int letters = (int) ((t - arrive - 150) / 38);
+        int letters = (int) ((t - arrive - 300) / 38);
         c.text(title.substring(0, Math.max(0, Math.min(title.length(), letters))), w / 2f, y, scale * 1.15f, ChopScene.alpha(wa) | name);
         y += 13f * scale;
         long worth = v.bestWorth();
@@ -996,8 +1021,9 @@ public final class OssuaryScene {
         float a = ease((t - r - 200) / 300f) * ChopScene.sceneAlpha;
         if (a <= 0.02f) return;
         float scale = Math.min(1.35f, h / 300f);
-        c.text("Nothing rare", w / 2f, h * 0.3f, scale * 1.1f, ChopScene.alpha(a) | 0x9A9A9A);
-        if (dryNote != null) c.text(dryNote, w / 2f, h * 0.3f + 13f * scale, scale * 0.8f, ChopScene.alpha(a * 0.85f) | 0x8A8478);
+        // Up where the header was, clear of the machine.
+        c.text("Nothing rare", w / 2f, h * 0.06f, scale * 1.1f, ChopScene.alpha(a) | 0x9A9A9A);
+        if (dryNote != null) c.text(dryNote, w / 2f, h * 0.06f + 13f * scale, scale * 0.8f, ChopScene.alpha(a * 0.85f) | 0x8A8478);
     }
 
     /** The whole chest in a row along the bottom, best first, and what it comes to after its cost. */

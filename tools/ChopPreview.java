@@ -166,7 +166,7 @@ public final class ChopPreview {
     }
 
     /** ChopScene's primitives, drawn with Java2D. */
-    static final class Java2D implements ChopScene.Canvas {
+    static class Java2D implements ChopScene.Canvas {
         final Graphics2D g;
         final Map<String, BufferedImage> tex;
         final String itemName;
