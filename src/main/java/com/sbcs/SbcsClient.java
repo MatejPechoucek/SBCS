@@ -1015,15 +1015,14 @@ public class SbcsClient implements ClientModInitializer {
                             "f1 .. f7, m1 .. m7", "the floor (f7/m7: the Wither Throne; m*: the red chest's seals)",
                             "bust blue purple gold", "the bands",
                             "jackpot", "the floor's jackpot",
-                            "dye", "Livid's (f5) or Necron's (f7) dye; elsewhere a jackpot",
-                            "obsidian / bedrock / ...", "the chest's tier (bedrock if left out)"));
+                            "dye", "Livid's (m5) or Necron's (m7) dye; elsewhere a jackpot",
+                            "wood .. bedrock", "the chest's tier (bedrock from floor 5, else obsidian, if left out)"));
             for (String fl : new String[]{"f1", "f2", "f3", "f4", "f5", "f6", "f7", "m1", "m2", "m3", "m4", "m5", "m6", "m7"}) {
                 LiteralArgumentBuilder<FabricClientCommandSource> floorNode = ClientCommands.literal(fl);
                 com.sbcs.detect.dungeon.DungeonFloor floor = com.sbcs.detect.dungeon.DungeonFloor.fromLabel(fl.toUpperCase(java.util.Locale.ROOT));
                 for (String out : com.sbcs.anim.OssuaryTests.OUTCOMES) {
                     LiteralArgumentBuilder<FabricClientCommandSource> outNode = ClientCommands.literal(out).executes(ctx -> {
-                        Minecraft.getInstance().execute(() -> com.sbcs.gui.OssuaryTestScreen.open(floor,
-                                com.sbcs.detect.dungeon.ChestTier.BEDROCK, out));
+                        Minecraft.getInstance().execute(() -> com.sbcs.gui.OssuaryTestScreen.open(floor, null, out));
                         return 1;
                     });
                     for (com.sbcs.detect.dungeon.ChestTier tier : com.sbcs.detect.dungeon.ChestTier.values()) {
@@ -1377,10 +1376,10 @@ public class SbcsClient implements ClientModInitializer {
             case "blaze" -> openHellion(com.sbcs.anim.HellionTimeline.Drop.valueOf(name), true);
             case "nucleus" -> openVault(com.sbcs.anim.VaultTimeline.Prize.test(name), true);
             case "dungeon" -> {
-                // "F7:jackpot" - a floor and an outcome, rolled on a Bedrock chest of that floor.
+                // "F7:jackpot" - a floor and an outcome, rolled on that floor's best chest (Bedrock from Floor V).
                 String[] p = name.split(":", 2);
                 com.sbcs.detect.dungeon.DungeonFloor floor = com.sbcs.detect.dungeon.DungeonFloor.fromLabel(p[0]);
-                if (floor != null && p.length == 2) com.sbcs.gui.OssuaryTestScreen.open(floor, com.sbcs.detect.dungeon.ChestTier.BEDROCK, p[1]);
+                if (floor != null && p.length == 2) com.sbcs.gui.OssuaryTestScreen.open(floor, null, p[1]);
             }
             case "seraph" -> {
                 // Under maintenance: only the developers may see it, from the menu or the commands.

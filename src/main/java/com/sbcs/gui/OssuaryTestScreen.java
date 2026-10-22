@@ -23,7 +23,7 @@ public class OssuaryTestScreen extends Screen {
 
     public OssuaryTestScreen(DungeonFloor floor, ChestTier tier, String outcome, Screen parent) {
         super(Component.literal("SBCS - the Ossuary"));
-        OssuaryTests.Test t = OssuaryTests.make(floor, tier, outcome, DungeonRolls.pool());
+        OssuaryTests.Test t = OssuaryTests.make(floor, tier, outcome, DungeonRolls.pool(), OssuaryRoll::market);
         this.roll = new OssuaryRoll(t.chest(), DungeonRolls.pool(), true, t.prices());
         this.parent = parent;
     }
@@ -74,8 +74,17 @@ public class OssuaryTestScreen extends Screen {
 
     /** Opens a test over whatever screen is up (and back to it after). */
     public static void open(DungeonFloor floor, ChestTier tier, String outcome) {
+        if (tier == null) tier = OssuaryTests.defaultTier(floor);
+        // Ask for the whole pool's prices, so the item picked for the outcome is picked at real prices (the first
+        // test of a floor may still pick by the wiki's costs while they arrive; the roll itself reprices live).
+        com.sbcs.market.Bazaar.request();
+        for (var e : DungeonRolls.pool().pool(floor, tier)) {
+            String k = e.look().key();
+            if (k != null && !k.startsWith("ENCHANTMENT_")) com.sbcs.market.LivePrice.request(k);
+        }
         Minecraft mc = Minecraft.getInstance();
         Screen now = mc.gui.screen();
-        mc.gui.setScreen(new OssuaryTestScreen(floor, tier, outcome, now instanceof SbcsMenuScreen ? now : null));
+        ChestTier t = tier;
+        mc.gui.setScreen(new OssuaryTestScreen(floor, t, outcome, now instanceof SbcsMenuScreen ? now : null));
     }
 }

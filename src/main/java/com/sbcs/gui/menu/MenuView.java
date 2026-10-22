@@ -663,8 +663,8 @@ public final class MenuView {
     }
 
     /** The Ossuary's Try it outcomes, each on a floor that shows its own setup off. */
-    private static final List<String> OSSUARY_TRY = List.of("F3:bust", "F2:blue", "F4:purple", "F6:gold", "F5:dye",
-            "F7:jackpot", "M3:gold", "M7:jackpot", "F7:dye");
+    private static final List<String> OSSUARY_TRY = List.of("F3:bust", "F2:blue", "F4:purple", "F6:gold", "F5:jackpot",
+            "F7:jackpot", "M6:gold", "M5:dye", "M7:jackpot", "M7:dye");
     private static final String[] CROESUS = {"Off", "A run's best chest", "Every chest"};
 
     private void dungeonRows(List<Row> rows, PatternConfig cfg) {

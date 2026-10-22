@@ -1480,7 +1480,7 @@ seals; F7/M7 the Wither Throne (four lords' drums with levers, M7's dragon statu
 Bedrock, the rest selectable; in a run the chest being opened rolls; at Croesus clicking a run rolls only its most profitable
 chest (least negative if all lose), the menu covered so a hover cannot show it; a setting turns Croesus off. **Read and draw
 only** - never a click, packet or "Open Reward Chest" for the player (ban risk). Licences: SkyOcean's code and repo data are
-MIT (the pools come from its `dungeon_chests.json`, credited in the JSON's note), its textures are not; BCCO is all rights
+MIT (its `dungeon_chests.json` completes the pools, credited in the JSON's note), its textures are not; BCCO is all rights
 reserved (ideas only); Skyblocker/SkyHanni strings are used as facts.
 
 - **Records first**: `detect/dungeon/DungeonRecorder` (0.3.5-alpha) writes `dungeon_chest` (title, every slot with SNBT
@@ -1489,16 +1489,27 @@ reserved (ideas only); Skyblocker/SkyHanni strings are used as facts.
   "Contents"/"Cost" lore and the back arrow "To Catacombs - Floor VII" against the first records.
 - **Pure**: `ChestReader` (a chest's menu: null until "Open Reward Chest" is there; a run's page from each head's lore),
   `PriceKeys`, `ChestValue` (best item ranks essence last; the key's price is added to the cost), `RewardChest.fingerprint`
-  (price keys, so the boss room and Croesus agree), `RollMemory` (72 h), `DungeonPool` (`tools/gen_dungeon_pool.py`
-  -> `dungeon_pool.json`; Wood and the others borrow the floor's Obsidian pool), `RollPicker` (which menu rolls, which
-  chest; a run's page is remembered as `RUN|...` so it rolls once - a chest rolled in the boss room does not count, the
-  page then rolls its best other chest). `tools/DungeonChestTest` (68).
+  (price keys, so the boss room and Croesus agree), `RollMemory` (72 h), `DungeonPool`, `RollPicker` (which menu rolls,
+  which chest; a run's page is remembered as `RUN|...` so it rolls once - a chest rolled in the boss room does not count,
+  the page then rolls its best other chest). `tools/DungeonChestTest` (212).
+- **The pools are every chest's own (2026-10-22, Matej: "the loot pools just arent accurate at all")**. Until then every
+  chest below Obsidian borrowed Obsidian's pool, so a Wood chest's reel showed Wither armour. `dungeon_pool.json` now has
+  Wood to Obsidian for all 14 floors and Bedrock for F5-F7 / M5-M7, with Hypixel's weights and the wiki's added cost per
+  item. Source per chest is in its `sources`: the wiki's Loot / Master_Mode_Loot pages, copied as data into
+  `tools/fixtures/dungeon_loot/<floor>.csv` (F2, F7, M2-M7 - the other pages would not load through the fetch); a cut
+  table (the fetch stops ~110k characters in, mid-Bedrock on F7, M5, M6, M7) completed from SkyOcean, whose Obsidian and
+  Bedrock weights **are** Hypixel's (every total checked within 0.1% - the old note calling them "not real chances" was
+  wrong); F3-F6's lower chests from their Master Mode page (F2 and F7 show both modes share them); F1/M1's lower chests
+  derived from F2's (Bonzo's items in Scarf's places) - **unverified, replace when the pages load**. The dyes are not
+  pool rolls (Hypixel rolls them after the pool); they sit under `extras` for their looks. DungeonChestTest checks every
+  wiki row (weight and added cost) against the pool and every chest's total against the wiki's. Regenerate with
+  `tools/gen_dungeon_pool.py <SkyOcean dungeon_chests.json> [neu cache]`.
 - **The roll**: `anim/OssuaryTimeline` (event log: pulls solved so the drum lands exactly on its niche whatever the
   strength; the hand waits `AUTO_WAIT` in chain mode, then keeps going at watch pace; seals, levers, Livid's shell game
   on F5; the tell's steps; bands BUST/BLUE (>= max(1M, the menu's floor))/PURPLE 5M/GOLD 25M/JACKPOT 150M or a floor's
   jackpot item; endings BUST/WIN/JACKPOT/DYE), `render/OssuaryScene` (through ChopScene's box renderer, so it sits in
   `com.sbcs.render`), `audio/OssuarySound` (event-driven: the host asks for the cues due since the last frame).
-  `tools/OssuaryTest` (242) hashes every frame and sound before the reveal over floors x tiers x input scripts x chain/watch
+  `tools/OssuaryTest` (513) hashes every frame and sound before the reveal over floors x tiers x input scripts x chain/watch
   x outcomes - the lords' drums show real items on purpose and are the exception. `tools/OssuaryPreview` renders frames
   (`FLOOR:TIER:KEY:WORTH[:chain]`, WORTH 0 a bust).
 - From the preview: the machine steps back and darkens for the showcase and the bust's strip; the 3D never fades (its
@@ -1512,7 +1523,11 @@ reserved (ideas only); Skyblocker/SkyHanni strings are used as facts.
   `Safety.hook(3/4)`; a cover nothing draws lifts after a second. `HudHiddenMixin` answers hidden while covered (SBO).
   A candidate menu is covered from its first frame for up to 1.5 s while its contents load; a run's page waits up to
   1.2 s for prices before picking. Try it / `/sbcs test dungeon <f1..m7> <bust|blue|purple|gold|jackpot|dye> [tier]` play
-  `anim/OssuaryTests` chests on `gui/OssuaryTestScreen`. Config `dungeon*`, stats key "dungeon".
+  `anim/OssuaryTests` chests on `gui/OssuaryTestScreen` (Bedrock from Floor V, else Obsidian). **A test chest is the
+  floor's real pool at market prices** (`OssuaryRoll.market`: bazaar instant sell, the key's instant buy, else Coflnet
+  lowest BIN); the outcome only picks which pool item is best, the priciest jackpot for "jackpot". With no market price an
+  item falls back to its wiki added cost (or 60k), so a band a floor cannot reach plays its nearest real item. The old
+  made-up filler prices (40k + 70k x n) were the "Recombobulator 180k" Matej saw. Config `dungeon*`, stats key "dungeon".
 - Next: Matej's records (2-3 runs, one Master Mode, Croesus, a Kismet reroll) - fix the strings, then watch it in game.
 
 ## The Vault (the Crystal Nucleus loot bundle, 2026-10-22) - unverified in game

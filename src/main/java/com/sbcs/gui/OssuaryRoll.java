@@ -65,7 +65,7 @@ public final class OssuaryRoll implements OssuaryScene.Canvas {
 
     /**
      * @param chest the chest as read off its menu (items carry their ItemStacks), or a made-up one for a test
-     * @param fixed prices to use instead of the market's (a test's), or null
+     * @param fixed a test's prices for what the market has not priced (the market comes first), or null
      */
     public OssuaryRoll(RewardChest chest, DungeonPool pool, boolean test, Map<String, Long> fixed) {
         this.chest = withLooks(chest, pool);
@@ -83,7 +83,7 @@ public final class OssuaryRoll implements OssuaryScene.Canvas {
         }
         long seed = System.nanoTime() ^ clock.openedAt();
         this.tl = new OssuaryTimeline(chest.floor(), chest.tier(), red, chain, seed, looks, weights);
-        if (fixed == null && (c == null || c.livePrices)) {
+        if (c == null || c.livePrices) {
             com.sbcs.market.Bazaar.request();
             for (Loot l : this.chest.items()) {
                 if (l.key() != null && !l.essence() && !l.key().startsWith("ENCHANTMENT_")) com.sbcs.market.LivePrice.request(l.key());
@@ -130,7 +130,14 @@ public final class OssuaryRoll implements OssuaryScene.Canvas {
 
     private Long price(String key) {
         if (key == null) return null;
-        if (fixed != null) return fixed.get(key);
+        Long live = market(key);
+        if (live != null) return live;
+        return fixed == null ? null : fixed.get(key);
+    }
+
+    /** The market's price: the bazaar's instant sell (instant buy for the key), else the lowest BIN. */
+    public static Long market(String key) {
+        if (key == null) return null;
         PatternConfig c = SbcsClient.config;
         if (c != null && !c.livePrices) return null;
         if (key.equals(ChestValue.KEY_ITEM)) {

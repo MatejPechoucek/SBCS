@@ -314,13 +314,42 @@ public class OssuaryTest {
             check("sound: " + o[0] + " the whole roll sounds", whole.size() > 20, whole.size() + " cues");
         }
 
-        // ---- Try it's made-up chests play the band they name, on every floor
-        for (String fl : new String[]{"F1", "F2", "F3", "F4", "F5", "F6", "F7", "M1", "M3", "M5", "M7"}) {
+        // ---- Try it's chests: the floor's own pool, real-shaped prices, and the band they name where the floor has one
+        for (String fl : new String[]{"F1", "F2", "F3", "F4", "F5", "F6", "F7", "M1", "M2", "M3", "M4", "M5", "M6", "M7"}) {
             DungeonFloor f = DungeonFloor.fromLabel(fl);
+            ChestTier tier = com.sbcs.anim.OssuaryTests.defaultTier(f);
+            var entries = pool.pool(f, tier);
             for (String out : com.sbcs.anim.OssuaryTests.OUTCOMES) {
-                com.sbcs.anim.OssuaryTests.Test tt = com.sbcs.anim.OssuaryTests.make(f, ChestTier.BEDROCK, out, pool);
-                OssuaryTimeline tl = make(f, ChestTier.BEDROCK, false, 5);
+                // Offline: no market, so every price is the wiki's added cost (or a cheap book's 60k).
+                com.sbcs.anim.OssuaryTests.Test tt = com.sbcs.anim.OssuaryTests.make(f, tier, out, pool, k -> null);
+                OssuaryTimeline tl = make(f, tier, false, 5);
                 tl.resolve(ChestValue.of(tt.chest(), tt.prices()::get), 1_000_000);
+                boolean fromPool = true;
+                long added = 0;
+                for (var l : tt.chest().items()) {
+                    if (l.essence() || OssuaryTimeline.DYES.contains(l.key())) continue;
+                    var e = entries.stream().filter(x -> x.look().key().equals(l.key())).findFirst();
+                    if (e.isEmpty()) fromPool = false;
+                    else added += e.get().cost();
+                }
+                check("try " + fl + " " + out + ": every item is from the floor's " + tier.title + " pool", fromPool, tt.chest().items().toString());
+                check("try " + fl + " " + out + ": costs the chest's base plus its items' added costs",
+                        tt.chest().cost() == com.sbcs.anim.OssuaryTests.baseCost(f, tier) + added, tt.chest().cost() + "");
+                boolean madeUp = false;
+                for (var en : tt.prices().entrySet()) {
+                    var e = entries.stream().filter(x -> x.look().key().equals(en.getKey())).findFirst();
+                    if (e.isPresent() && en.getValue() != (e.get().cost() > 0 ? e.get().cost() : 60_000)) madeUp = true;
+                }
+                check("try " + fl + " " + out + ": no made-up prices", !madeUp, tt.prices().toString());
+                long lo = switch (out) { case "blue" -> 1_000_000L; case "purple" -> 5_000_000L; case "gold" -> 25_000_000L; default -> 0L; };
+                long hi = switch (out) { case "blue" -> 5_000_000L; case "purple" -> 25_000_000L; default -> 150_000_000L; };
+                var jack = OssuaryTimeline.JACKPOTS.get(Math.min(6, Math.max(1, f.number()) - 1));
+                boolean reachable = switch (out) {
+                    case "bust" -> true;
+                    case "jackpot" -> entries.stream().anyMatch(e -> jack.contains(e.look().key()));
+                    case "dye" -> f.master() && (f.number() == 5 || f.number() == 7) || entries.stream().anyMatch(e -> jack.contains(e.look().key()));
+                    default -> entries.stream().anyMatch(e -> !jack.contains(e.look().key()) && e.cost() >= lo && e.cost() < hi);
+                };
                 Band wantBand = switch (out) {
                     case "bust" -> Band.BUST;
                     case "blue" -> Band.BLUE;
@@ -328,11 +357,19 @@ public class OssuaryTest {
                     case "gold" -> Band.GOLD;
                     default -> Band.JACKPOT;
                 };
-                boolean dyeOk = !out.equals("dye") || (f.number() == 5 || f.number() == 7) == (tl.ending() == Ending.DYE);
-                check("try " + fl + " " + out, tl.band() == wantBand && dyeOk, tl.band() + " " + tl.ending() + " best "
-                        + (tl.value().bestItem() == null ? null : tl.value().bestItem().key()));
+                boolean dyeOk = !out.equals("dye") || (f.master() && (f.number() == 5 || f.number() == 7)) == (tl.ending() == Ending.DYE);
+                String got = tl.band() + " " + tl.ending() + " best " + (tl.value().bestItem() == null ? null : tl.value().bestItem().key());
+                if (reachable) check("try " + fl + " " + out + " plays its band", tl.band() == wantBand && dyeOk, got);
+                else check("try " + fl + " " + out + " (not on this floor) plays a real item, not a jackpot",
+                        tl.value().bestItem() != null && tl.band() != Band.JACKPOT, got);
             }
         }
+        // The 180k Recombobulator Matej saw came from the old made-up filler prices: it is priced as itself now.
+        com.sbcs.anim.OssuaryTests.Test rec = com.sbcs.anim.OssuaryTests.make(DungeonFloor.fromLabel("F2"), ChestTier.OBSIDIAN,
+                "purple", pool, k -> k.equals("RECOMBOBULATOR_3000") ? 6_100_000L : null);
+        check("a recomb in a test is priced by the market", rec.chest().items().get(0).key().equals("RECOMBOBULATOR_3000")
+                && !rec.prices().containsKey("RECOMBOBULATOR_3000") || rec.prices().get("RECOMBOBULATOR_3000") == 5_000_000L,
+                rec.chest().items().get(0).key() + " " + rec.prices());
 
         System.out.printf("%n%d passed, %d failed%n", pass, fail);
         if (fail > 0) System.exit(1);

@@ -105,7 +105,7 @@ public final class OssuaryTimeline {
     public static final String[] DRAGON_NAMES = {"Power", "Flame", "Ice", "Soul", "Apex"};
 
     /** Each floor's jackpot items (the plan's), by price key. Normal and Master Mode share them; M7 adds its own. */
-    static final List<Set<String>> JACKPOTS = List.of(
+    public static final List<Set<String>> JACKPOTS = List.of(
             Set.of("BONZO_STAFF"),
             Set.of("RED_SCARF"),
             Set.of("ADAPTIVE_CHESTPLATE", "ADAPTIVE_LEGGINGS"),
