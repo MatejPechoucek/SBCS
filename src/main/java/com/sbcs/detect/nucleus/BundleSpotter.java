@@ -42,7 +42,8 @@ public final class BundleSpotter {
     public static final AABB NUCLEUS = new AABB(462, 63, 461, 564, 181, 565);
 
     private static final long ARMED_MS = 5 * 60_000;
-    private static final double SEARCH = 12;
+    /** Matej's spot is approximate ("around that"), so the search is wide; the closest candidate wins. */
+    private static final double SEARCH = 20;
 
     private static long armedAt;
     private static Vec3 spot;
@@ -162,8 +163,8 @@ public final class BundleSpotter {
         if (e instanceof net.minecraft.world.entity.decoration.ArmorStand stand) {
             double s = stand.isSmall() ? 0.5 : 1.0;
             Vec3 p = stand.position();
-            double r = 0.75 * s;
-            return new AABB(p.x - r, p.y, p.z - r, p.x + r, p.y + 2.0 * s, p.z + r);
+            double r = 1.1 * s;
+            return new AABB(p.x - r, p.y, p.z - r, p.x + r, p.y + 2.3 * s, p.z + r);
         }
         return e.getBoundingBox();
     }

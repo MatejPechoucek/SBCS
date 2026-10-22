@@ -26,9 +26,9 @@ public final class BundleCover {
     private BundleCover() {}
 
     /** How far the box stands off the bundle on every side, in blocks. */
-    private static final double MARGIN = 0.18;
+    private static final double MARGIN = 0.35;
     /** Small bundles (a dropped item) still get a box that reads as one. */
-    private static final double MIN_SIZE = 0.9;
+    private static final double MIN_SIZE = 1.2;
     private static final int BLACK = 0xFF000000;
 
     public static void register() {
