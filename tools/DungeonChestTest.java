@@ -188,11 +188,75 @@ public class DungeonChestTest {
         check("every floor has an Obsidian pool", List.of("F1", "F2", "F3", "F4", "F5", "F6", "F7", "M1", "M7").stream()
                 .allMatch(k -> !pool.pool(DungeonFloor.fromLabel(k), ChestTier.OBSIDIAN).isEmpty()), "");
         check("F7 Bedrock holds the handle", pool.pool(f7, ChestTier.BEDROCK).stream().anyMatch(e -> e.look().key().equals("NECRON_HANDLE")), "");
-        check("a Wood chest borrows a pool", !pool.pool(new DungeonFloor(2, false), ChestTier.WOOD).isEmpty(), "");
+        String[] floors = {"F1", "F2", "F3", "F4", "F5", "F6", "F7", "M1", "M2", "M3", "M4", "M5", "M6", "M7"};
+        for (String fl : floors) {
+            DungeonFloor f = DungeonFloor.fromLabel(fl);
+            for (ChestTier t : ChestTier.values()) {
+                if (t == ChestTier.BEDROCK && f.number() < 5) continue;
+                check(fl + " " + t.title + " has a pool of its own", pool.source(f, t) != null && !pool.pool(f, t).isEmpty(),
+                        String.valueOf(pool.source(f, t)));
+                Integer total = pool.total(f, t);
+                if (total != null) {
+                    // The wiki's total counts one more roll than the pool: the 1x Wither Essence (weight 1, or 4 on M4).
+                    int sum = pool.pool(f, t).stream().mapToInt(DungeonPool.Entry::weight).sum();
+                    check(fl + " " + t.title + " weighs what the wiki says", Math.abs(sum + 1 - total) <= Math.max(4, total / 100),
+                            "pool " + sum + " + 1 vs wiki " + total);
+                }
+            }
+        }
+        // Every row the wiki gave, item for item: its weight and added cost are in the pool.
+        int rows = 0, bad = 0;
+        StringBuilder why = new StringBuilder();
+        for (String fl : floors) {
+            Path csv = Path.of("tools/fixtures/dungeon_loot/" + fl + ".csv");
+            if (!Files.exists(csv)) continue;
+            DungeonFloor f = DungeonFloor.fromLabel(fl);
+            for (String line : Files.readAllLines(csv)) {
+                if (line.startsWith("#") || line.isBlank()) continue;
+                String[] r = line.split(",");
+                ChestTier t = ChestTier.fromTitle(Character.toUpperCase(r[0].charAt(0)) + r[0].substring(1));
+                String name = r[2];
+                String key = name.startsWith("EPIC ") || name.startsWith("LEGENDARY ")
+                        ? "PET_SPIRIT?Rarity=" + name.substring(0, name.indexOf(' ')) : PriceKeys.fromName(name, names);
+                rows++;
+                var hit = pool.pool(f, t).stream().filter(e -> e.look().key().equals(key)).findFirst();
+                if (hit.isEmpty() || hit.get().weight() != Integer.parseInt(r[5]) || hit.get().cost() != Long.parseLong(r[4])) {
+                    bad++;
+                    if (why.length() < 300) why.append(fl).append(' ').append(t).append(' ').append(name).append(" -> ").append(key).append("; ");
+                }
+            }
+        }
+        check("every wiki row is in its chest's pool (" + rows + " rows)", rows > 600 && bad == 0, bad + " bad: " + why);
+        DungeonFloor m7 = DungeonFloor.fromLabel("M7"), m5 = DungeonFloor.fromLabel("M5");
+        check("a Wood chest has its own pool, not Obsidian's", pool.pool(f7, ChestTier.WOOD).stream()
+                .noneMatch(e -> e.look().key().startsWith("WITHER_")) && pool.pool(f7, ChestTier.WOOD).size() == 5, "");
+        check("F7 Gold holds Wither Boots at 2.4M added", pool.pool(f7, ChestTier.GOLD).stream()
+                .anyMatch(e -> e.look().key().equals("WITHER_BOOTS") && e.cost() == 2_400_000), "");
+        check("F7 Obsidian has one Wisdom book (SkyOcean had two)", pool.pool(f7, ChestTier.OBSIDIAN).stream()
+                .filter(e -> e.look().key().equals("ENCHANTMENT_ULTIMATE_WISDOM_1")).count() == 1, "");
+        check("M7 Bedrock: the Claymore, weight 10, 148M added", pool.pool(m7, ChestTier.BEDROCK).stream()
+                .anyMatch(e -> e.look().key().equals("DARK_CLAYMORE") && e.weight() == 10 && e.cost() == 148_000_000), "");
+        check("the dyes are not pool rolls, but have looks", floorsHaveNo(pool, floors, "DYE_") && pool.look("DYE_NECRON") != null
+                && pool.look("DYE_LIVID") != null, "");
+        check("M5 Emerald's Warped Stone is AOTE_STONE", pool.pool(m5, ChestTier.EMERALD).stream()
+                .anyMatch(e -> e.look().key().equals("AOTE_STONE") && e.weight() == 1), "");
+        check("F7 Bedrock's cut tail comes from SkyOcean", pool.source(f7, ChestTier.BEDROCK).contains("SkyOcean")
+                && pool.pool(f7, ChestTier.BEDROCK).stream().anyMatch(e -> e.look().key().equals("PRECURSOR_GEAR")), "");
+        check("Bedrock below Floor V borrows Obsidian", pool.source(new DungeonFloor(3, false), ChestTier.BEDROCK) == null
+                && !pool.pool(new DungeonFloor(3, false), ChestTier.BEDROCK).isEmpty(), "");
         check("the Entrance borrows Floor I's", !pool.pool(new DungeonFloor(0, false), ChestTier.OBSIDIAN).isEmpty(), "");
         check("Thorn's boots are THORNS_BOOTS", pool.look("THORNS_BOOTS") != null, "");
 
         System.out.printf("%n%d passed, %d failed%n", pass, fail);
         if (fail > 0) System.exit(1);
+    }
+
+    static boolean floorsHaveNo(DungeonPool pool, String[] floors, String prefix) {
+        for (String fl : floors) {
+            for (ChestTier t : ChestTier.values()) {
+                if (pool.pool(DungeonFloor.fromLabel(fl), t).stream().anyMatch(e -> e.look().key().startsWith(prefix))) return false;
+            }
+        }
+        return true;
     }
 }

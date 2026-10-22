@@ -1,0 +1,72 @@
+# M3 reward chests, from https://hypixelskyblock.minecraft.wiki/w/The_Catacombs_-_Floor_III/Master_Mode_Loot (read 2026-10-22)
+# chest,base_cost,item,quality,added_cost,weight,first_roll_chance_percent
+wood,0,Necromancer's Brooch,110,0,2,1.6807
+wood,0,Enchanted Book (Bank I),100,0,20,16.8067
+wood,0,Enchanted Book (Ultimate Jerry I),100,0,1,0.8403
+wood,0,Enchanted Book (Feather Falling VI),80,0,35,29.4118
+wood,0,Enchanted Book (Infinite Quiver VI),80,0,30,25.2101
+wood,0,Enchanted Book (Rejuvenate I),80,0,30,25.2101
+gold,100000,Adaptive Boots,170,0,2,1.0526
+gold,100000,Hot Potato Book,160,0,5,2.6316
+gold,100000,Enchanted Book (Combo I),120,0,16,8.4211
+gold,100000,Enchanted Book (No Pain No Gain I),120,0,16,8.4211
+gold,100000,Necromancer's Brooch,110,0,14,7.3684
+gold,100000,Enchanted Book (Ultimate Wise I),100,0,20,10.5263
+gold,100000,Enchanted Book (Bank I),100,0,15,7.8947
+gold,100000,Enchanted Book (Wisdom I),100,0,15,7.8947
+gold,100000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5263
+gold,100000,Enchanted Book (Rejuvenate I),80,0,40,21.0526
+gold,100000,Enchanted Book (Feather Falling VI),80,0,25,13.1579
+gold,100000,Enchanted Book (Infinite Quiver VI),80,0,20,10.5263
+diamond,250000,Adaptive Helmet,185,250000,2,1.2821
+diamond,250000,Adaptive Boots,170,0,3,1.9231
+diamond,250000,Hot Potato Book,160,0,7,4.4872
+diamond,250000,Suspicious Vial,145,0,5,3.2051
+diamond,250000,Enchanted Book (Combo I),120,0,14,8.9744
+diamond,250000,Enchanted Book (No Pain No Gain I),120,0,14,8.9744
+diamond,250000,Necromancer's Brooch,110,0,14,8.9744
+diamond,250000,Enchanted Book (Wisdom I),100,0,20,12.8205
+diamond,250000,Enchanted Book (Ultimate Wise I),100,0,15,9.6154
+diamond,250000,Enchanted Book (Bank I),100,0,5,3.2051
+diamond,250000,Enchanted Book (Ultimate Jerry I),100,0,1,0.641
+diamond,250000,Enchanted Book (Rejuvenate I),80,0,30,19.2308
+diamond,250000,Enchanted Book (Feather Falling VI),80,0,15,9.6154
+diamond,250000,Enchanted Book (Infinite Quiver VI),80,0,10,6.4103
+emerald,500000,Adaptive Chestplate,260,1500000,1,0.7299
+emerald,500000,Fuming Potato Book,220,500000,1,0.7299
+emerald,500000,Adaptive Leggings,210,500000,1,0.7299
+emerald,500000,Adaptive Helmet,185,0,2,1.4599
+emerald,500000,Adaptive Boots,170,0,2,1.4599
+emerald,500000,Hot Potato Book,160,0,7,5.1095
+emerald,500000,Suspicious Vial,145,0,5,3.6496
+emerald,500000,Enchanted Book (Rejuvenate II),130,0,10,7.2993
+emerald,500000,Enchanted Book (Combo I),120,0,10,7.2993
+emerald,500000,Enchanted Book (No Pain No Gain I),120,0,10,7.2993
+emerald,500000,Necromancer's Brooch,110,0,5,3.6496
+emerald,500000,Enchanted Book (Bank I),100,0,18,13.1387
+emerald,500000,Enchanted Book (Last Stand I),100,0,10,7.2993
+emerald,500000,Enchanted Book (Ultimate Wise I),100,0,10,7.2993
+emerald,500000,Enchanted Book (Wisdom I),100,0,10,7.2993
+emerald,500000,Enchanted Book (Ultimate Jerry II),100,0,1,0.7299
+emerald,500000,Enchanted Book (Rejuvenate I),80,0,18,13.1387
+emerald,500000,Enchanted Book (Feather Falling VI),80,0,10,7.2993
+emerald,500000,Enchanted Book (Infinite Quiver VI),80,0,5,3.6496
+obsidian,1000000,First Master Star,280,4000000,2,2.5316
+obsidian,1000000,Adaptive Chestplate,260,1000000,1,1.2658
+obsidian,1000000,Master Skull - Tier 3,250,1000000,4,5.0633
+obsidian,1000000,Recombobulator 3000,250,5000000,4,5.0633
+obsidian,1000000,Fuming Potato Book,220,500000,3,3.7975
+obsidian,1000000,Adaptive Leggings,210,0,1,1.2658
+obsidian,1000000,Adaptive Helmet,185,0,2,2.5316
+obsidian,1000000,Adaptive Boots,170,0,2,2.5316
+obsidian,1000000,Hot Potato Book,160,0,5,6.3291
+obsidian,1000000,Suspicious Vial,145,0,5,6.3291
+obsidian,1000000,Enchanted Book (Combo I),120,0,5,6.3291
+obsidian,1000000,Enchanted Book (No Pain No Gain I),120,0,5,6.3291
+obsidian,1000000,Necromancer's Brooch,110,0,4,5.0633
+obsidian,1000000,Enchanted Book (Last Stand I),100,0,8,10.1266
+obsidian,1000000,Enchanted Book (Rejuvenate II),100,0,8,10.1266
+obsidian,1000000,Enchanted Book (Bank II),100,0,6,7.5949
+obsidian,1000000,Enchanted Book (Ultimate Wise I),100,0,6,7.5949
+obsidian,1000000,Enchanted Book (Wisdom I),100,0,6,7.5949
+obsidian,1000000,Enchanted Book (Ultimate Jerry II),100,0,1,1.2658

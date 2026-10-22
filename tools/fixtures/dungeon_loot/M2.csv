@@ -1,0 +1,59 @@
+# M2 reward chests, from https://hypixelskyblock.minecraft.wiki/w/The_Catacombs_-_Floor_II/Master_Mode_Loot (read 2026-10-22)
+# chest,base_cost,item,quality,added_cost,weight,first_roll_chance_percent
+wood,0,Necromancer's Brooch,110,0,1,0.7812
+wood,0,Enchanted Book (Bank I),100,0,20,15.625
+wood,0,Enchanted Book (Ultimate Jerry I),100,0,1,0.7812
+wood,0,Enchanted Book (Feather Falling VI),80,0,40,31.25
+wood,0,Enchanted Book (Infinite Quiver VI),80,0,35,27.3438
+wood,0,Enchanted Book (Rejuvenate I),80,0,30,23.4375
+gold,50000,Scarf's Studies,170,0,2,1.0309
+gold,50000,Hot Potato Book,160,0,5,2.5773
+gold,50000,Enchanted Book (Combo I),120,0,18,9.2784
+gold,50000,Enchanted Book (No Pain No Gain I),120,0,18,9.2784
+gold,50000,Necromancer's Brooch,110,0,14,7.2165
+gold,50000,Enchanted Book (Ultimate Wise I),100,0,20,10.3093
+gold,50000,Enchanted Book (Bank I),100,0,15,7.732
+gold,50000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5155
+gold,50000,Enchanted Book (Rejuvenate I),80,0,45,23.1959
+gold,50000,Enchanted Book (Feather Falling VI),80,0,30,15.4639
+gold,50000,Enchanted Book (Infinite Quiver VI),80,0,25,12.8866
+diamond,100000,Red Scarf,210,0,1,0.6369
+diamond,100000,Scarf's Studies,170,0,3,1.9108
+diamond,100000,Hot Potato Book,160,0,7,4.4586
+diamond,100000,Enchanted Book (Combo I),120,0,15,9.5541
+diamond,100000,Enchanted Book (No Pain No Gain I),120,0,15,9.5541
+diamond,100000,Necromancer's Brooch,110,0,14,8.9172
+diamond,100000,Enchanted Book (Ultimate Wise I),100,0,20,12.7389
+diamond,100000,Enchanted Book (Bank I),100,0,10,6.3694
+diamond,100000,Enchanted Book (Ultimate Jerry I),100,0,1,0.6369
+diamond,100000,Enchanted Book (Rejuvenate I),80,0,35,22.293
+diamond,100000,Enchanted Book (Feather Falling VI),80,0,20,12.7389
+diamond,100000,Enchanted Book (Infinite Quiver VI),80,0,15,9.5541
+emerald,200000,Adaptive Blade,250,1000000,1,0.9346
+emerald,200000,Fuming Potato Book,220,750000,2,1.8692
+emerald,200000,Red Scarf,210,0,1,0.9346
+emerald,200000,Scarf's Studies,170,0,4,3.7383
+emerald,200000,Hot Potato Book,160,0,7,6.5421
+emerald,200000,Enchanted Book (Combo I),120,0,10,9.3458
+emerald,200000,Enchanted Book (No Pain No Gain I),120,0,10,9.3458
+emerald,200000,Necromancer's Brooch,110,0,10,9.3458
+emerald,200000,Enchanted Book (Ultimate Wise I),100,0,20,18.6916
+emerald,200000,Enchanted Book (Bank I),100,0,5,4.6729
+emerald,200000,Enchanted Book (Ultimate Jerry I),100,0,1,0.9346
+emerald,200000,Enchanted Book (Rejuvenate I),80,0,20,18.6916
+emerald,200000,Enchanted Book (Feather Falling VI),80,0,10,9.3458
+emerald,200000,Enchanted Book (Infinite Quiver VI),80,0,5,4.6729
+obsidian,500000,Master Skull - Tier 2,250,0,3,4.8387
+obsidian,500000,Recombobulator 3000,250,5000000,3,4.8387
+obsidian,500000,Adaptive Blade,250,1000000,2,3.2258
+obsidian,500000,Adaptive Belt,240,0,3,4.8387
+obsidian,500000,Fuming Potato Book,220,750000,3,4.8387
+obsidian,500000,Red Scarf,210,0,1,1.6129
+obsidian,500000,Scarf's Studies,170,0,4,6.4516
+obsidian,500000,Hot Potato Book,160,0,5,8.0645
+obsidian,500000,Enchanted Book (Combo I),120,0,5,8.0645
+obsidian,500000,Enchanted Book (No Pain No Gain I),120,0,5,8.0645
+obsidian,500000,Necromancer's Brooch,110,0,5,8.0645
+obsidian,500000,Enchanted Book (Ultimate Wise I),100,0,10,16.129
+obsidian,500000,Enchanted Book (Bank I),100,0,2,3.2258
+obsidian,500000,Enchanted Book (Rejuvenate I),80,0,10,16.129
