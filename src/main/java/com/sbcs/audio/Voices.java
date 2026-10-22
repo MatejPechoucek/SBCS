@@ -2300,6 +2300,20 @@ public final class Voices {
         };
     }
 
+    /**
+     * Something inside knocking the door (a Flawless gem), {@code i} 0..2: a body thud and the steel ringing back,
+     * heavier and lower each time.
+     */
+    public static Voice[] vaultKnock(int i, long seed) {
+        float amp = 0.26f + 0.08f * i, low = 70f - 8f * i;
+        return new Voice[]{
+                tone(low, low * 0.7f, 0.35f, amp, 0.002f, new float[]{1f, 0.5f, 0.2f}, 0.5f),
+                noise(260f, 0.9f, 0.18f, amp * 0.6f, 0.001f, 0.4f, seed),
+                after(0.01f, tone(311f - 20f * i, 305f - 20f * i, 0.7f, 0.05f + 0.015f * i, 0.002f,
+                        new float[]{1f, 0f, 0.4f, 0f, 0.2f}, 0.9f)),
+        };
+    }
+
     /** A hinge creaking: a squeal sliding down, rough. */
     public static Voice[] vaultCreak(float seconds, float fromHz, float toHz, long seed) {
         java.util.List<Voice> out = new java.util.ArrayList<>();

@@ -1508,7 +1508,18 @@ or vault". Never call anything "Butcher": the mod is SBCS.
 - `tools/VaultTest` (164: frame and sound honesty for every prize on five seeds, the tells, the clocks, the Meltdown's
   order), `tools/VaultPreview` (ChopPreview's canvas; `-Dvanilla` a folder of the block textures plus quartz and
   gold_ingot). Menu card "Crystal Nucleus - The Vault", stats key "nucleus", `/sbcs test nucleus <word>`.
-- Next: the first real records (`nucleus_bundle`, `nucleus_haul`) - the bundle entity, and whether the cover sits right.
+- **The bundle is a dropped item** ("Player Head", Matej's first run, 2026-10-22): it lands about 515 106 534 and is
+  only seen once the player walks up to it. `BundleSpotter.DROP` is that spot, searched 20 blocks round, closest
+  candidate first; an armour stand's cover is where its held head would be drawn, not its empty box.
+- **Polish (2026-10-22, Matej: the amethyst crystal was clipped by the locks; "more pause for the good drops")**: the
+  sockets are on a ring of 5 (`SOCKET_R`; at 6 the upper-left one sat under the bolts), the bolts are slimmer and sit
+  across the door's edge (`BOLT_X`, `BOLT_HX`, `BOLT_TRAVEL`), the crystals fly in from the front (`flightPos`) with a
+  trail and are drawn after everything on the door, and each socket has a brass rim and takes its crystal's colour.
+  Every win holds `HOLD` 450 ms after the reveal before anything moves: a rare roll unlatches a crack with light round
+  the edge (`seam`) and swings at `SWING`; a Flawless gem knocks three times from inside (`KNOCKS`, `knock`,
+  `Voices.vaultKnock`) and blows at `BLOW`; the Alloy pours every 420 ms, holds white hot for over a second, trembling
+  harder, and melts at `MELT`; the Dye's frozen world has four heartbeats, the last followed by silence (`THAW`).
+- Next: whether the cover sits right on the next run.
 - **Compiling offline without Gradle**: the cloud cannot reach Mojang or Fabric, but the designer's Modrinth install has
   the **unobfuscated** 26.2 client jar (`ModrinthApp/meta/versions/26.2-0.19.5/26.2-0.19.5.jar`) and fabric-api's nested
   jars; staged with their libraries (class versions rewritten to 65) the whole mod compiles with `javac`.

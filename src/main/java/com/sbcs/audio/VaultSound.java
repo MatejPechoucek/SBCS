@@ -64,14 +64,24 @@ public final class VaultSound {
                 return sorted(out);
             }
             case OPEN -> {
-                out.add(new Cue(R, true, Voices.vaultOpen(seed + 100)));
-                out.add(new Cue(R + 80, false, Voices.vaultCreak(0.7f, 420f, 300f, seed + 110)));
-                out.add(new Cue(R + 300, false, Voices.hellionRise((arrive - R - 300) / 1000f)));
+                // The dial lands with a clunk; a held breath; the latch gives; then the door swings.
+                long sw = VaultTimeline.SWING;
+                out.add(new Cue(R, true, Voices.vaultBolt(seed + 100)));
+                out.add(new Cue(R + VaultTimeline.HOLD, false, Voices.vaultCreak(0.22f, 520f, 200f, seed + 105)));
+                out.add(new Cue(sw, false, Voices.vaultOpen(seed + 108)));
+                out.add(new Cue(sw + 80, false, Voices.vaultCreak(0.7f, 420f, 300f, seed + 110)));
+                out.add(new Cue(sw + 200, false, Voices.hellionRise((arrive - sw - 200) / 1000f)));
                 out.add(new Cue(arrive, false, Voices.hellionArrive(false, seed + 120)));
             }
             case BLOWN -> {
                 long b = tl.blowAt();
                 out.add(new Cue(R, true, Voices.vaultBolt(seed + 100)));
+                // Three knocks from inside, each heavier, and the strain building under them.
+                long[] knocks = VaultTimeline.KNOCKS;
+                for (int i = 0; i < knocks.length; i++) {
+                    out.add(new Cue(knocks[i], false, Voices.vaultKnock(i, seed + 102 + i)));
+                }
+                out.add(new Cue(knocks[0], false, Voices.vaultStrain((b - knocks[0]) / 1000f)));
                 out.add(new Cue(b, true, Voices.eruptionBoom(4, 0.9f, seed + 110)));
                 out.add(new Cue(b + 60, false, Voices.seraphShatter(seed + 115)));
                 out.add(new Cue(b + 200, false, Voices.hellionRise((arrive - b - 200) / 1000f)));
@@ -81,7 +91,7 @@ public final class VaultSound {
             }
             case ALLOY -> {
                 // The Meltdown: each crystal pours into the dial, the door roars hotter, then melts.
-                out.add(new Cue(R, true, Voices.vaultOpen(seed + 100)));
+                out.add(new Cue(R, true, Voices.vaultBolt(seed + 100)));
                 for (int k = 0; k < 5; k++) out.add(new Cue(VaultTimeline.POURS[k], false, Voices.vaultPour(k)));
                 long h0 = VaultTimeline.POURS[0];
                 out.add(new Cue(h0, false, Voices.vaultHeat((VaultTimeline.MELT - h0) / 1000f, seed + 110)));

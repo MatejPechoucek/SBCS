@@ -128,6 +128,14 @@ public final class VaultTest {
         check("the door heats steadily", m.heat(VaultTimeline.POURS[0]) <= m.heat(VaultTimeline.POURS[2]) && m.heat(VaultTimeline.POURS[2]) < m.heat(VaultTimeline.MELT));
         check("the door is white hot when it melts", m.heat(VaultTimeline.MELT) >= 0.99f);
         check("it melts away entirely", m.melt(VaultTimeline.POOLED) >= 0.99f);
+        check("the white-hot hold lasts a second or more", VaultTimeline.MELT - VaultTimeline.POURS[4] - 400 >= 1000);
+        check("every win holds its breath after the reveal", VaultTimeline.HOLD >= 400
+                && VaultTimeline.SWING > R + VaultTimeline.HOLD && VaultTimeline.KNOCKS[0] >= R + VaultTimeline.HOLD
+                && VaultTimeline.POURS[0] >= R + VaultTimeline.HOLD);
+        VaultTimeline jb = new VaultTimeline(Prize.test("ruby"), 1);
+        check("three knocks, then the door goes", jb.knocked(VaultTimeline.BLOW - 1) == 3 && jb.blowAt() == VaultTimeline.BLOW
+                && jb.doorFlight(VaultTimeline.BLOW - 1) < 0f && jb.doorFlight(VaultTimeline.BLOW + 100) > 0f);
+        check("no knocks on any other ending", m.knock(VaultTimeline.KNOCKS[1] + 10) == 0f && d.knocked(VaultTimeline.THAW) == 0);
         check("the alloy rises only once it has melted", m.itemRise(VaultTimeline.MELT) == 0f && m.arrive() > VaultTimeline.POOLED);
         check("nothing heats on any other ending", new VaultTimeline(Prize.test("ruby"), 1).heat(VaultTimeline.MELT) == 0f);
 

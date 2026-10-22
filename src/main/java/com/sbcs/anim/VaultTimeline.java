@@ -178,15 +178,26 @@ public final class VaultTimeline {
 
     /** A bust is over by this - short, so the player is back to the next run. */
     public static final long BUST_END = REVEAL + 1900;
+    /**
+     * A win's held breath: the dial lands with a clunk and nothing moves for this long (Matej, 2026-10-22: "hold
+     * some more pause for the good drops"). After the reveal, so it tells nothing the dial has not already said.
+     */
+    public static final long HOLD = 450;
+    /** A rare roll: the door unlatches a crack at the end of the hold, light round its edge, then swings here. */
+    public static final long SWING = REVEAL + HOLD + 650;
+    /** A Flawless gem: something inside knocks the door three times, harder each time, then it is blown off. */
+    public static final long[] KNOCKS = {REVEAL + HOLD, REVEAL + HOLD + 420, REVEAL + HOLD + 760};
+    public static final long BLOW = REVEAL + HOLD + 1150;
     /** The Jade Dye: everything stops this long after the reveal... */
     public static final long FREEZE = REVEAL + 260;
-    /** ...and the jade breaks it here, after three heartbeats. */
-    public static final long THAW = REVEAL + 2600;
-    public static final long[] HEARTS = {FREEZE + 450, FREEZE + 1100, FREEZE + 1750};
+    /** ...and the jade breaks it here, after four heartbeats, the last one followed by nothing at all. */
+    public static final long THAW = REVEAL + 3500;
+    public static final long[] HEARTS = {FREEZE + 500, FREEZE + 1150, FREEZE + 1750, FREEZE + 2350};
     /** Divan's Alloy: each crystal pours its light into the dial at these times... */
-    public static final long[] POURS = {REVEAL + 300, REVEAL + 560, REVEAL + 820, REVEAL + 1080, REVEAL + 1340};
-    /** ...the door heats from steel to white gold until it melts down here... */
-    public static final long MELT = REVEAL + 2500;
+    public static final long[] POURS = {REVEAL + HOLD, REVEAL + HOLD + 420, REVEAL + HOLD + 840, REVEAL + HOLD + 1260,
+            REVEAL + HOLD + 1680};
+    /** ...the door heats from steel to white gold, holds there white hot, and melts down here... */
+    public static final long MELT = REVEAL + HOLD + 3200;
     /** ...and is a pool of molten gold by this. */
     public static final long POOLED = MELT + 900;
     public static final long FADE = 400;
@@ -218,8 +229,8 @@ public final class VaultTimeline {
     public long arrive() {
         return switch (prize.ending) {
             case BUST -> Long.MAX_VALUE / 4;
-            case OPEN -> REVEAL + 1400;
-            case BLOWN -> REVEAL + 1500;
+            case OPEN -> SWING + 1300;
+            case BLOWN -> BLOW + 1400;
             case ALLOY -> MELT + 1700;
             case DYE -> THAW + 1500;
         };
@@ -228,7 +239,7 @@ public final class VaultTimeline {
     /** When the door is blown off: the jackpot's and the dye's; never for the others. */
     public long blowAt() {
         return switch (prize.ending) {
-            case BLOWN -> REVEAL + 140;
+            case BLOWN -> BLOW;
             case DYE -> THAW;
             default -> Long.MAX_VALUE / 4;
         };
@@ -350,12 +361,31 @@ public final class VaultTimeline {
         return switch (prize.ending) {
             // A creak open a crack, and a settle back a little.
             case BUST -> 0.24f * ease((p - REVEAL - 150) / 950f) - 0.03f * ease((p - REVEAL - 1100) / 300f);
-            case OPEN -> 1.75f * backOut((p - REVEAL - 80) / 820f);
-            // Pushed out a crack as the bolts give; blown off after (doorFlight).
-            case BLOWN -> 0.08f * ease((p - REVEAL) / 140f);
+            // Unlatched a crack, held there with light round its edge, then swung wide.
+            case OPEN -> 0.07f * ease((p - REVEAL - HOLD) / 220f) + 1.68f * backOut((p - SWING) / 820f);
+            // Pushed out further on every knock; blown off after (doorFlight).
+            case BLOWN -> 0.025f * knocked(t) + 0.03f * knock(t);
             case ALLOY -> 0f;
             case DYE -> 0.11f * ease((p - REVEAL) / 260f);
         };
+    }
+
+    /** How many of a Flawless gem's knocks have landed, 0..3. */
+    public int knocked(long t) {
+        if (prize.ending != Ending.BLOWN) return 0;
+        int n = 0;
+        for (long k : KNOCKS) if (t >= k) n++;
+        return n;
+    }
+
+    /** A knock's jolt, 1 as it lands and gone in ~150 ms, larger each time; 0 for any other ending. */
+    public float knock(long t) {
+        if (prize.ending != Ending.BLOWN) return 0f;
+        float best = 0f;
+        for (int i = 0; i < KNOCKS.length; i++) {
+            if (t >= KNOCKS[i]) best = Math.max(best, (0.6f + 0.2f * i) * (float) Math.exp(-(t - KNOCKS[i]) / 110.0));
+        }
+        return t >= BLOW ? 0f : best;
     }
 
     /** Divan's Alloy: crystal {@code k}'s light poured into the dial, 0..1 (the crystal drained as it goes). */
@@ -367,7 +397,8 @@ public final class VaultTimeline {
     /** The door's heat, 0 (steel) .. 1 (white gold), Divan's Alloy only. */
     public float heat(long t) {
         if (prize.ending != Ending.ALLOY || t < POURS[0]) return 0f;
-        float x = (t - POURS[0]) / (float) (MELT - POURS[0]);
+        // White hot by the last pour's end; held there until the melt.
+        float x = (t - POURS[0]) / (float) (POURS[4] + 400 - POURS[0]);
         return Math.min(1f, x * x * 0.85f + 0.15f * x);
     }
 
@@ -391,8 +422,8 @@ public final class VaultTimeline {
         float k = ease((p - REVEAL) / 400f);
         return switch (prize.ending) {
             case BUST -> 0.12f * k;
-            case OPEN -> k;
-            case BLOWN -> ease((p - REVEAL - 80) / 200f);
+            case OPEN -> 0.35f * ease((p - REVEAL - HOLD) / 220f) + 0.65f * ease((p - SWING) / 400f);
+            case BLOWN -> t < BLOW ? 0.12f * knocked(t) + 0.3f * knock(t) : ease((p - BLOW + 60) / 200f);
             case ALLOY -> 0.6f * heat(t) + 0.4f * melt(t);
             case DYE -> t < THAW ? 0.35f + 0.4f * heart(t) : 1f;
         };
@@ -401,7 +432,12 @@ public final class VaultTimeline {
     /** The drop rising out of the vault to its showcase, 0..1. */
     public float itemRise(long t) {
         if (!prize.win()) return 0f;
-        long from = prize.ending == Ending.DYE ? THAW + 150 : prize.ending == Ending.ALLOY ? MELT + 500 : REVEAL + 300;
+        long from = switch (prize.ending) {
+            case DYE -> THAW + 150;
+            case ALLOY -> MELT + 500;
+            case BLOWN -> BLOW + 150;
+            default -> SWING + 200;
+        };
         if (t < from) return 0f;
         return backOut(Math.min(1f, (t - from) / (float) (arrive() - from)));
     }
@@ -475,8 +511,11 @@ public final class VaultTimeline {
         float s = 0.004f * strain(t);
         long b = blowAt();
         if (t >= b && t < b + 450) s += 0.016f * (1f - (t - b) / 450f);
+        s += 0.007f * knock(t);
         if (prize.ending == Ending.ALLOY) {
-            s += 0.005f * heat(t) * (t < MELT ? 1f : 0f);
+            // The white-hot hold trembles harder the longer it lasts.
+            float held = t > POURS[4] + 400 && t < MELT ? (t - POURS[4] - 400) / (float) (MELT - POURS[4] - 400) : 0f;
+            s += (0.005f * heat(t) + 0.006f * held) * (t < MELT ? 1f : 0f);
             if (t >= MELT && t < MELT + 600) s += 0.018f * (1f - (t - MELT) / 600f);
         }
         return s;

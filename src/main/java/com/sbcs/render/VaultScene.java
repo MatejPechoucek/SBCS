@@ -44,7 +44,13 @@ public final class VaultScene {
     static final float BODY_X = 10.5f, BODY_Y = 11.5f, BODY_Z = 8f;
     static final float DOOR_X = 8.6f, DOOR_Y = 9.6f, DOOR_Z = 1.0f;
     static final float RECESS = 3.6f;
-    static final float SOCKET_R = 6.0f;
+    /**
+     * The sockets' ring. At 6 the upper-left socket sat under the bolts (Matej, 2026-10-22: "the locks clip the
+     * crystal"); at 5 it clears them even with the bolts drawn back.
+     */
+    static final float SOCKET_R = 5.0f;
+    /** The bolts: half their length, where they sit across the door's free edge into the frame, how far they draw back. */
+    static final float BOLT_HX = 1.25f, BOLT_X = -DOOR_X - 0.25f, BOLT_TRAVEL = 1.5f;
     static final float[] BOLT_Y = {7.2f, 3.6f, 0f, -3.6f, -7.2f};
 
     static final int[] FULL = {0, 0, 16, 16};
@@ -184,6 +190,8 @@ public final class VaultScene {
         float lx = -DOOR_X, lz = DOOR_Z;
         float cb = (float) Math.cos(ay), sb = (float) Math.sin(ay);
         float cx = DOOR_X + lx * cb + lz * sb + jx, cyw = jy, cz = BODY_Z - lx * sb + lz * cb;
+        // A Flawless gem's knocks from inside: the door jumps out at the camera.
+        cz += 0.55f * tl.knock(t);
         doorAlpha = 1f;
         doorHx = DOOR_X;
         doorHy = DOOR_Y;
@@ -271,9 +279,15 @@ public final class VaultScene {
         for (int k = 0; k < 5; k++) {
             float[] p = socket(k);
             float[] s = onDoor(p[0], p[1], front + 0.2f);
-            float[] g = greyed(0.22f, 0.22f, 0.26f);
-            ChopScene.boxAxes(s[0], s[1], s[2], DX, DY, DZ, 1.15f, 1.6f, 0.2f, ChopScene.all(TEX_DARK), FULL6,
-                    g[0], g[1], g[2], 0f, a, c);
+            // A brass rim, then the dark plate, which takes a little of its crystal's colour once it is seated.
+            float[] rim = greyed(0.62f, 0.5f, 0.3f);
+            ChopScene.boxAxes(s[0], s[1], s[2], DX, DY, DZ, 1.4f, 1.85f, 0.12f, ChopScene.all(TEX_STEEL), FULL6,
+                    rim[0], rim[1], rim[2], 0f, a, c);
+            float seated = VaultTimeline.fly(k, t) >= 1f ? 0.35f : 0f;
+            float[] g = greyed(mix3(new float[]{0.22f, 0.22f, 0.26f}, rgbF(VaultTimeline.CRYSTAL_RGB[k]), seated));
+            float[] sp = onDoor(p[0], p[1], front + 0.3f);
+            ChopScene.boxAxes(sp[0], sp[1], sp[2], DX, DY, DZ, 1.1f, 1.55f, 0.2f, ChopScene.all(TEX_DARK), FULL6,
+                    g[0], g[1], g[2], 0.15f * seated, a, c);
         }
         // The crystals that have reached their sockets (the ones still flying are drawn by crystals()).
         for (int k = 0; k < 5; k++) {
@@ -282,7 +296,6 @@ public final class VaultScene {
             float[] s = onDoor(p[0], p[1], front + 0.4f + 0.6f);
             crystal(c, tl, t, k, s, DX, DY, DZ, a);
         }
-        if (t < VaultTimeline.SOCKETS[4] + 400) crystalsFlying(c, tl, t);
 
         // The dial, turning on the door's face, in the colour it is showing.
         float d = VaultTimeline.dial(t);
@@ -316,10 +329,12 @@ public final class VaultScene {
         for (int k = 0; k < 5; k++) {
             float open = VaultTimeline.bolt(k, t);
             float rattle = VaultTimeline.strain(t) * 0.12f * (float) Math.sin(t * 0.7 + k * 1.9);
-            float[] b = onDoor(-DOOR_X + 0.4f + 2.3f * open + rattle, BOLT_Y[k], front + 0.42f);
-            ChopScene.boxAxes(b[0], b[1], b[2], DX, DY, DZ, 1.7f, 0.55f, 0.42f, ChopScene.all(TEX_STEEL), FULL6,
+            float[] b = onDoor(BOLT_X + BOLT_TRAVEL * open + rattle, BOLT_Y[k], front + 0.42f);
+            ChopScene.boxAxes(b[0], b[1], b[2], DX, DY, DZ, BOLT_HX, 0.5f, 0.42f, ChopScene.all(TEX_STEEL), FULL6,
                     bc[0], bc[1], bc[2], 0.6f * heat, a, c);
         }
+        // Last, so a crystal on its way in passes over everything on the door, never through it.
+        if (t < VaultTimeline.SOCKETS[4] + 400) crystalsFlying(c, tl, t);
     }
 
     /** Socket {@code k}'s place on the door's face, round the dial from the top. */
@@ -355,17 +370,28 @@ public final class VaultScene {
         for (int k = 0; k < 5; k++) {
             float f = VaultTimeline.fly(k, t);
             if (f < 0f || f >= 1f) continue;
-            float[] p = socket(k);
-            float[] end = onDoor(p[0], p[1], doorHz + 1.0f);
-            double phi = Math.toRadians(90 - 72 * k);
-            float sx = end[0] + (float) Math.cos(phi) * 34f, sy = end[1] + (float) Math.sin(phi) * 26f + 6f, sz = end[2] + 22f;
-            float e = ease(f);
-            float x = sx + (end[0] - sx) * e, y = sy + (end[1] - sy) * e + 5f * (float) Math.sin(f * Math.PI), z = sz + (end[2] - sz) * e;
-            float spin = (1f - e) * 7f;
+            float[] q = flightPos(k, f);
+            float x = q[0], y = q[1], z = q[2];
+            float spin = (1f - ease(f)) * 7f;
             float cs = (float) Math.cos(spin), sn = (float) Math.sin(spin);
             float[] X = {cs, 0f, -sn}, Y = {0f, 1f, 0f}, Z = {sn, 0f, cs};
             crystal(c, tl, t, k, new float[]{x, y, z}, X, Y, Z, Math.min(1f, f * 4f));
         }
+    }
+
+    /**
+     * Where crystal {@code k} is, {@code f} of the way in: from out in front and a little outward of its socket,
+     * coming in square to the door at the end - swept in from the side, it crossed the bolts and the other sockets.
+     */
+    static float[] flightPos(int k, float f) {
+        float[] p = socket(k);
+        float[] end = onDoor(p[0], p[1], doorHz + 1.0f);
+        double phi = Math.toRadians(90 - 72 * k);
+        float sx = end[0] + (float) Math.cos(phi) * 16f, sy = end[1] + (float) Math.sin(phi) * 11f + 4f, sz = end[2] + 30f;
+        float e = ease(f);
+        float side = 1f - (1f - e) * (1f - e) * (1f - e);
+        return new float[]{sx + (end[0] - sx) * side, sy + (end[1] - sy) * side + 3f * (float) Math.sin(f * Math.PI),
+                sz + (end[2] - sz) * e};
     }
 
     /** The frame round the opening: four strips on the body's front, over the recess's edges. */
@@ -418,7 +444,7 @@ public final class VaultScene {
         for (int k = 0; k < 5; k++) {
             long since = t - VaultTimeline.SOCKETS[k] - VaultTimeline.BOLT_DELAY;
             if (since < 0 || since > 260) continue;
-            float[] b = onDoor(-DOOR_X - 1.2f, BOLT_Y[k], doorHz + 0.4f);
+            float[] b = onDoor(BOLT_X - BOLT_HX, BOLT_Y[k], doorHz + 0.4f);
             ChopScene.project(b[0], b[1], b[2]);
             float k01 = since / 260f;
             for (int i = 0; i < 4; i++) {
@@ -427,9 +453,25 @@ public final class VaultScene {
                         ChopScene.alpha(a * (1f - k01)) | (i % 2 == 0 ? 0xFFE7A0 : 0xFFB040));
             }
         }
+        trails(layer, tl, t);
         switch (tl.ending()) {
             case BUST -> dust(layer, tl, t, r);
-            case BLOWN -> blast(layer, tl, t, r, false);
+            case OPEN -> {
+                // The held crack: the vault's light round the door's free edge until it swings.
+                long from = VaultTimeline.REVEAL + VaultTimeline.HOLD;
+                if (t >= from && t < VaultTimeline.SWING + 250) {
+                    float on = ease((t - from) / 220f) * (1f - ease((t - VaultTimeline.SWING) / 250f));
+                    seam(c, layer, t, on, 0f, tl.prize().light(), 0xFFFFFF);
+                }
+            }
+            case BLOWN -> {
+                // Each knock forces more light out round the door, until it goes.
+                if (tl.knocked(t) > 0 && t < VaultTimeline.BLOW) {
+                    float on = 0.35f + 0.2f * tl.knocked(t);
+                    seam(c, layer, t, on, tl.knock(t), tl.prize().light(), 0xFFFFFF);
+                }
+                blast(layer, tl, t, r, false);
+            }
             case ALLOY -> meltdown(layer, tl, t, r, w, h);
             case DYE -> {
                 jadeSeam(c, layer, tl, t);
@@ -496,21 +538,55 @@ public final class VaultScene {
     static void jadeSeam(ChopScene.Canvas c, CrystalVeins.Fill layer, VaultTimeline tl, long t) {
         if (t < VaultTimeline.REVEAL || t >= VaultTimeline.THAW + 200) return;
         float on = ease((t - VaultTimeline.REVEAL) / 250f) * (1f - ease((t - VaultTimeline.THAW) / 200f));
-        float beat = tl.heart(t);
+        seam(c, layer, t, on, tl.heart(t), 0x55FF55, 0xA8FFB0);
+    }
+
+    /**
+     * Light escaping round a door that is not quite shut: squares down its free edge, and along its top and bottom
+     * once it swells ({@code beat}, 0..1). Never greyed: in the Dye's stopped world it is the only colour left.
+     */
+    static void seam(ChopScene.Canvas c, CrystalVeins.Fill layer, long t, float on, float beat, int rgb, int pale) {
         float a = ChopScene.sceneAlpha * on * (0.55f + 0.45f * beat);
-        // Down the free edge, where it has opened a crack.
+        int dark = ChopScene.mix(rgb, 0x000000, 0.35f);
         for (float y = -DOOR_Y; y <= DOOR_Y; y += 0.8f) {
             float[] p = onDoor(-DOOR_X - 0.15f, y, 0f);
             ChopScene.project(p[0], p[1], p[2]);
             float wob = (float) Math.sin(y * 1.7f + t / 140.0) * 0.5f + 0.5f;
-            square(layer, ChopScene.P[0], ChopScene.P[1], unit, ChopScene.alpha(a) | (wob > 0.5f ? 0x55FF55 : 0xA8FFB0));
+            square(layer, ChopScene.P[0], ChopScene.P[1], unit, ChopScene.alpha(a) | (wob > 0.5f ? rgb : pale));
             if (beat > 0.3f && wob > 0.7f) {
-                square(layer, ChopScene.P[0] - unit * (1 + Math.round(3 * beat)), ChopScene.P[1], unit, ChopScene.alpha(a * 0.6f) | 0x00AA00);
+                square(layer, ChopScene.P[0] - unit * (1 + Math.round(3 * beat)), ChopScene.P[1], unit, ChopScene.alpha(a * 0.6f) | dark);
+            }
+        }
+        if (beat > 0.05f) {
+            for (float x = -DOOR_X; x <= DOOR_X; x += 1.1f) {
+                for (float y : new float[]{DOOR_Y + 0.15f, -DOOR_Y - 0.15f}) {
+                    float[] p = onDoor(x, y, 0f);
+                    ChopScene.project(p[0], p[1], p[2]);
+                    square(layer, ChopScene.P[0], ChopScene.P[1], unit, ChopScene.alpha(a * beat) | pale);
+                }
             }
         }
         float[] mid = onDoor(-DOOR_X, 0f, 0f);
         ChopScene.project(mid[0], mid[1], mid[2]);
-        ChopScene.glow(c, ChopScene.P[0], ChopScene.P[1], (14f + 10f * beat) * ChopScene.size, 0x55FF55, 0.45f * on + 0.35f * beat);
+        ChopScene.glow(c, ChopScene.P[0], ChopScene.P[1], (14f + 10f * beat) * ChopScene.size, rgb, 0.45f * on + 0.35f * beat);
+    }
+
+    /** A crystal in flight leaves a short trail of squares in its colour, and a glint or two behind that. */
+    static void trails(CrystalVeins.Fill layer, VaultTimeline tl, long t) {
+        for (int k = 0; k < 5; k++) {
+            float f = VaultTimeline.fly(k, t);
+            if (f <= 0f || f >= 1f) continue;
+            for (int i = 1; i <= 7; i++) {
+                long back = t - i * 22L;
+                float fb = VaultTimeline.fly(k, back);
+                if (fb < 0f) break;
+                float[] q = flightPos(k, fb);
+                ChopScene.project(q[0], q[1], q[2]);
+                float fade = 1f - i / 8f;
+                int col = i % 3 == 0 ? 0xFFFFFF : VaultTimeline.CRYSTAL_RGB[k];
+                square(layer, ChopScene.P[0], ChopScene.P[1], unit * (i < 3 ? 2 : 1), ChopScene.alpha(ChopScene.sceneAlpha * 0.8f * fade) | greyed(col));
+            }
+        }
     }
 
     /**
