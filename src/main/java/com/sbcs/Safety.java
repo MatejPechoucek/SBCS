@@ -107,8 +107,21 @@ public final class Safety {
         checkedAt = now;
         boolean dev = net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment();
         var server = Minecraft.getInstance().getCurrentServer();
-        hypixel = dev || (server != null && server.ip != null && server.ip.toLowerCase(Locale.ROOT).contains("hypixel.net"));
+        hypixel = dev || (server != null && isHypixelAddress(server.ip));
         return hypixel;
+    }
+
+    /**
+     * Whether a server address is Hypixel's: hypixel.net or a name under it ("mc.hypixel.net"), with or without a
+     * port. Only the host counts - "hypixel.net.example.com" or "nothypixel.net" merely contain the words.
+     */
+    public static boolean isHypixelAddress(String address) {
+        if (address == null) return false;
+        String host = address.strip().toLowerCase(Locale.ROOT);
+        int colon = host.lastIndexOf(':');
+        if (colon >= 0 && host.indexOf(':') == colon) host = host.substring(0, colon);
+        if (host.endsWith(".")) host = host.substring(0, host.length() - 1);
+        return host.equals("hypixel.net") || host.endsWith(".hypixel.net");
     }
 
     // ------------------------------------------------------------------ spam
