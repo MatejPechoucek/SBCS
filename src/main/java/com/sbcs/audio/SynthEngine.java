@@ -222,6 +222,15 @@ public final class SynthEngine {
             if (!alive) active.remove(i);
         }
 
+        // One NaN or infinity from a voice would get into the reverb's feedback and stay there, and every block
+        // after it would be silent until the next silence(). A bad block is dropped instead, the reverb with it.
+        if (!finite(left) || !finite(right) || !finite(send)) {
+            Arrays.fill(left, 0f);
+            Arrays.fill(right, 0f);
+            Arrays.fill(send, 0f);
+            reverb.reset();
+        }
+
         reverb.process(send, left, right, BLOCK);
 
         float gain = master;
@@ -244,6 +253,13 @@ public final class SynthEngine {
      * merely sounds loud. It is a safety net, not a mixing stage - voices are expected to
      * stay within {@link Voice#HEADROOM}.
      */
+    /** Whether every sample in {@code block} is a real number (no NaN, no infinity). */
+    public static boolean finite(float[] block) {
+        float sum = 0f;
+        for (float v : block) sum += v * 0f;   // 0 * finite is 0; 0 * NaN or infinity is NaN
+        return sum == 0f;
+    }
+
     public static float softClip(float v) {
         // Untouched up to half scale, then bent smoothly towards 1 - continuous and with no corner anywhere. The old
         // cubic gave 0.83 just under 1.0 and jumped to 1.0 just over it: every loud moment with the volume sliders
