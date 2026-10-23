@@ -31,7 +31,7 @@ public final class DropDetector {
         }
 
         public static DropResult pet(String rarity) {
-            return new DropResult(Outcome.PET, rarity == null ? "unknown" : rarity.toLowerCase());
+            return new DropResult(Outcome.PET, rarity == null ? "unknown" : rarity.toLowerCase(java.util.Locale.ROOT));
         }
 
         public static DropResult blocked() {

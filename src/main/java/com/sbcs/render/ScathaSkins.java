@@ -426,7 +426,7 @@ public final class ScathaSkins {
                     : isOverride(part) ? "§afrom your PNG"
                     : isBundled(part) ? "§eshipped with the mod"
                     : "§acaptured from the mob";
-            sb.append("§7").append(part.name().toLowerCase()).append(": ").append(state).append("  ");
+            sb.append("§7").append(part.name().toLowerCase(java.util.Locale.ROOT)).append(": ").append(state).append("  ");
         }
         sb.append("§8(").append(saved.tally.size()).append(" candidate skin(s) seen)");
         return sb.toString();
