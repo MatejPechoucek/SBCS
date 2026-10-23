@@ -101,12 +101,6 @@ Magma Slug, Moogma, Volcanic Snail, Lava Leech, Pyroclastic Worm, Lava Flame, Fi
 Fried Chicken (Crimson Isle), and the Crystal Hollows' Magma Fields creatures: nothing worth a reveal. The Carmine Dye
 may be on some of their tables at the 1/2.5M rate - the any-creature dye rule above covers that too.
 
-## Lava rolls that are not creatures
-
-- **Lava treasure** (wiki, Treasure/Loot/Lava): an OUTSTANDING CATCH is 750k coins (0.05-0.2% a catch), a GREAT CATCH a
-  Titanic Experience Bottle. Covered by the treasure plan, [08](08-fishing-treasure.md).
-- **Trophy fish**, [07](07-trophy-fish.md).
-
 ## Bobbin' Scriptures, for every mythic
 
 1% from Jawbus, Ragnarok, Plhlegblast, Titanoboa, Wiki Tiki, Nessie... A cheap book. Today a bust. Option: a one-second

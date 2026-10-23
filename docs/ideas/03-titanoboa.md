@@ -33,7 +33,7 @@ Catch rate: weight 25, 0.25% of catches (1 in 400) at Fishing 30+; Whale/Light/D
 - **The snake is many segments.** Each segment may be its own armour stand or entity; only one should carry the HP
   nametag. **Theory** - the first records must show how many nametags one Titanoboa has. If every segment shows HP,
   dedupe by "first one seen" as the Seraph's two-entity spawn was handled.
-- Best built as one `FishingWatcher` that takes a creature table, so Wiki Tiki (02) and the other water mythics (06)
+- Best built as one `FishingWatcher` that takes a creature table, so Wiki Tiki (02) and any later water mythic
   are rows, not classes. LavaWatcher could later move onto it.
 
 ## Cutscene concept: "The Coil"
