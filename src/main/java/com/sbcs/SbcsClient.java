@@ -441,7 +441,9 @@ public class SbcsClient implements ClientModInitializer {
             Runnable open = () -> openChop(verdict, head, false);
             String what = "Diana: " + com.sbcs.render.DianaItems.name(verdict);
             if (isAnimationPlaying()) {
-                if (!makeRoom(verdict.win(), what)) waitForTurn(open, verdict.win(), what);
+                // A bust that waits too long is dropped; its kill still goes in the stats, as openChop would have.
+                Runnable dropped = killed == null ? null : () -> SbcsStats.get().onDiana(killed.name(), null);
+                if (!makeRoom(verdict.win(), what)) waitForTurn(open, verdict.win(), what, dropped);
                 else open.run();
                 return;
             }
