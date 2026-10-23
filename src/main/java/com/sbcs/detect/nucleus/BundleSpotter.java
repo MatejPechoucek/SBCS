@@ -51,6 +51,8 @@ public final class BundleSpotter {
     /** The followed entity's box in the world, or null while only the vault spot is known. */
     private static AABB box;
     private static int followed = -1;
+    /** How sure the followed entity is the bundle ({@link #score}): 4 and up is the bundle itself. */
+    private static int followedScore;
     private static String followedName = "";
     private static final Set<Integer> recorded = new HashSet<>();
     /** What stood near the vault before the message: decorations, not the bundle - unless named as one. */
@@ -62,6 +64,7 @@ public final class BundleSpotter {
         spot = DROP;
         box = null;
         followed = -1;
+        followedScore = 0;
         followedName = "";
         recorded.clear();
         before.clear();
@@ -129,8 +132,10 @@ public final class BundleSpotter {
         Entity best = null;
         int bestScore = 0;
         double bestDist = Double.MAX_VALUE;
+        boolean followedHere = false;
         for (Entity e : level.getEntities(player, near)) {
             if (e instanceof net.minecraft.world.entity.player.Player) continue;
+            if (e.getId() == followed) followedHere = true;
             if (recorded.add(e.getId())) record(e);
             int score = score(e);
             if (score < 4 && before.contains(e.getId())) score = 0;
@@ -141,16 +146,29 @@ public final class BundleSpotter {
                 best = e;
             }
         }
+        // The bundle itself (a named loot item or a dropped head) going is the pickup. Anything weaker that was only
+        // followed for want of better - some other item on the floor - going is not: the box goes back to waiting
+        // for the bundle instead of switching off before it has even landed.
+        if (followed >= 0 && !followedHere) {
+            if (followedScore >= 4) {
+                disarm("the bundle went - picked up", log, player);
+                return;
+            }
+            if (log != null) log.note("§8Nucleus: " + followedName + " went - it was not the bundle; still watching");
+            followed = -1;
+            followedScore = 0;
+            box = null;
+            spot = DROP;
+        }
         if (best != null) {
             spot = best.position();
             box = coverOf(best);
+            followedScore = bestScore;
             if (best.getId() != followed) {
                 followed = best.getId();
                 followedName = describe(best);
                 if (log != null) log.note("§7Nucleus: following " + followedName + " as the bundle");
             }
-        } else if (followed >= 0) {
-            disarm("the bundle went - picked up", log, player);
         }
     }
 
@@ -189,7 +207,9 @@ public final class BundleSpotter {
         if (name.contains("loot")) return 4;
         if (e instanceof net.minecraft.world.entity.item.ItemEntity item) {
             String n = item.getItem().getHoverName().getString().toLowerCase(Locale.ROOT);
-            return n.contains("bundle") || n.contains("loot") ? 5 : 2;
+            if (n.contains("bundle") || n.contains("loot")) return 5;
+            // The bundle is a dropped player head (Matej's first run, 2026-10-22): ahead of any other item on the floor.
+            return item.getItem().is(net.minecraft.world.item.Items.PLAYER_HEAD) ? 4 : 2;
         }
         if (e instanceof net.minecraft.world.entity.decoration.ArmorStand stand && holdsHead(stand)) {
             return 2;
