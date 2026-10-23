@@ -58,24 +58,51 @@ Here the game provides it, so the animation only has to make the player feel it.
 - Recording: a `superpairs_menu` record per change (title, slot -> item name + lore, clicks/time), written by a
   small `DropRecorder`-style recorder while the menu is open. Two or three games from Matej give the strings.
 
-## Cutscene concept: "The Hunt" (over the menu, never blocking it)
+## Matej's rule: a rare tile is covered (2026-10-23)
 
-The player is busy in a menu with a time limit, so nothing may cover the grid or slow them down. Everything is drawn
-around the menu's edge or as a light glow on the tiles, and the big moment waits until the game ends.
+"If it is an ultra-rare tile, please cover it with some kind of black box or something within the gui because you
+don't want the user to see it." So the item itself is never shown until the cutscene.
 
-- **Reveal (the hunt starts):** the tile of the ultra-rare card gets a pulsing border in its rarity's colour. A low
-  heartbeat starts (`Voices`, quiet). Faint embers rise from the edges of the screen outside the menu. Nothing else
-  happens. The player still has to play.
+- **The cover.** When a revealed slot holds a covered-tier item, we draw a black box over that slot inside the menu,
+  in place of the item and its tooltip (no hover tooltip either, or the name leaks). It's the same idea as the
+  Nucleus bundle cover (`render/BundleCover`), done in the GUI with a container-screen hook instead of in the world.
+  It goes on the frame the tile flips, so the player never sees the item for even one frame. **Theory:** the hook
+  point needs checking with javap (the container screen's slot render, or the item tooltip).
+- **The box has to be the same for every covered item**, or its look gives the drop away. So it's one plain black
+  tile with a faint shimmer. It shows the same whatever is under it.
+- **Cover more than the jackpots**, or a black box on its own means "VII book". Cover every tile from the "rare" row
+  up (Serum, Experiment the Fish, Legendary Guardian, the VIIs, endcaps, the dye). Then a box only says "something
+  good", and the cutscene tells you what.
+- **The game must stay playable.** Superpairs is matching, and two covered tiles might be different items (a Serum
+  and a VII). If both are plain black, the player can't tell whether they match. So each covered tile also carries a
+  small **mark** (a letter or rune, A, B, C... in the order covered items were first seen this game). Its pair gets
+  the same mark when it flips. The mark tells you which boxes match and nothing about what is under them.
+- **Hidden after the match too.** A matched pair stays covered. The reward is only shown by the cutscene after the game,
+  and the claim screen (if it lists rewards) is covered the same way until then.
+- **Off switch.** A menu setting "Cover rare Superpairs tiles" (default on), for players who would rather see.
+
+## Cutscene concept: "The Hunt" (around the menu, never blocking play)
+
+The player is busy in a menu with a time limit, so only the covers sit on the grid; everything else is around the
+menu's edge, and the reveal waits until the game ends.
+
+- **A box appears (the hunt starts):** the box lands on the tile with a soft thud and its mark glows. A low heartbeat
+  starts (`Voices`, quiet). Faint embers rise from the edges of the screen outside the menu. The player still has to
+  play.
 - **While hunting:** each further flip that misses makes the heartbeat a touch faster, and the remaining clicks
   appear beside the menu as pips, going out one by one. That's the tension, and it's the true state of the game, so
   it isn't a lie.
-- **Match:** a crack of light runs between the two tiles, both flash, the heartbeat stops dead on one chord. Then,
-  when the player closes the menu or the game ends, **the jackpot plays**: the book rises in the middle of the screen,
-  opens, its pages riffle, the name stamps in letter by letter ("Ultimate ... VII" / "Nadeshiko Dye"), with odds
-  ("1 in ~3,700 experiments") and the price counted up. The Nadeshiko Dye gets the grandest version: pink petals
-  (its colour) fill the screen in pixel squares and the dye forms in the middle, as each animation's dye does.
-- **Lost (clicks or time ran out):** the border cracks and goes grey, the heartbeat fades out, nothing more. Short,
-  so a missed one stings without dragging.
+- **Match:** a crack of light runs between the two boxes, both flash, the heartbeat stops on one chord. The boxes stay
+  shut.
+- **After the game** (it ends, or the menu closes), **the reveal plays**, one per matched box, best last. The box drifts
+  to the middle of the screen and opens. A Serum, a Fish or a Guardian gets a short reveal. A VII or an endcap: the
+  book rises, opens, its pages riffle, and the name stamps in letter by letter with odds ("1 in ~3,700 experiments")
+  and the price counted up. The Nadeshiko Dye gets the grandest version: pink petals (its colour) fill the screen in
+  pixel squares and the dye forms in the middle, as each animation's dye does. Because every box looks the same, the
+  build-up as it opens is identical whatever is inside (the honesty rule, checked by a test as the others are).
+- **Lost (clicks or time ran out with a box unmatched):** the game ends and the box opens anyway, to show what got
+  away: a short, grey "missed" reveal (the item, "you didn't find its pair"). Matej's call whether a missed one should
+  be shown at all, or stay secret.
 - **Ordinary game, optional:** after a game, a small corner card with the best reward (e.g. a VI book) and the
   game's total worth. Off by default.
 
@@ -92,9 +119,8 @@ The "rare" row needs prices checked. Experiment the Fish and the Serum may be ch
 
 ## Open questions for Matej
 
-1. Hold the jackpot until the menu closes, or play it the moment the pair matches (over the menu, after the game has
-   effectively been won)?
-2. Should the hunt glow show at all? It's honest (it only reacts to what's on screen), but it could feel like the mod
-   is "helping".
-3. Which rewards count: VIIs and the dye only, or the Serum, Fish and Guardian pet too?
+1. A missed box (never matched): open it at the end to show what got away, or keep it secret forever?
+2. Which rewards get covered: from the Serum / Fish / Guardian up (recommended, so a box doesn't mean "VII"), or the
+   VIIs and the dye only?
+3. The mark on each box (A, B, C...) so pairs can still be matched: OK, or another way?
 4. Does Matej do Metaphysical daily? His games with records on are what detection gets written against.
