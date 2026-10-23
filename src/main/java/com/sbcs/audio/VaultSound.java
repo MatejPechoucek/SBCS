@@ -60,7 +60,16 @@ public final class VaultSound {
         switch (e) {
             case BUST -> {
                 out.add(new Cue(R, true, Voices.vaultEmpty(seed + 100)));
-                out.add(new Cue(R + 150, false, Voices.vaultCreak(0.95f, 260f, 150f, seed + 110)));
+                switch (tl.bustStyle()) {
+                    case CRACK -> out.add(new Cue(R + 150, false, Voices.vaultCreak(0.95f, 260f, 150f, seed + 110)));
+                    // A long, slow creak all the way open.
+                    case SWING -> out.add(new Cue(R + 250, false, Voices.vaultCreak(1.5f, 300f, 120f, seed + 110)));
+                    case JAM -> {
+                        out.add(new Cue(R + 120, false, Voices.vaultCreak(0.25f, 240f, 200f, seed + 110)));
+                        for (int k = 0; k < 5; k++) out.add(new Cue(VaultTimeline.jamBolt(k), false, Voices.vaultBolt(seed + 111 + k)));
+                        out.add(new Cue(VaultTimeline.jamBolt(0), false, Voices.vaultKnock(1, seed + 118)));
+                    }
+                }
                 return sorted(out);
             }
             case OPEN -> {
@@ -69,6 +78,10 @@ public final class VaultSound {
                 out.add(new Cue(R, true, Voices.vaultBolt(seed + 100)));
                 out.add(new Cue(R + VaultTimeline.HOLD, false, Voices.vaultCreak(0.22f, 520f, 200f, seed + 105)));
                 out.add(new Cue(sw, false, Voices.vaultOpen(seed + 108)));
+                if (tl.openStyle() == VaultTimeline.OpenStyle.SLAM) {
+                    out.add(new Cue(VaultTimeline.slamHit(), false, Voices.vaultKnock(2, seed + 109)));
+                    out.add(new Cue(VaultTimeline.slamHit(), false, Voices.eruptionBoom(2, 0.5f, seed + 119)));
+                }
                 out.add(new Cue(sw + 80, false, Voices.vaultCreak(0.7f, 420f, 300f, seed + 110)));
                 out.add(new Cue(sw + 200, false, Voices.hellionRise((arrive - sw - 200) / 1000f)));
                 out.add(new Cue(arrive, false, Voices.hellionArrive(false, seed + 120)));

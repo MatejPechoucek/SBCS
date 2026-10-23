@@ -139,6 +139,35 @@ public final class VaultTest {
         check("the alloy rises only once it has melted", m.itemRise(VaultTimeline.MELT) == 0f && m.arrive() > VaultTimeline.POOLED);
         check("nothing heats on any other ending", new VaultTimeline(Prize.test("ruby"), 1).heat(VaultTimeline.MELT) == 0f);
 
+        // Nothing on the door clips anything else (Matej's friends, 2026-10-23: the locks and the dial ran into the gems).
+        float gap = com.sbcs.render.VaultScene.clearance();
+        check("the dial, bolts and sockets never touch (" + gap + ")", gap > 0.1f);
+
+        // The variations: every bust style and both rare styles turn up across seeds, and each ends as it should.
+        java.util.Set<VaultTimeline.BustStyle> busts = java.util.EnumSet.noneOf(VaultTimeline.BustStyle.class);
+        java.util.Set<VaultTimeline.OpenStyle> opens = java.util.EnumSet.noneOf(VaultTimeline.OpenStyle.class);
+        for (long sd = 0; sd < 12; sd++) {
+            busts.add(new VaultTimeline(Prize.BUST, sd).bustStyle());
+            opens.add(new VaultTimeline(Prize.test("claw"), sd).openStyle());
+        }
+        check("every bust style turns up", busts.size() == VaultTimeline.BustStyle.values().length);
+        check("both ways of opening turn up", opens.size() == 2);
+        for (long sd = 0; sd < 12; sd++) {
+            VaultTimeline b = new VaultTimeline(Prize.BUST, sd);
+            float end = b.doorAngle(b.total() - 1);
+            boolean ok = switch (b.bustStyle()) {
+                case CRACK -> end > 0.1f && end < 0.3f;
+                case SWING -> end > 1.3f;
+                case JAM -> Math.abs(end) < 0.03f && b.boltNow(0, b.total() - 1) < 0.01f;
+            };
+            check("bust " + b.bustStyle() + " ends right (seed " + sd + ", door " + end + ")", ok);
+            VaultTimeline o = new VaultTimeline(Prize.test("claw"), sd);
+            float wide = o.doorAngle(o.arrive());
+            check("rare " + o.openStyle() + " is wide open by the showcase (" + wide + ")", wide > 1.55f && wide < 2.0f);
+            check("the variation is after the reveal (seed " + sd + ")", b.doorAngle(R - 1) == 0f && o.doorAngle(R - 1) == 0f
+                    && b.boltNow(2, R - 1) == VaultTimeline.bolt(2, R - 1));
+        }
+
         System.out.println(passed + " passed, " + failed + " failed");
         if (failed > 0) System.exit(1);
     }
