@@ -178,6 +178,7 @@ public final class DianaWatcher {
     public void onChatLine(String text) {
         if (text == null) return;
         String s = plain(text);
+        if (ChatLines.fromPlayer(s)) return;
         Matcher share = SHARE.matcher(s);
         Matcher charm = CHARM.matcher(s);
         boolean shared = share.find();

@@ -1748,8 +1748,9 @@ public class SbcsClient implements ClientModInitializer {
         // Our own lines (the chat summary, test notes) are never evidence of anything: not recorded, not detected.
         if (message.getString().replaceAll("§.", "").startsWith("[SBCS]")) return true;
         if (!overlay) com.sbcs.detect.DropRecorder.chatLine(message.getString());
-        // Game lines only: a player typing "RARE DROP! Chimera" is not a drop. And on Hypixel only - another
-        // server's lookalike line is not one either (Safety.onHypixel).
+        // Game lines only, and on Hypixel only (Safety.onHypixel). Hypixel sends players' chat as game lines too,
+        // so "player" is never true there: each watcher drops typed lines itself (detect/ChatLines), and the drop
+        // lines read here are matched from their start, where a typed line always has its sender.
         boolean game = !overlay && !player && config != null && Safety.onHypixel();
         String text = message.getString();
         if (game && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.onChatLine(text));
