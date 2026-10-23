@@ -66,7 +66,15 @@ Farmers break ~20 crops a second, so it is a real, if mythical, chance.
   red at once; the dye forms in the biggest flower. Dung Dye can share the beats with a funnier palette (it is a dye
   from a pest - a mud geyser instead of flowers).
 
-## 4. Greenhouse / mutations (new, 2026)
+## 4. Garden visitors
+
+Every visitor's offer is a roll too: most rewards are copper and small items, but some visitors can give rare ones -
+the wiki gives **Vincent a 1 in 2,500 chance to reward the Wild Strawberry Dye**, and from memory visitors can also
+give Overgrown Grass, Jungle Keys, Dedication books and similar. **Theory** for everything but Vincent. Detection: the
+visitor's reward appears in its offer menu and in chat on accepting (`OFFER ACCEPTED`, from memory). A rare reward
+gets the Vacuum popup's sibling (the visitor's head nods and hands it over); the Dye from Vincent plays Overbloom.
+
+## 5. Greenhouse / mutations (new, 2026)
 
 The Garden now has mutation crops (Dustgrain, Witherbloom, Gloomgourd... - drop rates halved on 2026-03-18). Not
 researched further; ask Matej whether any of them is rare enough to matter.

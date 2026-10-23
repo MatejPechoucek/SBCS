@@ -1,7 +1,7 @@
 # 11 - Any dye, anywhere
 
 My idea. Every animation gives its dye the grandest ending, but dyes drop from far more places than SBCS animates
-(Pearlescent from Zealots, Dung from pests, Aquamarine from water mythics, Wild Strawberry from crops, Tentacle from
+(Dung from pests, Treasure from fishing treasure, Aquamarine from water mythics, Wild Strawberry from crops, Tentacle from
 Kuudra, and more). A dye is the rarest thing a player will ever see drop, and missing one because its source has no
 cutscene is the worst miss there is.
 

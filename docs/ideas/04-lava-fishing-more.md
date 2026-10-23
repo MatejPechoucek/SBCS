@@ -1,48 +1,120 @@
-# 04 - More lava fishing
+# 04 - Lava fishing: every creature, and what is left
 
-Matej's idea: "other lava fishing mobs that are pretty rare". First the honest finding: **Eruption already covers
-every rare drop of every rare Crimson Isle lava creature** - Thunder, Fiery Scuttler, Lord Jawbus, Ragnarok and
-Plhlegblast (for the Carmine Dye). What is left is small, so this is a list of **extensions to Eruption**, not a new
-cutscene.
+Matej's idea: "other lava fishing mobs that are pretty rare", and (2026-10-23) "include stuff for lava fishing such as
+jawbus and others". Eruption already plays for the five rare Crimson Isle creatures, so this file is the whole lava
+picture: each creature's real drop table (wiki, 2026-10-23), what Eruption does with it today, and what could be added.
 
-## The lava creatures (wiki, Crimson Isle list)
+## Today, in one table
 
-| Creature | Tier | Base chance | In Eruption? |
+Eruption's endings (`EruptionTimeline.Drop`): Chain (PLAIN), Severed Pincer (PINCER), Flash I (FLASH), Brimstone Handle
+(FORGE), Radioactive Vial (VIAL, "Meltdown"), Scuttler Shell (SHELL), Burnt Texts (END_TIMES), Carmine Dye (KUUDRA,
+"Kuudra Rises"). Everything else is the bust, which shows the guaranteed drop under the cooled vent.
+
+## The creatures
+
+### Lord Jawbus - Mythic, 0.17% (Fishing 45, Adept Trophy Fisher)
+Catch line: "You have angered a legendary creature... Lord Jawbus has arrived."
+
+| Drop | Chance | Eruption today | Idea |
 | --- | --- | --- | --- |
-| Magma Slug, Moogma, Volcanic Snail | Uncommon | 25-35% | no - nothing rare |
-| Lava Leech, Pyroclastic Worm, Lava Flame, Fire Eel, Fireproof Witch | Rare | 6-15% | no |
-| Taurus | Epic | 3.4% | no |
-| Magma Pillar | Epic | 5% | no |
-| Thunder | Legendary | 0.86% | yes |
-| Fiery Scuttler | Legendary | 1% (hotspot) | yes |
-| Lord Jawbus | Mythic | 0.17% | yes |
-| Ragnarok | Mythic | 0.25% (hotspot) | yes |
-| Plhlegblast | Mythic | 0.1% of Plhlegblast Pool catches | dye only |
+| Magma Lord Fragment | 100% | shown on the bust | - |
+| Silver Magmafish x16-32 | 100% | - | - |
+| Lord Jawbus Shard | 2% | bust | small win? (check price) |
+| Bobbin' Scriptures | 1% | bust | small win - see below |
+| Radioactive Vial | 0.5% | **Meltdown** | - |
+| Carmine Dye | 1/50k | **Kuudra Rises** | - |
+| *Loot share:* Magma Lord Fragment 20%, Radioactive Vial 0.1% | | plays if the win's line comes to us (0.2.82) | confirm from records |
 
-## Candidates
+Jawbus is the creature people hunt for weeks, so **every Jawbus kill is an event even without a drop**. Idea: a Jawbus
+**intro** - the golem's real rig (`LavaRigs.golem`) rising out of the lava before the build-up starts, his roar, the
+camera shaking - which Thunder and the Scuttler don't get. The same for every Jawbus, so it gives nothing away.
+Plus a **"Jawbus #N"** line on every bust ("your 14th Jawbus, 0 Vials") - the stats already count kills per source.
 
-1. **Taurus's Carmine Dye (1 in 2.5M).** The Carmine Dye drops from Taurus too. Eruption's dye detection already reads
-   any line naming the Carmine Dye, but only for a creature Eruption followed. Make the dye play from **any** lava
-   creature (Kuudra Rises with a generic creature at the start, or the creature skipped). Cheap and the rarest drop in
-   lava fishing. **Recommended.**
-2. **Plhlegblast's Squid Boots (1%).** Plhlegblast is a 1-in-1000 pool catch, so its kill is special by itself;
-   today it plays only for the dye. Add a small PINCER-sized ending for Squid Boots if the boots are worth the 500k
-   floor (price check), else leave it.
-3. **Loot-shared Radioactive Vial.** Jawbus's loot share pool has the Vial at 0.1%. Eruption already plays someone
-   else's creature when its own win comes to us (0.2.82) - check a loot-shared Vial actually opens it (**Theory**:
-   only the line format is unknown).
-4. **Bobbin' Scriptures (1% from every mythic, lava and water).** A cheap win. Today it is a bust. Option: a 1-second
-   "small win" beat after the bust (book flips open, a pixel fish jumps out). Ask Matej - it would make 1 in 100
-   kills not a bust.
-5. **Taurus Helmet (2%) / Horn of Taurus.** Cheap; leave as nothing.
-6. **Trophy fish** - the actually rare lava-fishing RNG nobody animates. See [07](07-trophy-fish.md).
-7. **Galatea lava** (Stridersurfer, Moonglade Marsh) - only a Rare creature. Nothing to animate.
+### Thunder - Legendary, 0.86% (Fishing 36, Novice Trophy Fisher)
+Catch line: "You hear a massive rumble as Thunder emerges."
 
-## Detection
+| Drop | Chance | Today |
+| --- | --- | --- |
+| Thunder Fragment | 100% | bust |
+| Silver Magmafish x8-16 | 100% | - |
+| Flash I book | 1.5% (loot share 0.3%) | **FLASH** |
+| Carmine Dye | 1/50k | Kuudra Rises |
 
-**Proven** for everything above except the Taurus nametag and line (not in `SlayerRecorder.LAVA`) and the loot-share
-Vial line. Adding "Taurus" to the recorder's list is the first step.
+Thunder is common enough (1 in 116 catches) that its bust should be the shortest of all. Check that the short-bust
+setting feels right for Thunder in particular; maybe Thunder busts are short by default.
+
+### Ragnarok - Mythic, 0.25% of Crimson Isle hotspot catches (Fishing 47)
+Catch line: "The sky darkens and the air thickens. The end times are upon us: Ragnarok is here."
+
+| Drop | Chance | Today |
+| --- | --- | --- |
+| Silver Magmafish x16-32 | 100% | - |
+| Bobbin' Scriptures | 1% | bust |
+| Chain of the End Times | 1% | **PLAIN** |
+| Brimstone Handle | 0.5% | **FORGE** |
+| Burnt Texts | 0.25% | **END_TIMES** |
+| Carmine Dye | 1/50k | Kuudra Rises |
+
+Fully covered. Possible addition: Ragnarok's own intro (the sky darkening - the floor fog turned red-black).
+
+### Fiery Scuttler - Legendary, 1% of hotspot catches (Fishing 37)
+Catch line: "A Fiery Scuttler inconspicuously waddles up to you, friends in tow."
+
+| Drop | Chance | Today |
+| --- | --- | --- |
+| Scorched Crab Stick | 100% | shown on the bust |
+| Severed Pincer | 0.2% | **PINCER** |
+| Scuttler Shell | 0.1% | **SHELL** |
+| Carmine Dye | 1/50k | Kuudra Rises |
+
+Fully covered.
+
+### Plhlegblast - Mythic, 0.1% of Plhlegblast Pool catches (Fishing 36)
+Catch line: "WOAH! A Plhlegblast appeared."
+
+| Drop | Chance | Today |
+| --- | --- | --- |
+| Ink sacs, lily pads | 100% | - |
+| Enchanted Ink Sac | 0.5% | nothing |
+| Squid Boots | 1% | nothing |
+| Bobbin' Scriptures | 1% | nothing |
+| Carmine Dye | 1/50k | **Kuudra Rises** |
+
+Today Plhlegblast plays **only** for the dye (Matej's call, 0.2.74). Option: play every Plhlegblast kill like the
+others, with a Squid Boots ending, since the creature itself is a 1-in-1000 pool catch. Price check the boots first.
+
+### Taurus - Epic, 3.4% (Fishing 35)
+Catch line: "Taurus and his steed emerge."
+
+| Drop | Chance | Today |
+| --- | --- | --- |
+| Horn of Taurus, Silver Magmafish | 100% | - |
+| Taurus Helmet | 2% | - |
+| **Carmine Dye** | **1 in 2,500,000** | **missed** |
+
+**The one real gap.** Eruption doesn't follow Taurus, so a Taurus Carmine Dye - the rarest roll in lava fishing - plays
+nothing. Fix: let the dye line open Kuudra Rises from any lava creature, the way the Diana Dye plays from any
+creature. Add "Taurus" to `SlayerRecorder.LAVA` first. **Recommended, small.**
+
+### The rest (no rare drops)
+Magma Slug, Moogma, Volcanic Snail, Lava Leech, Pyroclastic Worm, Lava Flame, Fire Eel, Fireproof Witch, Magma Pillar,
+Fried Chicken (Crimson Isle), and the Crystal Hollows' Magma Fields creatures: nothing worth a reveal. The Carmine Dye
+may be on some of their tables at the 1/2.5M rate - the any-creature dye rule above covers that too.
+
+## Lava rolls that are not creatures
+
+- **Lava treasure** (wiki, Treasure/Loot/Lava): an OUTSTANDING CATCH is 750k coins (0.05-0.2% a catch), a GREAT CATCH a
+  Titanic Experience Bottle. Covered by the treasure plan, [08](08-fishing-treasure.md).
+- **Trophy fish**, [07](07-trophy-fish.md).
+
+## Bobbin' Scriptures, for every mythic
+
+1% from Jawbus, Ragnarok, Plhlegblast, Titanoboa, Wiki Tiki, Nessie... A cheap book. Today a bust. Option: a one-second
+"small win" beat after the bust (the book flips open, a pixel fish jumps out). Matej's call.
 
 ## Open questions
 
-- Which of 1-4 does Matej want? Recommendation: 1 now (tiny), 3 verified from records, 4 if busts feel too common.
+1. The any-creature Carmine Dye - yes? (recommended)
+2. A Jawbus intro and the "Jawbus #N" line on busts?
+3. Plhlegblast: keep it dye-only, or play every kill with a Squid Boots ending?
+4. Bobbin' Scriptures and the Jawbus Shard: small wins or busts?
