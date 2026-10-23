@@ -280,7 +280,7 @@ public class PatternConfig {
     public int dungeonTiers = com.sbcs.detect.dungeon.ChestTier.DEFAULT_BITS;
     /** At Croesus: 0 off, 1 a run's most profitable chest rolls when the run's page is opened, 2 also any chest's own page. */
     public int dungeonCroesus = 1;
-    /** "Pull the chain" (the player drives it; the skeleton's hand takes over if left alone), else "Just watch". */
+    /** "Spin the wheel" (the player drags it; the skeleton's hand takes over if left alone), else "Just watch". */
     public boolean dungeonChain = true;
     /** Master Mode's red chest and its seals. */
     public boolean dungeonMasterRed = true;

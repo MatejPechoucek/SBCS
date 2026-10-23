@@ -53,6 +53,10 @@ public class OssuaryTest {
         public String dropSkin() { return null; }
         public void loot(Loot l, float cx, float cy, float size, float alpha) { mix("loot", l.key(), l.name(), cx, cy, size, alpha); }
         public String headSkin(String key) { return "head_" + key; }
+        public void imageAffine(String key, int[] argb, int iw, int ih, float ox, float oy, float ux, float uy, float vx, float vy) {
+            // The wheel's face, texel by texel.
+            mix("img", key, iw, ih, ox, oy, ux, uy, vx, vy, java.util.Arrays.hashCode(java.util.Arrays.copyOf(argb, iw * ih)));
+        }
     }
 
     static DungeonPool pool;
@@ -199,22 +203,23 @@ public class OssuaryTest {
         for (long t = 0; t < 30_000 && sw.reveal() < 0; t += 16) sw.update(t);
         check("watch mode cracks every seal and throws every lever", sw.reveal() > 0 && sw.unlockAt() > 0, "reveal " + sw.reveal());
 
-        System.out.println("The Wither Throne");
+        System.out.println("The wheel");
         OssuaryTimeline th = make(new DungeonFloor(7, false), ChestTier.BEDROCK, true, 3);
         th.resolve(chest(th.floor(), ChestTier.BEDROCK, "NECRON_HANDLE", 600_000_000L), 0);
         th.update(800);
-        check("four drums", th.drumCount() == 4, "");
-        check("Necron's waits for the lords", !th.canPull(3, 900), "");
-        th.pull(2, 0.5f, 900);
-        th.pull(0, 0.5f, 950);
-        th.pull(1, 0.5f, 1000);
-        long lords = Math.max(th.drum(0).stopAt, Math.max(th.drum(1).stopAt, th.drum(2).stopAt));
-        check("in any order", th.drum(0).t0 > 0 && th.drum(1).t0 > 0 && th.drum(2).t0 > 0, "");
-        check("then Necron's", th.canPull(3, lords + 1), "");
-        var rk = th.ranked();
-        check("the lords stop on the 3rd, 4th and 2nd best", th.niche(0, th.drum(0).target, lords) == rk.get(2)
-                && th.niche(1, th.drum(1).target, lords) == rk.get(3) && th.niche(2, th.drum(2).target, lords) == rk.get(1), rk.toString());
-        check("Necron's stays shrouded", th.niche(3, th.drum(3).target < 0 ? 0 : th.drum(3).target, lords) == -2 || th.drum(3).target < 0, "");
+        check("one wheel on every floor, F7 too", th.drumCount() == 1, "");
+        check("three veiled segments", OssuaryTimeline.VEILS.length == 3, "");
+        boolean fixed = true;
+        for (long i = 0; i < OssuaryTimeline.SEGMENTS; i++) {
+            if (th.fillerAt(0, i) != th.fillerAt(0, i + OssuaryTimeline.SEGMENTS * 5L)) fixed = false;
+        }
+        check("filler is the same every turn", fixed, "");
+        th.pull(0, 0.5f, 900);
+        long wheelStop = th.drum(0).stopAt;
+        check("the stop is veiled", OssuaryTimeline.veiled(th.drum(0).target), "target " + th.drum(0).target);
+        check("it stays veiled until the reveal", th.niche(0, th.drum(0).target, wheelStop) == -2, "");
+        for (long t = 900; t < 30_000 && th.reveal() < 0; t += 16) th.update(t);
+        check("and shows the best item after it", th.niche(0, th.drum(0).target, th.reveal()) == th.value().best(), "");
 
         System.out.println("The Livid shell game");
         DungeonFloor f5 = new DungeonFloor(5, false);

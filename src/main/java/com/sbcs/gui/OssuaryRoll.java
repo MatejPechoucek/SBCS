@@ -258,12 +258,6 @@ public final class OssuaryRoll implements OssuaryScene.Canvas {
                 return true;
             }
         }
-        for (int d = 0; d < tl.drumCount() && tl.throne(); d++) {
-            if (inside(OssuaryScene.hitLevers[d], x, y) && tl.canPull(d, t)) {
-                tl.pull(d, OssuaryTimeline.DEFAULT_PULL, t);
-                return true;
-            }
-        }
         if (tl.livid()) {
             for (int i = 0; i < 9; i++) {
                 if (inside(OssuaryScene.hitLivids[i], x, y)) {
@@ -407,6 +401,18 @@ public final class OssuaryRoll implements OssuaryScene.Canvas {
         pose.scale(w, h);
         g.fill(0, 0, 1, 1, argb);
         pose.popMatrix();
+    }
+
+    /**
+     * The wheel's face, composed on the CPU each frame and drawn as one turned image, and its black silhouette for the
+     * outline. One RasterImage each: an upload is only done once a frame, so two images through one would share it.
+     */
+    private static final com.sbcs.render.RasterImage WHEEL = new com.sbcs.render.RasterImage("ossuary_wheel"),
+            WHEEL_INK = new com.sbcs.render.RasterImage("ossuary_wheel_ink");
+
+    @Override
+    public void imageAffine(String key, int[] argb, int iw, int ih, float ox, float oy, float ux, float uy, float vx, float vy) {
+        (key.endsWith("_ink") ? WHEEL_INK : WHEEL).drawAffine(g, argb, iw, ih, ox, oy, ux, uy, vx, vy);
     }
 
     @Override public void item(float cx, float cy, float size, float alpha, float yaw) { }

@@ -16,18 +16,23 @@ import java.util.Set;
  * scene time {@code t}, the host feeds it what the player did (a seal clicked, the chain dragged, a lever thrown, a
  * Livid picked), and {@link #update} fires the automatic version of each after its wait.
  *
+ * <h2>The wheel (2026-10-23)</h2>
+ * One big prize wheel on every floor (Matej's friends: "the whole 4 levers is not it, one big wheel that looks super
+ * cool"). It replaced a drum of niches, and on F7/M7 the four lords' drums. The wheel has {@link #SEGMENTS} segments:
+ * {@link #VEILS} of them are veiled (a cobweb over a mystery), the rest hold filler from the floor's pool, fixed per
+ * segment by the seed, so the wheel looks the same all the way round each turn. The spin is "drum" 0.
+ *
  * <h2>Honest</h2>
- * Nothing before {@link #reveal()} depends on what the chest holds, except the F7/M7 lords' drums, which stop on the
- * chest's own 3rd, 4th and 2nd best items by design (the plan Matej approved). The main drum stops on a shrouded
- * niche; what passes the window is filler drawn from the floor's pool by index and seed alone; the lantern (M7: the
- * five dragon statues) cycles the same colours every time and lands on the truth at the reveal. <b>The pull never
- * changes the result</b>: whatever the player does only changes how long and how wild the spin is - the stop is
- * solved backwards from the speed so the drum stops exactly on the shrouded niche.
+ * Nothing before {@link #reveal()} depends on what the chest holds. The wheel always stops with a veiled segment under
+ * the pointer - which of the veiled ones depends on the pull alone; the bulbs (M7: the five dragon gems) cycle the same
+ * colours every time and land on the truth at the reveal. <b>The pull never changes the result</b>: whatever the
+ * player does only changes how long and how wild the spin is - the stop is solved backwards from the speed so the
+ * wheel stops exactly on a veiled segment.
  *
  * <h2>Shape</h2>
- * Arrive ({@link #ARRIVE}); on Master Mode the seals ({@code floor} of them, the last of M7's three clicks); the pull
- * (chain mode: the player drags the chain, a skeleton hand pulls it after {@link #AUTO_WAIT}; watch mode: the hand
- * pulls at once); the spin; on F5/M5 the Livid shell game; the tell ({@link #TELL_MS}); the reveal and its ending;
+ * Arrive ({@link #ARRIVE}); on Master Mode the seals ({@code floor} of them, the last of M7's three clicks); the spin
+ * (chain mode: the player drags the wheel round, a skeleton hand yanks it after {@link #AUTO_WAIT}; watch mode: the
+ * hand yanks it at once); on F5/M5 the Livid shell game; the tell ({@link #TELL_MS}); the reveal and its ending;
  * the whole chest laid out with its profit; the fade back to the real menu.
  */
 public final class OssuaryTimeline {
@@ -95,10 +100,16 @@ public final class OssuaryTimeline {
         }
     }
 
-    /** The F7/M7 lords, left to right; Necron's is the big drum. */
-    public static final String[] LORDS = {"MAXOR", "STORM", "GOLDOR", "NECRON"};
-    /** Which of the chest's items each lord's drum stops on: 3rd, 4th, 2nd best; Necron the best, shrouded. */
-    static final int[] LORD_RANK = {2, 3, 1, 0};
+    /** The wheel's segments, and which of them are veiled - the stop is always one of these. */
+    public static final int SEGMENTS = 16;
+    public static final int[] VEILS = {0, 6, 11};
+
+    /** Whether niche (segment index) {@code i} is veiled. */
+    public static boolean veiled(long i) {
+        int k = (int) Math.floorMod(i, (long) SEGMENTS);
+        for (int v : VEILS) if (v == k) return true;
+        return false;
+    }
 
     /** M7's five dragons, the order their statues light: Power, Flame, Ice, Soul, Apex. */
     public static final int[] DRAGONS = {0xE33A3A, 0xFF8A1F, 0x5CC8FF, 0xA040FF, 0x49E36B};
@@ -169,8 +180,6 @@ public final class OssuaryTimeline {
         public long t0 = -1, stopAt = -1;
         float p0, v0;
         public long target = -1;
-        /** The niche stopped on shows {@code show}: an item of the chest (>= 0), or -1 shrouded. */
-        int show = -1;
         public boolean big;
     }
 
@@ -202,19 +211,16 @@ public final class OssuaryTimeline {
             sum += w;
         }
         this.fillerTotal = sum;
-        this.drums = new Drum[throne ? 4 : 1];
-        for (int d = 0; d < drums.length; d++) {
-            drums[d] = new Drum();
-            drums[d].big = !throne || d == 3;
-        }
+        this.drums = new Drum[]{new Drum()};
+        drums[0].big = true;
         if (seals == 0) unlockAt = ARRIVE;
     }
 
     // ------------------------------------------------------------------ the outcome
 
     /**
-     * The chest, priced. Called by the host with the latest prices until it locks: at the tell (or, on the throne,
-     * at the first lord's pull - its drums show real items). {@code floorCoins} is the menu's minimum worth.
+     * The chest, priced. Called by the host with the latest prices until it locks at the tell. {@code floorCoins} is
+     * the menu's minimum worth.
      */
     public void resolve(ChestValue v, long floorCoins) {
         if (locked || v == null) return;
@@ -258,13 +264,6 @@ public final class OssuaryTimeline {
             };
             if (band == Band.JACKPOT && ending != Ending.DYE) jackpotRgb = DRAGONS[dragon];
         }
-        if (throne) {
-            for (int d = 0; d < 3; d++) drums[d].show = itemOfRank(LORD_RANK[d]);
-        }
-    }
-
-    private int itemOfRank(int r) {
-        return r < ranked.size() ? ranked.get(r) : -1;
     }
 
     // ------------------------------------------------------------------ input
@@ -299,24 +298,20 @@ public final class OssuaryTimeline {
         unlockAt = Math.max(t, last + SEAL_FALL);
     }
 
-    /** Whether drum {@code d} may be pulled now: unlocked, not stopped, Necron's only once the lords have stopped. */
+    /** Whether the wheel may be spun now: unlocked, and not about to stop. */
     public boolean canPull(int d, long t) {
         if (d < 0 || d >= drums.length || unlockAt < 0 || t < unlockAt) return false;
         Drum dr = drums[d];
         if (dr.pulls.size() >= MAX_PULLS) return false;
-        if (dr.stopAt >= 0 && t >= dr.stopAt - 450) return false;
-        if (throne && d == 3) for (int k = 0; k < 3; k++) if (drums[k].stopAt < 0 || t < drums[k].stopAt) return false;
-        if (throne && d < 3 && !locked) return value != null;
-        return true;
+        return dr.stopAt < 0 || t < dr.stopAt - 450;
     }
 
     /**
-     * The chain (or a lever) let go: {@code strength} 0..1 from how far and how fast it was pulled. Solves the stop
-     * so the drum lands exactly on its niche whatever the strength.
+     * The wheel let go: {@code strength} 0..1 from how far and how fast it was dragged. Solves the stop so the wheel
+     * lands exactly on a veiled segment whatever the strength.
      */
     public void pull(int d, float strength, long t) {
         if (!canPull(d, t)) return;
-        if (throne && d < 3) locked = true;
         lastInputAt = t;
         Drum dr = drums[d];
         strength = Math.max(0f, Math.min(1f, strength));
@@ -327,6 +322,7 @@ public final class OssuaryTimeline {
         span = Math.min(SPIN_MAX, span);
         long target = (long) Math.ceil(p + v0 * span / 2f);
         if (target <= p + 3) target = (long) Math.ceil(p) + 3;
+        while (!veiled(target)) target++;
         float dist = target - p;
         dr.t0 = t;
         dr.p0 = p;
@@ -375,7 +371,7 @@ public final class OssuaryTimeline {
             long ready = readyAt(d);
             if (ready < 0) continue;
             boolean waitForPlayer = chain && !handTook;
-            long wait = waitForPlayer ? AUTO_WAIT : (throne && d < 3 ? WATCH_WAIT + 380L * d : WATCH_WAIT);
+            long wait = waitForPlayer ? AUTO_WAIT : WATCH_WAIT;
             long at = (waitForPlayer ? Math.max(ready, lastInputAt) : ready) + wait;
             if (t >= at + HAND_STROKE / 2) {
                 handTook = true;
@@ -415,16 +411,9 @@ public final class OssuaryTimeline {
         return d < handAt.length ? handAt[d] : -1;
     }
 
-    /** When drum {@code d} became pullable, or -1 if it is not yet. */
+    /** When the wheel became spinnable, or -1 if it is not yet. */
     long readyAt(int d) {
-        if (unlockAt < 0) return -1;
-        if (!throne || d < 3) return unlockAt;
-        long last = -1;
-        for (int k = 0; k < 3; k++) {
-            if (drums[k].stopAt < 0) return -1;
-            last = Math.max(last, drums[k].stopAt);
-        }
-        return last;
+        return unlockAt;
     }
 
     // ------------------------------------------------------------------ the drums
@@ -457,22 +446,20 @@ public final class OssuaryTimeline {
     }
 
     /**
-     * What niche {@code i} of drum {@code d} holds: an index into the chest's items (>= 0), -1 for filler (then
-     * {@link #fillerAt} says which), -2 shrouded (the stop niche and its neighbours, before the reveal).
+     * What segment {@code i} of the wheel holds: an index into the chest's items (>= 0, the stop once revealed), -1
+     * for filler (then {@link #fillerAt} says which), -2 veiled.
      */
     public int niche(int d, long i, long t) {
+        if (!veiled(i)) return -1;
         Drum dr = drums[d];
-        if (dr.target >= 0 && Math.abs(i - dr.target) <= (dr.big ? 1 : 0)) {
-            if (!dr.big) return dr.show >= 0 ? dr.show : -1;
-            if (i == dr.target) return t >= reveal() && reveal() >= 0 ? (value == null ? -1 : value.best()) : -2;
-            return -2;
-        }
-        return -1;
+        if (i == dr.target && reveal() >= 0 && t >= reveal()) return value == null ? -1 : value.best();
+        return -2;
     }
 
-    /** The filler at niche {@code i} of drum {@code d}: fixed by the seed and the index, never by the outcome. */
+    /** The filler on segment {@code i}: fixed by the seed and the segment, never by the outcome. */
     public Loot fillerAt(int d, long i) {
-        Random r = new Random(seed * 1_000_003L + d * 7_919L + i * 104_729L);
+        long seg = Math.floorMod(i, (long) SEGMENTS);
+        Random r = new Random(seed * 1_000_003L + d * 7_919L + seg * 104_729L);
         r.nextInt();
         int pick = r.nextInt(fillerTotal);
         for (int k = 0; k < fillerWeights.length; k++) {

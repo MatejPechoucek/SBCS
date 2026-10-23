@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 
 /**
  * "Try it" and {@code /sbcs test dungeon}: a made-up chest ({@link OssuaryTests}) rolled on a screen of its own, since
- * there is no reward chest's menu to cover. The roll is the real one - chain, seals, levers and all - and never
+ * there is no reward chest's menu to cover. The roll is the real one - wheel, seals and all - and never
  * counted. Escape, or the roll's end, goes back to where it was opened from (the menu, for Try it).
  */
 public class OssuaryTestScreen extends Screen {
