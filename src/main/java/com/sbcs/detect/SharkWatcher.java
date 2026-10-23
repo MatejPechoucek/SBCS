@@ -79,6 +79,7 @@ public final class SharkWatcher {
     public void onChatLine(String text) {
         if (text == null) return;
         String s = DianaWatcher.plain(text);
+        if (ChatLines.fromPlayer(s)) return;
         long now = System.currentTimeMillis();
         if (SharkDrops.of(s) != null) {
             lastDropAt = now;

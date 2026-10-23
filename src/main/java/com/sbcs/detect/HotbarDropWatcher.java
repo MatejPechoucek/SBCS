@@ -16,7 +16,9 @@ import net.minecraft.world.item.component.CustomData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -134,12 +136,13 @@ public final class HotbarDropWatcher {
 
         Inventory inventory = player.getInventory();
         NonNullList<ItemStack> items = inventory.getNonEquipmentItems();
+        Map<CustomData, Read> reads = new IdentityHashMap<>();
         for (ItemStack stack : items) {
             if (stack == null || stack.isEmpty()) continue;
-            CompoundTag data = getSkyBlockData(stack);
-            if (data == null) continue;
+            Read read = read(stack, reads);
+            if (read == null) continue;
 
-            String id = data.getString("id").orElse(null);
+            String id = read.id();
             if (debugDump != null && id != null) {
                 if (debugDump.length() > 0) debugDump.append(", ");
                 debugDump.append(id).append('x').append(stack.getCount());
@@ -147,15 +150,13 @@ public final class HotbarDropWatcher {
             if (ID_BLOCK_BRAN.equals(id)) {
                 currentBlockBrans += stack.getCount();
             } else if (ID_PET.equals(id)) {
-                String petInfoRaw = data.getString("petInfo").orElse(null);
-                if (petInfoRaw != null) {
-                    String[] typeAndTier = parsePetInfo(petInfoRaw);
-                    if (typeAndTier != null && PET_TYPE_SCATHA.equals(typeAndTier[0])) {
-                        currentPetCounts.merge(typeAndTier[1], stack.getCount(), Integer::sum);
-                    }
+                String[] typeAndTier = read.pet();
+                if (typeAndTier != null && PET_TYPE_SCATHA.equals(typeAndTier[0])) {
+                    currentPetCounts.merge(typeAndTier[1], stack.getCount(), Integer::sum);
                 }
             }
         }
+        lastReads = reads;
 
         if (freshKillWindow) {
             SbcsClient.LOGGER.info("[SBCS/debug] kill window opened - previousBlockBrans={} currentBlockBrans={} previousPetCounts={} currentPetCounts={} cachedDrops={} allItemIds=[{}]",
@@ -278,9 +279,34 @@ public final class HotbarDropWatcher {
         SbcsClient.trigger(result);
     }
 
-    private static CompoundTag getSkyBlockData(ItemStack stack) {
+    /** What one stack's SkyBlock data says: its "id", and {type, tier} if it is a pet. */
+    private record Read(String id, String[] pet) {}
+
+    /**
+     * Last tick's reads, by the stack's data component itself. Item components are immutable, so an unchanged
+     * stack keeps the same CustomData instance from tick to tick and is not read again. Copying every stack's
+     * NBT (copyTag is a deep copy - SkyBlock items carry a lot) and parsing every pet's JSON twenty times a
+     * second was the bulk of this watcher's cost.
+     */
+    private Map<CustomData, Read> lastReads = new IdentityHashMap<>();
+
+    private Read read(ItemStack stack, Map<CustomData, Read> reads) {
         CustomData customData = stack.getComponents().get(DataComponents.CUSTOM_DATA);
-        return customData != null ? customData.copyTag() : null;
+        if (customData == null) return null;
+        Read read = reads.get(customData);
+        if (read == null) read = lastReads.get(customData);
+        if (read == null) {
+            CompoundTag data = customData.copyTag();
+            String id = data.getString("id").orElse(null);
+            String[] pet = null;
+            if (ID_PET.equals(id)) {
+                String petInfoRaw = data.getString("petInfo").orElse(null);
+                if (petInfoRaw != null) pet = parsePetInfo(petInfoRaw);
+            }
+            read = new Read(id, pet);
+        }
+        reads.put(customData, read);
+        return read;
     }
 
     /** Returns {type, tier} both upper-cased, or null if the petInfo JSON couldn't be read. */
@@ -291,7 +317,7 @@ public final class HotbarDropWatcher {
             String type = obj.has("type") ? obj.get("type").getAsString() : null;
             String tier = obj.has("tier") ? obj.get("tier").getAsString() : null;
             if (type == null || tier == null) return null;
-            return new String[]{type.toUpperCase(), tier.toUpperCase()};
+            return new String[]{type.toUpperCase(Locale.ROOT), tier.toUpperCase(Locale.ROOT)};
         } catch (JsonSyntaxException | ClassCastException | IllegalStateException e) {
             return null;
         }

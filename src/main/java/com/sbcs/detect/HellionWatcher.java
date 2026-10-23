@@ -118,6 +118,7 @@ public final class HellionWatcher {
     public void onChatLine(String text, long now) {
         if (text == null) return;
         String s = DianaWatcher.plain(text).trim();
+        if (ChatLines.fromPlayer(s)) return;
 
         if (s.startsWith("SLAYER BOSS!") && s.contains(NAME) && s.contains("spawned")) {
             spawnLineAt = now;

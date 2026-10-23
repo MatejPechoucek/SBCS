@@ -112,6 +112,7 @@ public final class LavaWatcher {
     public void onChatLine(String text, long now) {
         if (text == null) return;
         String s = DianaWatcher.plain(text).trim();
+        if (ChatLines.fromPlayer(s)) return;
 
         Creature caught = LavaDrops.ofCatch(s);
         if (caught != null) {
