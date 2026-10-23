@@ -715,6 +715,13 @@ public final class MenuView {
             rows.add(new SliderRow("blaze_hide", "Hide the HUD below", cfg.blazeHidePct, 0, 30, 1,
                     v -> cfg.blazeHidePct = v, v -> v == 0 ? "Off" : v + "% HP"));
             rows.add(new NoticeRow("The HUD and chat fade out when your Demonlord gets this low, so nothing gives the drop away."));
+            rows.add(new SectionRow("The fight"));
+            String[] stages = {"Fire pillars", "No pillars, bigger blaze"};
+            int st = Math.max(0, Math.min(1, cfg.blazeStage));
+            rows.add(new ValueRow("Stage", stages[st], st != 0, () -> { cfg.blazeStage = 1 - st; cfg.save(); },
+                    () -> { cfg.blazeStage = 1 - st; cfg.save(); }));
+            rows.add(toggle("Land the hits yourself (left click)", cfg.blazeClick, () -> cfg.blazeClick = !cfg.blazeClick, cfg));
+            if (cfg.blazeClick) rows.add(new NoticeRow("Each hit waits for your click; leave it and the fight carries on by itself. The drop is the same either way."));
             rows.add(new SectionRow("The endings"));
             rows.add(toggle("Drop banner (RARE DROP! and up)", cfg.blazeBanner, () -> cfg.blazeBanner = !cfg.blazeBanner, cfg));
             rows.add(toggle("Show the price", cfg.blazePrice, () -> cfg.blazePrice = !cfg.blazePrice, cfg));

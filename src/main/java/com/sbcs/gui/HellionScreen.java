@@ -44,6 +44,12 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
     private final com.sbcs.anim.SceneClock clock = new com.sbcs.anim.SceneClock(
             com.sbcs.SbcsClient.config == null ? 100 : com.sbcs.SbcsClient.config.blazeSpeed);
     private boolean active = true;
+    /** The menu's "Land the hits yourself": each hit holds the scene until a left click, or {@link #AUTO_HIT_MS}. */
+    private final boolean clickHits = com.sbcs.SbcsClient.config != null && com.sbcs.SbcsClient.config.blazeClick;
+    private final boolean noPillars = com.sbcs.SbcsClient.config != null && com.sbcs.SbcsClient.config.blazeStage == 1;
+    static final long AUTO_HIT_MS = 1500, EARLY_CLICK_MS = 300;
+    private boolean attackWasDown;
+    private long releasedHold = -1, clickedAt = -1;
 
     private GuiGraphicsExtractor g;
     private final Matrix3x2f matrix = new Matrix3x2f();
@@ -143,6 +149,7 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(g, mouseX, mouseY, partialTick);
+        hits();
         long t = clock.t();
         if (t >= tl.total()) {
             summary();
@@ -169,6 +176,8 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
         HellionScene.nthNote = nth;
         ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
         HellionScene.showBanner = SbcsClient.config == null || SbcsClient.config.blazeBanner;
+        HellionScene.noPillars = noPillars;
+        HellionScene.waitingForHit = clickHits && clock.held();
         this.g = g;
         PILLARS.begin(width, height, HellionScene.unitFor(height));
         boolean[] flushed = {false};
@@ -186,6 +195,43 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
         this.g = null;
         // The game itself, live, in a corner (SkyMaxx's gameplay view) - drawn last, over everything.
         com.sbcs.render.GameplayView.draw(g, pipFade(), 0xFFE8742A);
+    }
+
+    /**
+     * "Land the hits yourself": the scene stands just short of each hit (every other shield step, where the
+     * nametag's hits come off) until the player left-clicks - a click a moment early counts - or it has waited
+     * {@link #AUTO_HIT_MS}. Only the pace changes: what is drawn at each scene time is the same, so the tell still
+     * cannot say anything early. A skip jumps past every hold.
+     */
+    private void hits() {
+        boolean down = false;
+        try {
+            down = net.minecraft.client.Minecraft.getInstance().options.keyAttack.isDown();
+        } catch (Throwable ignored) {
+        }
+        boolean pressed = down && !attackWasDown;
+        attackWasDown = down;
+        if (!clickHits) return;
+        long now = System.currentTimeMillis();
+        if (pressed) clickedAt = now;
+        long t = clock.t();
+        if (clock.held()) {
+            if (now - clickedAt <= EARLY_CLICK_MS || clock.heldFor() >= AUTO_HIT_MS) {
+                releasedHold = t;
+                clickedAt = -1;
+                clock.release();
+            }
+            return;
+        }
+        if (clock.holding()) return;
+        long[] steps = HellionTimeline.STEPS;
+        for (int i = 1; i < steps.length; i += 2) {
+            long at = steps[i] - 1;
+            if (at > releasedHold && at >= t) {
+                clock.holdAt(at);
+                return;
+            }
+        }
     }
 
     /** The gameplay window's fade-in as the cutscene opens. */
