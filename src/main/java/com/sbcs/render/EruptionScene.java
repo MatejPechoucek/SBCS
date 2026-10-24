@@ -169,6 +169,7 @@ public final class EruptionScene {
         long erupt = tl.eruptAt();
         if (erupt >= 0 && t >= erupt && t < erupt + 500) shake += 4f * (1f - (t - erupt) / 500f);
         if (tl.ending() == Ending.KUUDRA) shake += 2.5f * tl.eye(t) * (1f - tl.eye(t)) * 4f + 2f * tl.swell(t) * (1f - tl.swell(t)) * 4f;
+        shake *= Punch.shake();
         if (ChopScene.calm) shake = 0f;
         if (shake > 0f) {
             ChopScene.sx0 += shake * (float) Math.sin(t * 0.13);

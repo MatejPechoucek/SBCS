@@ -1870,6 +1870,35 @@ public final class Voices {
     }
 
     /** The hang: the shield flickering between colours - a tiny glassy tick on each flicker. */
+    /** A pillar's countdown: a dry tick a second, higher and harder through its last second (step 1-4). */
+    public static Voice[] hellionCountTick(int step, int pillar) {
+        float hz = (pillar == 0 ? 880f : 987.77f) * (float) Math.pow(2, step / 12.0 * 2);
+        float amp = 0.07f + 0.025f * step;
+        return new Voice[]{
+                tone(hz, hz, 0.06f, amp, 0.0005f, new float[]{1f, 0.35f, 0.15f}, 0.5f),
+                noise(4200f, 2f, 0.02f, amp * 0.6f, 0.0005f, 0.3f, 7200L + step),
+        };
+    }
+
+    /**
+     * A pillar blowing up: a deep boom, the fire roaring out, terracotta clattering down round it. The
+     * second is a little bigger than the first.
+     */
+    public static Voice[] hellionPillarBlast(int pillar, long seed) {
+        float amp = pillar == 0 ? 0.8f : 0.95f;
+        java.util.List<Voice> out = new java.util.ArrayList<>();
+        out.add(tone(70f, 28f, 1.1f, 0.42f * amp, 0.002f, new float[]{1f, 0.6f, 0.3f}, 0.7f));
+        out.add(noise(180f, 0.6f, 0.8f, 0.24f * amp, 0.002f, 0.7f, seed));
+        out.add(noise(1300f, 0.9f, 0.45f, 0.15f * amp, 0.002f, 0.6f, seed + 1));
+        out.add(after(0.04f, noise(520f, 0.7f, 0.9f, 0.12f * amp, 0.15f, 0.6f, seed + 2)));
+        java.util.Random rng = new java.util.Random(seed);
+        for (int i = 0; i < 10; i++) {
+            float at = 0.35f + 0.06f * i + 0.12f * rng.nextFloat();
+            out.add(after(at, noise(500f + rng.nextFloat() * 700f, 1.2f, 0.07f, 0.07f * amp, 0.001f, 0.4f, seed + 10 + i)));
+        }
+        return out.toArray(new Voice[0]);
+    }
+
     public static Voice[] hellionFlicker(int i) {
         float hz = i % 2 == 0 ? 2637f : 3136f;
         return new Voice[]{tone(hz, hz, 0.04f, 0.05f, 0.0005f, new float[]{1f, 0.2f}, 0.6f)};

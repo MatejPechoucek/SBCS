@@ -221,6 +221,7 @@ public class ChopScreen extends Screen implements ChopScene.Canvas, Cutscene {
         }
         this.g = g;
         ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
+        com.sbcs.render.Punch.set(t >= ChopTimeline.SPLIT, tl.verdict() != null && tl.verdict().win(), tl.price());
         ChopScene.draw(this, tl, t, width, height);
         bustLine(t);
         this.g = null;

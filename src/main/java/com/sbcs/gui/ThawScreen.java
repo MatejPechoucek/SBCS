@@ -264,7 +264,7 @@ public class ThawScreen extends Screen {
 
         // ---- the whole picture shakes, not just the models ----
         float[] shake = shake(t, sh);
-        shakeMargin = sh * 0.05f + 2f;
+        shakeMargin = sh * 0.09f + 2f;
         Matrix3x2fStack pose = g.pose();
         // The Dye's heartbeat: the whole frame thumps outward with each beat.
         float beat = heartbeat(t);
@@ -1734,7 +1734,20 @@ public class ThawScreen extends Screen {
             x += force * (float) Math.sin(dt / 23.0);
             y += force * 0.8f * (float) Math.sin(dt / 17.0 + 0.6);
         }
-        return new float[]{x * k, y * k};
+        // Matej, 2026-10-24: everything harder. Before the landing it is the same for every haul.
+        if (t >= tl.finaleStart()) {
+            com.sbcs.render.Punch.setLevel(true, switch (tl.finale()) {
+                case CRASH -> 0f;
+                case REVEAL -> 0.2f;
+                case EXPLODE -> 0.5f;
+                case LOCKET -> 0.8f;
+                case SPECIAL -> 1f;
+            });
+        } else {
+            com.sbcs.render.Punch.setLevel(false, 0f);
+        }
+        float p = com.sbcs.render.Punch.shake();
+        return new float[]{x * k * p, y * k * p};
     }
 
     // ================================================================== leaving

@@ -55,8 +55,8 @@ final class ChopFill {
             project(tl.strikeX(k), 2f * ChopTimeline.HEAD + 0.5f, 0f);
             float ox = P[0], oy = P[1];
             Random r = new Random(tl.seed() * 31 + 101 + k);
-            float power = k == 3 ? 1.15f : 0.75f + 0.1f * k;
-            for (int i = 0; i < DEBRIS[k]; i++) {
+            float power = (k == 3 ? 1.15f : 0.75f + 0.1f * k) * (0.7f + 0.3f * Punch.now);
+            for (int i = 0, n = Punch.count(DEBRIS[k]); i < n; i++) {
                 boolean spark = i % 3 == 0;
                 // Out and up, to either side - never at the viewer.
                 float a = (float) Math.toRadians(-172 + r.nextFloat() * 164);
@@ -168,7 +168,7 @@ final class ChopFill {
         float u = px();
         Random r = new Random(tl.seed() * 7 + 3);
         float sec = (t - from) / 1000f;
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < Punch.count(40); i++) {
             float x0 = r.nextFloat() * w;
             float speed = h * (0.05f + r.nextFloat() * 0.07f);
             float phase = r.nextFloat();
@@ -191,7 +191,7 @@ final class ChopFill {
         float u = px();
         Random r = new Random(tl.seed() * 19 + 5);
         float sec = k * 0.7f;
-        for (int i = 0; i < 26; i++) {
+        for (int i = 0; i < Punch.count(26); i++) {
             float a = (float) Math.toRadians(-180 + r.nextFloat() * 180);
             float speed = w * (0.12f + r.nextFloat() * 0.22f);
             float x = ox + (float) Math.cos(a) * speed * sec;

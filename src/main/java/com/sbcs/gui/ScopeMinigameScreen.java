@@ -580,7 +580,7 @@ public class ScopeMinigameScreen extends Screen {
         float th = escapeAt >= 0 ? 0f : thrash(now);
         if (th > 0f && lastImpactAt >= 0) {
             float ms = now - lastImpactAt;
-            float force = SCREEN_SHAKE * Math.min(sw, sh) * th * (1f + SHAKE_GROWTH * tension())
+            float force = SCREEN_SHAKE * com.sbcs.render.Punch.BASE * Math.min(sw, sh) * th * (1f + SHAKE_GROWTH * tension())
                     * knob(SbcsClient.config == null ? 100 : SbcsClient.config.calmEffects ? 0 : SbcsClient.config.shakeStrength);
             shakeX = force * (float) Math.sin(ms / 21.0);
             shakeY = force * 0.7f * (float) Math.sin(ms / 14.0 + 1.1);
@@ -592,7 +592,7 @@ public class ScopeMinigameScreen extends Screen {
         // by the largest offset the shake can ever reach means the edge being uncovered
         // is always still inside the art. Computed from the constants rather than from
         // this frame's offset, so the margin does not itself change as the shake decays.
-        shakeMargin = Math.round(SCREEN_SHAKE * Math.min(sw, sh) * (1f + SHAKE_GROWTH)
+        shakeMargin = Math.round(SCREEN_SHAKE * com.sbcs.render.Punch.BASE * Math.min(sw, sh) * (1f + SHAKE_GROWTH)
                 * knob(SbcsClient.config == null ? 100 : SbcsClient.config.calmEffects ? 0 : SbcsClient.config.shakeStrength))
                 + 2;
 

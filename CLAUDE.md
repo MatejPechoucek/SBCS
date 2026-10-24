@@ -1217,6 +1217,20 @@ able to click it or just have it automatic")** - both options, the classic is th
 300 ms early counts) or 1.5 s has passed; `HellionScene.waitingForHit` shows "Left click to hit!". Only the pace changes;
 a skip jumps past every hold.
 
+**Pillars explode in turn (2026-10-24, Matej)** - `blazeStage` 2, `HellionScene.countdown`: each pillar's tag counts down to
+its own `HellionTimeline.PILLAR_BLOW` (2300, 3600), where it is blown apart (`blast`: flash, a ring of fire squares,
+burning chunks, smoke; a shake; `Voices.hellionPillarBlast` and `hellionCountTick`, `HellionSound.schedule(tl, true)`),
+gone by `BLOW_MS` later; then the tag moves over the blaze, counting to the reveal. The same on every run (HellionTest).
+
+## Punch (2026-10-24, Matej: "make all effects more exaggerated")
+
+`render/Punch`: every scene's screen shake, `ChopScene.glow` (alpha and size) and the bigger particle bursts (ChopFill
+debris, rays' motes, Ossuary bursts, Hellion's blasts) scale by `Punch.now`. It is `BASE` 1.5 on every run until the
+reveal, and from the reveal a win raises it with its price (`set(revealed, win, coins)`, log scale 500k -> 200M, up to
+`MAX` 2.4) or its band (`setLevel`: the Ossuary, the Thaw's finale). Busts stay at the base. Each screen sets it once a
+frame next to `ChopScene.calm`; the Scatha uses `BASE` alone. Offline tests and previews leave it at the base. Calm
+effects still zero the shakes.
+
 ## The Seraph's Glyph (the Enderman slayer, Voidgloom Seraph tier IV) - 0.2.63
 
 Pitched 2026-10-03; the designer approved it with three calls: **End Crystals at the sides**, the

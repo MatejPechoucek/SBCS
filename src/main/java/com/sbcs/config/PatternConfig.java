@@ -236,7 +236,7 @@ public class PatternConfig {
     public int blazeSpeed = 100;
     /**
      * Hellion's stage (2026-10-23, a friend's idea, kept as an option): 0 the fight's two fire pillars either side,
-     * 1 no pillars and a bigger blaze.
+     * 1 no pillars and a bigger blaze, 2 (2026-10-24, Matej) the pillars each count down and explode in turn, then the blaze.
      */
     public int blazeStage = 0;
     /** Hellion's hits: false they come by themselves, true the player lands each with a left click (it goes on alone if left). */
@@ -443,7 +443,7 @@ public class PatternConfig {
         dianaSize = clamp(dianaSize, 60, 140);
         blazeVolume = clamp(blazeVolume, 0, 150);
         blazeSpeed = clamp(blazeSpeed, 50, 200);
-        blazeStage = clamp(blazeStage, 0, 1);
+        blazeStage = clamp(blazeStage, 0, 2);
         seraphVolume = clamp(seraphVolume, 0, 150);
         seraphSpeed = clamp(seraphSpeed, 50, 200);
         lavaVolume = clamp(lavaVolume, 0, 150);
