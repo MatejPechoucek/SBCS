@@ -1,0 +1,91 @@
+# M6 reward chests, from https://hypixelskyblock.minecraft.wiki/w/The_Catacombs_-_Floor_VI/Master_Mode_Loot (read 2026-10-22)
+# chest,base_cost,item,quality,added_cost,weight,first_roll_chance_percent
+wood,0,Enchanted Book (Bank I),100,0,20,17.094
+wood,0,Enchanted Book (Ultimate Jerry I),100,0,1,0.8547
+wood,0,Enchanted Book (Feather Falling VI),80,0,35,29.9145
+wood,0,Enchanted Book (Infinite Quiver VI),80,0,30,25.641
+wood,0,Enchanted Book (Rejuvenate I),80,0,30,25.641
+gold,100000,Enchanted Book (Swarm I),170,400000,2,1.1111
+gold,100000,Hot Potato Book,160,0,5,2.7778
+gold,100000,Giant Tooth,160,400000,4,2.2222
+gold,100000,Enchanted Book (Combo I),120,0,16,8.8889
+gold,100000,Enchanted Book (No Pain No Gain I),120,0,16,8.8889
+gold,100000,Enchanted Book (Ultimate Wise I),100,0,20,11.1111
+gold,100000,Enchanted Book (Bank I),100,0,15,8.3333
+gold,100000,Enchanted Book (Wisdom I),100,0,15,8.3333
+gold,100000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5556
+gold,100000,Enchanted Book (Rejuvenate I),80,0,40,22.2222
+gold,100000,Enchanted Book (Feather Falling VI),80,0,25,13.8889
+gold,100000,Enchanted Book (Infinite Quiver VI),80,0,20,11.1111
+diamond,250000,Necromancer Lord Boots,210,1250000,2,1.0582
+diamond,250000,Enchanted Book (Swarm I),170,250000,6,3.1746
+diamond,250000,Giant Tooth,160,250000,7,3.7037
+diamond,250000,Hot Potato Book,160,0,5,2.6455
+diamond,250000,Enchanted Book (Combo I),120,0,16,8.4656
+diamond,250000,Enchanted Book (No Pain No Gain I),120,0,16,8.4656
+diamond,250000,Enchanted Book (Ultimate Wise I),100,0,20,10.582
+diamond,250000,Enchanted Book (Bank I),100,0,15,7.9365
+diamond,250000,Enchanted Book (Wisdom I),100,0,15,7.9365
+diamond,250000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5291
+diamond,250000,Enchanted Book (Rejuvenate I),80,0,40,21.164
+diamond,250000,Enchanted Book (Feather Falling VI),80,0,25,13.2275
+diamond,250000,Enchanted Book (Infinite Quiver VI),80,0,20,10.582
+emerald,500000,Necromancer Lord Helmet,240,1500000,2,1.0695
+emerald,500000,Sadan's Brooch,220,1000000,2,1.0695
+emerald,500000,Necromancer Lord Boots,210,1000000,3,1.6043
+emerald,500000,Enchanted Book (Swarm I),170,0,8,4.2781
+emerald,500000,Giant Tooth,160,0,8,4.2781
+emerald,500000,Hot Potato Book,160,0,5,2.6738
+emerald,500000,Enchanted Book (No Pain No Gain I),160,0,5,2.6738
+emerald,500000,Enchanted Book (Combo I),120,0,16,8.5561
+emerald,500000,Enchanted Book (Infinite Quiver VI),120,0,16,8.5561
+emerald,500000,Enchanted Book (Ultimate Wise I),100,0,20,10.6952
+emerald,500000,Enchanted Book (Bank I),100,0,15,8.0214
+emerald,500000,Enchanted Book (Wisdom I),100,0,15,8.0214
+emerald,500000,Enchanted Book (Last Stand I),100,0,1,0.5348
+emerald,500000,Enchanted Book (Rejuvenate II),80,0,25,13.369
+emerald,500000,Enchanted Book (Ultimate Jerry II),80,0,25,13.369
+emerald,500000,Enchanted Book (Feather Falling VI),80,0,20,10.6952
+obsidian,1000000,Fourth Master Star,320,7000000,3,0.6565
+obsidian,1000000,Summoning Ring,310,11000000,1,0.2188
+obsidian,1000000,Necromancer Sword,285,9000000,2,0.4376
+obsidian,1000000,Necromancer Lord Leggings,260,3000000,3,0.6565
+obsidian,1000000,Master Skull - Tier 4,250,7000000,6,1.3129
+obsidian,1000000,Recombobulator 3000,250,5000000,6,1.3129
+obsidian,1000000,Soulweaver Gloves,250,4000000,3,0.6565
+obsidian,1000000,Necromancer Lord Helmet,240,1000000,4,0.8753
+obsidian,1000000,Sadan's Brooch,220,500000,4,0.8753
+obsidian,1000000,Necromancer Lord Boots,210,500000,6,1.3129
+obsidian,1000000,Fuming Potato Book,175,0,9,1.9694
+obsidian,1000000,Enchanted Book (Swarm I),170,0,15,3.2823
+obsidian,1000000,Hot Potato Book,160,0,40,8.7527
+obsidian,1000000,Giant Tooth,160,0,15,3.2823
+obsidian,1000000,Enchanted Book (Combo I),120,0,40,8.7527
+obsidian,1000000,Enchanted Book (No Pain No Gain I),120,0,40,8.7527
+obsidian,1000000,Enchanted Book (Last Stand I),100,0,60,13.1291
+obsidian,1000000,Enchanted Book (Rejuvenate II),100,0,60,13.1291
+obsidian,1000000,Enchanted Book (Bank II),100,0,45,9.8468
+obsidian,1000000,Enchanted Book (Ultimate Wise I),100,0,45,9.8468
+obsidian,1000000,Enchanted Book (Wisdom I),100,0,45,9.8468
+obsidian,1000000,Enchanted Book (Ultimate Jerry II),100,0,4,0.8753
+bedrock,2000000,Precursor Eye,370,28000000,3,0.1108
+bedrock,2000000,Giant's Sword,340,23000000,6,0.2216
+bedrock,2000000,Necromancer Lord Chestplate,325,8000000,8,0.2954
+bedrock,2000000,Fourth Master Star,320,6000000,10,0.3693
+bedrock,2000000,Summoning Ring,310,10000000,10,0.3693
+bedrock,2000000,Fel Skull,300,4000000,15,0.5539
+bedrock,2000000,Necromancer Sword,285,8000000,20,0.7386
+bedrock,2000000,Master Skull - Tier 4,270,6000000,10,0.3693
+bedrock,2000000,Necromancer Lord Leggings,260,2000000,30,1.1078
+bedrock,2000000,Recombobulator 3000,250,4000000,120,4.4313
+bedrock,2000000,Soulweaver Gloves,250,3000000,30,1.1078
+bedrock,2000000,Necromancer Lord Helmet,240,0,40,1.4771
+bedrock,2000000,Sadan's Brooch,220,0,40,1.4771
+bedrock,2000000,Necromancer Lord Boots,210,0,60,2.2157
+bedrock,2000000,Fuming Potato Book,175,0,200,7.3855
+bedrock,2000000,Enchanted Book (Swarm I),170,0,150,5.5391
+bedrock,2000000,Giant Tooth,160,0,50,1.8464
+bedrock,2000000,Enchanted Book (Combo II),120,0,200,7.3855
+bedrock,2000000,Enchanted Book (No Pain No Gain II),120,0,175,6.4623
+bedrock,2000000,Enchanted Book (Last Stand II),100,0,380,14.0325
+bedrock,2000000,Enchanted Book (Rejuvenate III),100,0,380,14.0325

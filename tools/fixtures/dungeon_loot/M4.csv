@@ -1,0 +1,72 @@
+# M4 reward chests, from https://hypixelskyblock.minecraft.wiki/w/The_Catacombs_-_Floor_IV/Master_Mode_Loot (read 2026-10-22)
+# chest,base_cost,item,quality,added_cost,weight,first_roll_chance_percent
+wood,0,Enchanted Book (Bank I),100,0,20,17.094
+wood,0,Enchanted Book (Ultimate Jerry I),100,0,1,0.8547
+wood,0,Enchanted Book (Feather Falling VI),80,0,35,29.9145
+wood,0,Enchanted Book (Infinite Quiver VI),80,0,30,25.641
+wood,0,Enchanted Book (Rejuvenate I),80,0,30,25.641
+gold,100000,Enchanted Book (Rend I),170,400000,2,1.0526
+gold,100000,Hot Potato Book,160,0,5,2.6316
+gold,100000,Enchanted Book (Combo I),120,0,16,8.4211
+gold,100000,Enchanted Book (No Pain No Gain I),120,0,16,8.4211
+gold,100000,Necromancer's Brooch,110,0,14,7.3684
+gold,100000,Enchanted Book (Ultimate Wise I),100,0,20,10.5263
+gold,100000,Enchanted Book (Bank I),100,0,15,7.8947
+gold,100000,Enchanted Book (Wisdom I),100,0,15,7.8947
+gold,100000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5263
+gold,100000,Enchanted Book (Rejuvenate I),80,0,40,21.0526
+gold,100000,Enchanted Book (Feather Falling VI),80,0,25,13.1579
+gold,100000,Enchanted Book (Infinite Quiver VI),80,0,20,10.5263
+diamond,250000,Spirit Stone,185,500000,2,1.0309
+diamond,250000,Enchanted Book (Rend I),170,250000,2,1.0309
+diamond,250000,EPIC Spirit Pet,170,750000,2,1.0309
+diamond,250000,Hot Potato Book,160,0,5,2.5773
+diamond,250000,Enchanted Book (Combo I),120,0,16,8.2474
+diamond,250000,Enchanted Book (No Pain No Gain I),120,0,16,8.2474
+diamond,250000,Necromancer's Brooch,110,0,14,7.2165
+diamond,250000,Enchanted Book (Ultimate Wise I),100,0,20,10.3093
+diamond,250000,Enchanted Book (Bank I),100,0,15,7.732
+diamond,250000,Enchanted Book (Wisdom I),100,0,15,7.732
+diamond,250000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5155
+diamond,250000,Enchanted Book (Rejuvenate I),80,0,40,20.6186
+diamond,250000,Enchanted Book (Feather Falling VI),80,0,25,12.8866
+diamond,250000,Enchanted Book (Infinite Quiver VI),80,0,20,10.3093
+emerald,500000,Spirit Boots,260,3000000,1,0.9009
+emerald,500000,Spirit Bone,240,1000000,1,0.9009
+emerald,500000,Fuming Potato Book,220,500000,1,0.9009
+emerald,500000,LEGENDARY Spirit Pet,210,4500000,1,0.9009
+emerald,500000,Spirit Stone,185,500000,2,1.8018
+emerald,500000,Enchanted Book (Rend I),170,0,2,1.8018
+emerald,500000,Hot Potato Book,160,0,7,6.3063
+emerald,500000,Enchanted Book (Rejuvenate II),130,0,12,10.8108
+emerald,500000,Enchanted Book (Combo I),120,0,10,9.009
+emerald,500000,Enchanted Book (No Pain No Gain I),120,0,10,9.009
+emerald,500000,Enchanted Book (Bank I),100,0,18,16.2162
+emerald,500000,Enchanted Book (Last Stand I),100,0,10,9.009
+emerald,500000,Enchanted Book (Ultimate Wise I),100,0,10,9.009
+emerald,500000,Enchanted Book (Wisdom I),100,0,10,9.009
+emerald,500000,Enchanted Book (Ultimate Jerry II),100,0,1,0.9009
+emerald,500000,Enchanted Book (Feather Falling VI),80,0,10,9.009
+emerald,500000,Enchanted Book (Infinite Quiver VI),80,0,4,3.6036
+obsidian,1000000,Second Master Star,270,5000000,8,2.7304
+obsidian,1000000,Spirit Mask,270,14000000,1,0.3413
+obsidian,1000000,Spirit Boots,260,3000000,4,1.3652
+obsidian,1000000,Spirit Shortbow,260,3000000,4,1.3652
+obsidian,1000000,Spirit Sword,260,2000000,4,1.3652
+obsidian,1000000,Master Skull - Tier 3,250,1000000,12,4.0956
+obsidian,1000000,Recombobulator 3000,250,5000000,12,4.0956
+obsidian,1000000,Spirit Wing,250,1000000,8,2.7304
+obsidian,1000000,Spirit Bone,240,500000,8,2.7304
+obsidian,1000000,Fuming Potato Book,220,500000,12,4.0956
+obsidian,1000000,LEGENDARY Spirit Pet,210,4000000,4,1.3652
+obsidian,1000000,Spirit Stone,185,500000,8,2.7304
+obsidian,1000000,Enchanted Book (Rend II),170,0,8,2.7304
+obsidian,1000000,Hot Potato Book,160,0,20,6.8259
+obsidian,1000000,Enchanted Book (Combo I),120,0,20,6.8259
+obsidian,1000000,Enchanted Book (No Pain No Gain I),120,0,16,5.4608
+obsidian,1000000,Enchanted Book (Last Stand I),100,0,32,10.9215
+obsidian,1000000,Enchanted Book (Rejuvenate II),100,0,32,10.9215
+obsidian,1000000,Enchanted Book (Bank II),100,0,24,8.1911
+obsidian,1000000,Enchanted Book (Ultimate Wise I),100,0,24,8.1911
+obsidian,1000000,Enchanted Book (Wisdom I),100,0,24,8.1911
+obsidian,1000000,Enchanted Book (Ultimate Jerry II),100,0,4,1.3652

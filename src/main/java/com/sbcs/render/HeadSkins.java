@@ -48,6 +48,11 @@ public final class HeadSkins {
     public static final HeadSkins LAVA = new HeadSkins("/assets/sbcs/lava_heads.json", "lava_head_");
     /** The Crystal Nucleus bundle's head drops (the Jade Dye, the Quick Claw), by NEU id. */
     public static final HeadSkins NUCLEUS = new HeadSkins("/assets/sbcs/nucleus_heads.json", "nucleus_head_");
+    /**
+     * The Ossuary's dealers, by floor boss (BONZO ... NECRON, SADAN): bosses are in no repo, so each wears its floor's
+     * own head drop from NEU (Bonzo's Mask, the Wither helmets...) and Sadan the bestiary's Terracotta.
+     */
+    public static final HeadSkins DUNGEON = new HeadSkins("/assets/sbcs/dungeon_heads.json", "dungeon_head_");
 
     private final String resource, bankPrefix;
     private Map<String, String> blobs;
@@ -95,6 +100,7 @@ public final class HeadSkins {
             case "slayer" -> SLAYER;
             case "lava" -> LAVA;
             case "nucleus" -> NUCLEUS;
+            case "dungeon" -> DUNGEON;
             default -> null;
         };
     }

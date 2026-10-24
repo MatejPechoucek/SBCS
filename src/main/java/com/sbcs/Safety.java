@@ -182,7 +182,8 @@ public final class Safety {
     // ------------------------------------------------------------------ hooks
 
     /** The optional hooks (mixins with require = 0): their feature is lost, not the game, if one cannot apply. */
-    public static final String[] OPTIONAL_HOOKS = {"dropped items", "item pickups", "HUD hidden for other mods"};
+    public static final String[] OPTIONAL_HOOKS = {"dropped items", "item pickups", "HUD hidden for other mods",
+            "dungeon chest cover", "dungeon roll drawing"};
     private static final boolean[] hooked = new boolean[OPTIONAL_HOOKS.length];
 
     /** An optional mixin's handler ran, so it is in. On hot paths (every entity, every frame): one array read. */

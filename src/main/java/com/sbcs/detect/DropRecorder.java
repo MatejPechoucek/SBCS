@@ -99,6 +99,12 @@ public final class DropRecorder {
     private static final Pattern NUCLEUS = Pattern.compile(
             "(?i)nucleus|crystal found|you placed the|loot bundle|jade dye|divan's alloy|quick claw|flawless");
 
+    /** Dungeons (2026-10-22, for "The Ossuary"): reward chests, Croesus, Kismet, the bosses' lines. */
+    private static final Pattern DUNGEON = Pattern.compile(
+            "(?i)RARE REWARD|reward chest|croesus|kismet|reroll|catacombs|master mode|extra stats|team score"
+                    + "|wood chest|gold chest|diamond chest|emerald chest|obsidian chest|bedrock chest|essence"
+                    + "|\\[BOSS\\]|necron|maxor|storm|goldor|livid|sadan|thorn|professor|bonzo|scarf");
+
     private static boolean enabled() {
         return SbcsClient.config == null || SbcsClient.config.recordDrops;
     }
@@ -129,6 +135,11 @@ public final class DropRecorder {
             JsonObject o = new JsonObject();
             o.addProperty("line", text);
             record("nucleus_line", o);
+        }
+        if (enabled() && DUNGEON.matcher(text).find()) {
+            JsonObject o = new JsonObject();
+            o.addProperty("line", text);
+            record("dungeon_line", o);
         }
         // The Fishing Festival's lines, for the same reason: SharkDrops was written before a real
         // Megalodon or tooth line had been seen.

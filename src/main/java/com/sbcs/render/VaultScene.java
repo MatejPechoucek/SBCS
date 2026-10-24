@@ -45,12 +45,16 @@ public final class VaultScene {
     static final float DOOR_X = 8.6f, DOOR_Y = 9.6f, DOOR_Z = 1.0f;
     static final float RECESS = 3.6f;
     /**
-     * The sockets' ring. At 6 the upper-left socket sat under the bolts (Matej, 2026-10-22: "the locks clip the
-     * crystal"); at 5 it clears them even with the bolts drawn back.
+     * The sockets' ring. At 6 with a socket at the top, the one at upper left sat under the bolts (Matej, 2026-10-22:
+     * "the locks clip the crystal"); at 5 the dial's corners swept through all five as it spun (Matej's friends,
+     * 2026-10-23). Now the ring points its odd socket at the hinge, so the two on the bolts' side sit at +-144 degrees,
+     * well in from the edge, and it is wide enough that the dial's corners ({@link #DIAL_H} * sqrt 2) clear every rim.
      */
-    static final float SOCKET_R = 5.0f;
+    static final float SOCKET_R = 6.0f;
+    /** The dial's half-size: its corners reach 3.5, the sockets' rims start at 4.15. */
+    static final float DIAL_H = 2.45f;
     /** The bolts: half their length, where they sit across the door's free edge into the frame, how far they draw back. */
-    static final float BOLT_HX = 1.25f, BOLT_X = -DOOR_X - 0.25f, BOLT_TRAVEL = 1.5f;
+    static final float BOLT_HX = 1.1f, BOLT_X = -DOOR_X - 0.25f, BOLT_TRAVEL = 1.2f;
     static final float[] BOLT_Y = {7.2f, 3.6f, 0f, -3.6f, -7.2f};
 
     static final int[] FULL = {0, 0, 16, 16};
@@ -312,7 +316,7 @@ public final class VaultScene {
         if (t >= VaultTimeline.REVEAL && tl.ending().win()) dglow = 0.3f * (float) Math.exp(-(t - VaultTimeline.REVEAL) / 300.0);
         dglow = Math.max(dglow, 0.7f * heat);
         String[] dt = {TEX_STEEL, TEX_STEEL, TEX_STEEL, TEX_STEEL, TEX_DIAL, TEX_STEEL};
-        ChopScene.boxAxes(at[0], at[1], at[2], X, Y, DZ, 3f, 3f, 0.55f, dt, FULL6, dc[0], dc[1], dc[2], dglow, a, c);
+        ChopScene.boxAxes(at[0], at[1], at[2], X, Y, DZ, DIAL_H, DIAL_H, 0.55f, dt, FULL6, dc[0], dc[1], dc[2], dglow, a, c);
         float[] hub = onDoor(0f, 0f, front + 1.1f + 0.6f);
         float[] hc = greyed(0.85f, 0.72f, 0.42f);
         ChopScene.boxAxes(hub[0], hub[1], hub[2], X, Y, DZ, 0.8f, 0.8f, 0.6f, ChopScene.all(TEX_STEEL), FULL6,
@@ -327,7 +331,7 @@ public final class VaultScene {
         float[] bc = greyed(0.86f, 0.72f, 0.42f);
         if (heat > 0f) bc = mix3(bc, new float[]{1f, 0.6f, 0.2f}, heat);
         for (int k = 0; k < 5; k++) {
-            float open = VaultTimeline.bolt(k, t);
+            float open = tl.boltNow(k, t);
             float rattle = VaultTimeline.strain(t) * 0.12f * (float) Math.sin(t * 0.7 + k * 1.9);
             float[] b = onDoor(BOLT_X + BOLT_TRAVEL * open + rattle, BOLT_Y[k], front + 0.42f);
             ChopScene.boxAxes(b[0], b[1], b[2], DX, DY, DZ, BOLT_HX, 0.5f, 0.42f, ChopScene.all(TEX_STEEL), FULL6,
@@ -339,8 +343,35 @@ public final class VaultScene {
 
     /** Socket {@code k}'s place on the door's face, round the dial from the top. */
     static float[] socket(int k) {
-        double phi = Math.toRadians(90 - 72 * k);
+        double phi = socketAngle(k);
         return new float[]{(float) Math.cos(phi) * SOCKET_R, (float) Math.sin(phi) * SOCKET_R};
+    }
+
+    /**
+     * The smallest gap, world units, between the door's fittings: the dial's corners and every socket's rim, and every
+     * bolt (drawn back as far as it goes, rattling) and every rim. Negative is a clip. For VaultTest.
+     */
+    public static float clearance() {
+        float rimX = 1.4f, rimY = 1.85f, best = Float.MAX_VALUE;
+        for (int k = 0; k < 5; k++) {
+            float[] p = socket(k);
+            // The dial's corners sweep a circle of radius DIAL_H * sqrt 2; the rim's nearest point to the centre.
+            float nx = Math.max(Math.abs(p[0]) - rimX, 0f), ny = Math.max(Math.abs(p[1]) - rimY, 0f);
+            best = Math.min(best, (float) Math.hypot(nx, ny) - DIAL_H * (float) Math.sqrt(2));
+            for (float by : BOLT_Y) {
+                float right = BOLT_X + BOLT_TRAVEL + 0.12f + BOLT_HX;
+                float gapX = p[0] - rimX - right, gapY = Math.abs(by - p[1]) - rimY - 0.5f;
+                best = Math.min(best, Math.max(gapX, gapY));
+            }
+            // Every rim inside the door's face.
+            best = Math.min(best, Math.min(DOOR_X - Math.abs(p[0]) - rimX, DOOR_Y - Math.abs(p[1]) - rimY));
+        }
+        return best;
+    }
+
+    /** Socket {@code k}'s angle on the ring, radians: clockwise from upper left, the fifth on the hinge side. */
+    static double socketAngle(int k) {
+        return Math.toRadians(144 - 72 * k);
     }
 
     static void crystal(ChopScene.Canvas c, VaultTimeline tl, long t, int k, float[] at, float[] X, float[] Y, float[] Z, float a) {
@@ -386,7 +417,7 @@ public final class VaultScene {
     static float[] flightPos(int k, float f) {
         float[] p = socket(k);
         float[] end = onDoor(p[0], p[1], doorHz + 1.0f);
-        double phi = Math.toRadians(90 - 72 * k);
+        double phi = socketAngle(k);
         float sx = end[0] + (float) Math.cos(phi) * 16f, sy = end[1] + (float) Math.sin(phi) * 11f + 4f, sz = end[2] + 30f;
         float e = ease(f);
         float side = 1f - (1f - e) * (1f - e) * (1f - e);
@@ -455,8 +486,18 @@ public final class VaultScene {
         }
         trails(layer, tl, t);
         switch (tl.ending()) {
-            case BUST -> dust(layer, tl, t, r);
+            case BUST -> {
+                switch (tl.bustStyle()) {
+                    case CRACK -> dust(layer, tl, t, r);
+                    case SWING -> {
+                        dust(layer, tl, t, r);
+                        moth(layer, tl, t);
+                    }
+                    case JAM -> jam(layer, tl, t, r);
+                }
+            }
             case OPEN -> {
+                if (tl.openStyle() == VaultTimeline.OpenStyle.SLAM) slamSparks(layer, tl, t, r);
                 // The held crack: the vault's light round the door's free edge until it swings.
                 long from = VaultTimeline.REVEAL + VaultTimeline.HOLD;
                 if (t >= from && t < VaultTimeline.SWING + 250) {
@@ -478,6 +519,63 @@ public final class VaultScene {
                 blast(layer, tl, t, r, true);
             }
             default -> { }
+        }
+    }
+
+    /** A bust that just swung open: a moth flutters out of the empty vault and away up to the left. */
+    static void moth(CrystalVeins.Fill layer, VaultTimeline tl, long t) {
+        float s = (t - VaultTimeline.REVEAL - 700) / 1600f;
+        if (s < 0f || s > 1f) return;
+        float x = -2f - 16f * s + 1.5f * (float) Math.sin(s * 19), y = -1f + 14f * s + 1.2f * (float) Math.sin(s * 31);
+        ChopScene.project(x, y, BODY_Z + 3f + 6f * s);
+        float a = ChopScene.sceneAlpha * Math.min(1f, (1f - s) * 3f);
+        boolean up = ((t / 70) & 1) == 0;
+        square(layer, ChopScene.P[0], ChopScene.P[1], unit, ChopScene.alpha(a) | 0xB8AE96);
+        square(layer, ChopScene.P[0] - unit, ChopScene.P[1] - (up ? unit : 0), unit, ChopScene.alpha(a) | 0xD8CEB4);
+        square(layer, ChopScene.P[0] + unit, ChopScene.P[1] - (up ? unit : 0), unit, ChopScene.alpha(a) | 0xD8CEB4);
+    }
+
+    /** A jammed bust: a spark off each bolt as it slams home, and grey smoke curling off the door's edge. */
+    static void jam(CrystalVeins.Fill layer, VaultTimeline tl, long t, Random r) {
+        for (int k = 0; k < 5; k++) {
+            long since = t - VaultTimeline.jamBolt(k);
+            if (since < 0 || since > 300) continue;
+            float[] b = onDoor(BOLT_X - BOLT_HX, BOLT_Y[k], doorHz + 0.4f);
+            ChopScene.project(b[0], b[1], b[2]);
+            float k01 = since / 300f;
+            for (int i = 0; i < 6; i++) {
+                double ang = Math.PI * (0.6 + 0.8 * i / 5.0);
+                float d = (1.5f + 7f * k01) * ChopScene.size;
+                square(layer, ChopScene.P[0] + (float) Math.cos(ang) * d, ChopScene.P[1] - (float) Math.sin(ang) * d + 6f * k01 * k01 * ChopScene.size,
+                        unit, ChopScene.alpha(ChopScene.sceneAlpha * (1f - k01)) | (i % 2 == 0 ? 0xFFE7A0 : 0xFF9A30));
+            }
+        }
+        long since = t - VaultTimeline.jamBolt(0);
+        if (since < 0) return;
+        for (int i = 0; i < 24; i++) {
+            float delay = r.nextFloat() * 700f, life = 1100f + r.nextFloat() * 600f;
+            float y0 = (r.nextFloat() * 2f - 1f) * DOOR_Y * 0.9f;
+            float s = (since - delay) / life;
+            if (s < 0f || s > 1f) continue;
+            float rise = 1f - (1f - s) * (1f - s);
+            ChopScene.project(-DOOR_X - 0.3f - 2.5f * rise + 0.8f * (float) Math.sin(s * 9 + i), y0 + 6f * rise, BODY_Z + 1.5f + 2f * rise);
+            int col = i % 2 == 0 ? 0x6A6A70 : 0x8A8A90;
+            square(layer, ChopScene.P[0], ChopScene.P[1], unit * (s < 0.5f ? 2 : 1), ChopScene.alpha(ChopScene.sceneAlpha * 0.7f * (1f - s)) | col);
+        }
+    }
+
+    /** A rare roll kicked open: sparks off the hinges and the safe's side as the door bangs into it. */
+    static void slamSparks(CrystalVeins.Fill layer, VaultTimeline tl, long t, Random r) {
+        long since = t - VaultTimeline.slamHit();
+        if (since < 0 || since > 650) return;
+        float k01 = since / 650f;
+        int light = tl.prize().light();
+        for (int i = 0; i < 30; i++) {
+            float vx = 2f + r.nextFloat() * 10f, vy = (r.nextFloat() * 2f - 0.6f) * 9f, vz = r.nextFloat() * 8f;
+            float y0 = (r.nextFloat() * 2f - 1f) * DOOR_Y;
+            ChopScene.project(BODY_X + vx * k01, y0 + vy * k01 - 10f * k01 * k01, BODY_Z + 1f + vz * k01);
+            int col = i % 3 == 0 ? 0xFFFFFF : i % 3 == 1 ? 0xFFD27A : light;
+            square(layer, ChopScene.P[0], ChopScene.P[1], unit, ChopScene.alpha(ChopScene.sceneAlpha * (1f - k01)) | col);
         }
     }
 

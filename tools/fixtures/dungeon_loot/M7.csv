@@ -1,0 +1,83 @@
+# M7 reward chests, from https://hypixelskyblock.minecraft.wiki/w/The_Catacombs_-_Floor_VII/Master_Mode_Loot (read 2026-10-22)
+# chest,base_cost,item,quality,added_cost,weight,first_roll_chance_percent
+wood,0,Enchanted Book (Bank I),100,0,20,17.094
+wood,0,Enchanted Book (Ultimate Jerry I),100,0,1,0.8547
+wood,0,Enchanted Book (Feather Falling VI),80,0,35,29.9145
+wood,0,Enchanted Book (Infinite Quiver VI),80,0,30,25.641
+wood,0,Enchanted Book (Rejuvenate I),80,0,30,25.641
+gold,100000,Wither Boots,170,2400000,2,1.0638
+gold,100000,Hot Potato Book,160,0,5,2.6596
+gold,100000,Wither Catalyst,160,900000,5,2.6596
+gold,100000,Precursor Gear,140,400000,7,3.7234
+gold,100000,Enchanted Book (Combo I),120,0,16,8.5106
+gold,100000,Enchanted Book (No Pain No Gain I),120,0,16,8.5106
+gold,100000,Enchanted Book (Ultimate Wise I),100,0,20,10.6383
+gold,100000,Enchanted Book (Bank I),100,0,15,7.9787
+gold,100000,Enchanted Book (Wisdom I),100,0,15,7.9787
+gold,100000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5319
+gold,100000,Enchanted Book (Rejuvenate I),80,0,40,21.2766
+gold,100000,Enchanted Book (Feather Falling VI),80,0,25,13.2979
+gold,100000,Enchanted Book (Infinite Quiver VI),80,0,20,10.6383
+diamond,250000,Wither Helmet,210,3750000,1,0.5208
+diamond,250000,Enchanted Book (Soul Eater I),180,750000,2,1.0417
+diamond,250000,Wither Boots,170,2250000,2,1.0417
+diamond,250000,Hot Potato Book,160,0,5,2.6042
+diamond,250000,Wither Catalyst,160,750000,5,2.6042
+diamond,250000,Precursor Gear,140,250000,8,4.1667
+diamond,250000,Enchanted Book (Combo I),120,0,16,8.3333
+diamond,250000,Enchanted Book (No Pain No Gain I),120,0,16,8.3333
+diamond,250000,Enchanted Book (Ultimate Wise I),100,0,20,10.4167
+diamond,250000,Enchanted Book (Bank I),100,0,15,7.8125
+diamond,250000,Enchanted Book (Wisdom I),100,0,15,7.8125
+diamond,250000,Enchanted Book (Ultimate Jerry I),100,0,1,0.5208
+diamond,250000,Enchanted Book (Rejuvenate I),80,0,40,20.8333
+diamond,250000,Enchanted Book (Feather Falling VI),80,0,25,13.0208
+diamond,250000,Enchanted Book (Infinite Quiver VI),80,0,20,10.4167
+emerald,500000,Wither Leggings,250,5500000,1,0.5376
+emerald,500000,Wither Cloak Sword,230,4000000,1,0.5376
+emerald,500000,Wither Blood,210,2000000,2,1.0753
+emerald,500000,Wither Helmet,210,3500000,2,1.0753
+emerald,500000,Enchanted Book (Soul Eater I),180,500000,6,3.2258
+emerald,500000,Wither Boots,170,2000000,4,2.1505
+emerald,500000,Hot Potato Book,160,0,5,2.6882
+emerald,500000,Enchanted Book (No Pain No Gain I),160,0,5,2.6882
+emerald,500000,Wither Catalyst,160,500000,5,2.6882
+emerald,500000,Precursor Gear,140,0,7,3.7634
+emerald,500000,Enchanted Book (Combo I),120,0,16,8.6022
+emerald,500000,Enchanted Book (Infinite Quiver VI),120,0,16,8.6022
+emerald,500000,Enchanted Book (Ultimate Wise I),100,0,20,10.7527
+emerald,500000,Enchanted Book (Bank I),100,0,15,8.0645
+emerald,500000,Enchanted Book (Wisdom I),100,0,15,8.0645
+emerald,500000,Enchanted Book (Last Stand I),100,0,10,5.3763
+emerald,500000,Enchanted Book (Rejuvenate II),80,0,25,13.4409
+emerald,500000,Enchanted Book (Feather Falling VI),80,0,20,10.7527
+emerald,500000,Enchanted Book (Ultimate Jerry II),80,0,10,5.3763
+obsidian,1000000,Fifth Master Star,320,8000000,1,0.1506
+obsidian,1000000,Wither Chestplate,310,9000000,1,0.1506
+obsidian,1000000,Enchanted Book (One For All I),290,1000000,1,0.1506
+obsidian,1000000,Master Skull - Tier 4,250,7000000,4,0.6024
+obsidian,1000000,Wither Leggings,250,5000000,4,0.6024
+obsidian,1000000,Recombobulator 3000,250,5000000,2,0.3012
+obsidian,1000000,Wither Cloak Sword,230,3500000,6,0.9036
+obsidian,1000000,Wither Blood,210,1500000,6,0.9036
+obsidian,1000000,Wither Helmet,210,3000000,6,0.9036
+obsidian,1000000,Enchanted Book (Soul Eater I),180,0,14,2.1084
+obsidian,1000000,Fuming Potato Book,175,0,14,2.1084
+obsidian,1000000,Wither Shard,170,0,350,52.7108
+obsidian,1000000,Wither Boots,170,1500000,14,2.1084
+obsidian,1000000,Wither Catalyst,160,0,14,2.1084
+obsidian,1000000,Hot Potato Book,160,0,10,1.506
+obsidian,1000000,Precursor Gear,140,0,16,2.4096
+obsidian,1000000,Enchanted Book (Combo I),120,0,32,4.8193
+obsidian,1000000,Enchanted Book (No Pain No Gain I),120,0,10,1.506
+obsidian,1000000,Enchanted Book (Rejuvenate II),100,0,50,7.5301
+obsidian,1000000,Enchanted Book (Ultimate Wise I),100,0,40,6.0241
+obsidian,1000000,Enchanted Book (Last Stand I),100,0,30,4.5181
+obsidian,1000000,Enchanted Book (Bank II),100,0,15,2.259
+obsidian,1000000,Enchanted Book (Wisdom I),100,0,15,2.259
+obsidian,1000000,Enchanted Book (Ultimate Jerry II),100,0,8,1.2048
+bedrock,2000000,Implosion,380,48000000,25,0.1799
+bedrock,2000000,Shadow Warp,380,48000000,25,0.1799
+bedrock,2000000,Wither Shield,380,48000000,25,0.1799
+bedrock,2000000,Necron's Handle,380,98000000,18,0.1296
+bedrock,2000000,Dark Claymore,360,148000000,10,0.072

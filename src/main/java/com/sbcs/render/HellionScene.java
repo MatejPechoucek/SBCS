@@ -61,7 +61,12 @@ public final class HellionScene {
         Attunement att = tl.attunement(t);
         float clang = HellionTimeline.clang(t);
 
-        pillars(c, pillars, tl, t, w, h, att, clang, master);
+        if (!noPillars) pillars(c, pillars, tl, t, w, h, att, clang, master);
+        else if (t < HellionTimeline.REVEAL + 160) {
+            // No pillars: the fight's nametag hangs over the blaze instead.
+            ChopScene.project(0f, HEAD_Y + 9f, 0f);
+            tag(c, ChopScene.P[0], ChopScene.P[1], t, clang, master * ease((t - 300) / 300f), w, h);
+        }
 
         // A glow of the shield's colour behind the blaze.
         ChopScene.project(0f, HEAD_Y, 0f);
@@ -71,6 +76,7 @@ public final class HellionScene {
 
         blaze(c, tl, t, att, clang);
         sigils(c, tl, t, att, clang, w, h);
+        if (waitingForHit) hitPrompt(c, t, w, h, master);
         if (shatter >= 0f) shards(c, tl, t, w, h);
         if (burn >= 0f) ash(c, tl, t, h);
 
@@ -80,6 +86,21 @@ public final class HellionScene {
             else item(c, pillars, tl, t, w, h);
         }
         ChopScene.sceneAlpha = 1f;
+    }
+
+    /** The menu's stage: no fire pillars, and the blaze bigger in their place. Set by the screen. */
+    public static boolean noPillars;
+    /** The scene stands waiting for the player's click to land the next hit. Set by the screen. */
+    public static boolean waitingForHit;
+
+    /** "Left click to hit": pulsing under the blaze while a hit waits for the player. */
+    static void hitPrompt(ChopScene.Canvas c, long t, int w, int h, float alpha) {
+        float p = 0.6f + 0.4f * (float) Math.sin(System.currentTimeMillis() / 140.0);
+        float ts = Math.min(1.35f, h / 300f);
+        String msg = "Left click to hit!";
+        float tw = msg.length() * 6f * ts;
+        c.fill(w / 2f - tw / 2f - 4f, h * 0.95f - 7f * ts, tw + 8f, 13f * ts, ChopScene.alpha(0.5f * alpha) | 0x000000);
+        c.text(msg, w / 2f, h * 0.95f, ts * (1f + 0.06f * p), ChopScene.alpha(p * alpha) | 0xFFD060);
     }
 
     // ================================================================== camera
@@ -98,12 +119,12 @@ public final class HellionScene {
         float appear = HellionTimeline.appear(t);
         // A slight push in through the cycle, and a kick on each clang.
         float push = 1f + 0.10f * ease(t / (float) HellionTimeline.REVEAL) + 0.025f * HellionTimeline.clang(t);
-        ChopScene.size = h * 0.62f / 30f * appear * push;
+        ChopScene.size = h * 0.62f / 30f * appear * push * (noPillars ? 1.25f : 1f);
         ChopScene.fx = 0f;
         ChopScene.fy = 0.5f;
         ChopScene.fz = 0f;
         ChopScene.sx0 = w / 2f;
-        ChopScene.sy0 = h * 0.47f;
+        ChopScene.sy0 = h * (noPillars ? 0.43f : 0.47f);
         if (tl.rolls()) {
             // As the die stops, the camera leans over it and closes in - after the reveal, so it tells
             // nothing. The High Class one leans in through its bullet time, and further.
@@ -1017,30 +1038,34 @@ public final class HellionScene {
 
             // The nametag, as the fight shows it: seconds left, then hits left.
             if (t < HellionTimeline.REVEAL + 160 && rise > 0.9f) {
-                // The last second in tenths, red, landing on 0.0 on the reveal frame - whole seconds rounded up
-                // never reached 0 (the review, H3).
-                long ms = Math.max(0, HellionTimeline.REVEAL - t);
-                boolean last = ms < 1000;
-                int steps = Math.max(0, HellionTimeline.step(t) + 1);
-                int hits = Math.max(0, 8 - steps / 2);
                 ChopScene.project(px, top + BLOCK * 3.4f, pz);
-                float ts = Math.min(1.2f, h / 300f);
-                String secs = last ? (ms / 1000) + "." + (ms / 100 % 10) + "s" : (long) Math.ceil(ms / 1000.0) + "s";
-                String hit = hits + " Hits";
-                float cw = 6f * ts;
-                float wTot = (secs.length() + 1 + hit.length()) * cw;
-                // Kept on the screen: on 4:3 the pillar stands near the edge and its tag ran a few pixels off.
-                float edge = wTot / 2f + 6f * ts;
-                float nx = Math.max(edge, Math.min(w - edge, ChopScene.P[0]));
-                c.fill(nx - wTot / 2f - 2f, ChopScene.P[1] - 6f * ts, wTot + 4f, 11f * ts,
-                        ChopScene.alpha(0.45f * alpha) | 0x000000);
-                c.text(secs, nx - wTot / 2f + secs.length() * cw / 2f, ChopScene.P[1], ts,
-                        ChopScene.alpha(alpha) | (last ? 0xFF5555 : 0xFFFF55));
-                // White, red only for a moment as a hit comes off - it used to flip with every clang (the review, H4).
-                c.text(hit, nx + wTot / 2f - hit.length() * cw / 2f, ChopScene.P[1], ts,
-                        ChopScene.alpha(alpha) | (clang > 0.3f && steps % 2 == 0 && steps > 0 ? 0xFF5555 : 0xFFFFFF));
+                tag(c, ChopScene.P[0], ChopScene.P[1], t, clang, alpha, w, h);
             }
         }
+    }
+
+    /** The fight's nametag, "6s 8 Hits", centred on (x, y) and kept on the screen. */
+    static void tag(ChopScene.Canvas c, float x, float y, long t, float clang, float alpha, int w, int h) {
+        if (alpha <= 0.02f) return;
+        // The last second in tenths, red, landing on 0.0 on the reveal frame - whole seconds rounded up
+        // never reached 0 (the review, H3).
+        long ms = Math.max(0, HellionTimeline.REVEAL - t);
+        boolean last = ms < 1000;
+        int steps = Math.max(0, HellionTimeline.step(t) + 1);
+        int hits = Math.max(0, 8 - steps / 2);
+        float ts = Math.min(1.2f, h / 300f);
+        String secs = last ? (ms / 1000) + "." + (ms / 100 % 10) + "s" : (long) Math.ceil(ms / 1000.0) + "s";
+        String hit = hits + " Hits";
+        float cw = 6f * ts;
+        float wTot = (secs.length() + 1 + hit.length()) * cw;
+        // Kept on the screen: on 4:3 the pillar stands near the edge and its tag ran a few pixels off.
+        float edge = wTot / 2f + 6f * ts;
+        float nx = Math.max(edge, Math.min(w - edge, x));
+        c.fill(nx - wTot / 2f - 2f, y - 6f * ts, wTot + 4f, 11f * ts, ChopScene.alpha(0.45f * alpha) | 0x000000);
+        c.text(secs, nx - wTot / 2f + secs.length() * cw / 2f, y, ts, ChopScene.alpha(alpha) | (last ? 0xFF5555 : 0xFFFF55));
+        // White, red only for a moment as a hit comes off - it used to flip with every clang (the review, H4).
+        c.text(hit, nx + wTot / 2f - hit.length() * cw / 2f, y, ts,
+                ChopScene.alpha(alpha) | (clang > 0.3f && steps % 2 == 0 && steps > 0 ? 0xFF5555 : 0xFFFFFF));
     }
 
     /** A snuffed pillar fire's puff: grey squares off its top, growing and drifting up and out. */

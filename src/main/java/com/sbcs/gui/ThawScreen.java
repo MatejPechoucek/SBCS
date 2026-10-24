@@ -108,6 +108,28 @@ public class ThawScreen extends Screen {
 
     // The Locket's ending, in ms from the moment the last pick lands.
     private static final long LOCKET_ORBIT = 450, LOCKET_SNAP = 2600;
+    /**
+     * The Locket's block holds this long after the last hit - shaking, gold light leaking out of its cracks - and then
+     * goes all at once: a big burst, chunks tumbling in the slow motion, two shockwaves (Matej's friends, 2026-10-23:
+     * "the ice breaking for locket should be exaggerated").
+     */
+    private static final long LOCKET_BREAK = 340;
+
+    /**
+     * What the last hit does to the ice on a worse drop (a common or uncommon headline), picked per corpse: it only
+     * shows from the landing, where every ending is already told apart (the same friends: "slightly unique variations
+     * of what could happen to the ice for worse drops ... a small hole or some water drips").
+     */
+    private enum Fate {
+        /** It goes dull grey-blue and a little rubble drops off - the original. */
+        DULL,
+        /** The pick punches a small dark hole where it hit; a frosty puff and a drip from its lip. */
+        HOLE,
+        /** It starts to melt: water drips off its bottom edge, splashing below. */
+        DRIP,
+        /** A corner chunk cracks off and tumbles away. */
+        CHIP
+    }
     /** How long the price counter takes to climb to the price. */
     private static final long COUNT_MS = 1500;
 
@@ -118,6 +140,7 @@ public class ThawScreen extends Screen {
     private final List<Strike> strikes;
     private final int n;
     private final int variant;
+    private final Fate fate;
     /** Corpses since the last legendary, as it stood before this one was counted. */
     private final int streakBefore;
     /** Not final: "Quick Thaw" moves it back, so a bust's strikes are skipped. */
@@ -141,7 +164,7 @@ public class ThawScreen extends Screen {
     private boolean finaleFired, floodFired, trayFilledFired;
     /** The last step of the final strike's cycle that has sounded: -1 none, 0 the opening glow. */
     private int climbed = -1;
-    private boolean beat1Fired, beat2Fired, swellFired, orbitFired, snapFired, countLanded;
+    private boolean beat1Fired, beat2Fired, swellFired, orbitFired, snapFired, countLanded, breakFired;
     private int lettersSounded, coinTicks;
     /** The Locket's price, fixed the moment the counter starts so it cannot jump mid-count. */
     private LivePrice.Quote quote;
@@ -176,6 +199,7 @@ public class ThawScreen extends Screen {
         this.strikes = tl.strikes();
         this.n = strikes.size();
         this.variant = rng.nextInt(ThawArt.VARIANTS);
+        this.fate = Fate.values()[rng.nextInt(Fate.values().length)];
         // A pose per corpse, one way round or the other, so a run of corpses is not the
         // same frozen man every time.
         ThawMeshes.Pose pose = ThawMeshes.POSES[rng.nextInt(ThawMeshes.POSES.length)];
@@ -262,6 +286,8 @@ public class ThawScreen extends Screen {
 
         drawFlare(g, sw, sh, t, master);
         drawIce(g, sw, sh, t, master);
+        drawFate(g, sw, sh, t, master);
+        drawLocketBreak(g, sw, sh, t, master);
         drawShards(g, v, master);
         drawPick(g, sw, sh, v, master);
         drawFrost(g, sw, sh, t, master);
@@ -387,8 +413,8 @@ public class ThawScreen extends Screen {
                 SbcsAudio.onThawStrike(i, n, flareOn() ? s.flare().ordinal() : 1);
                 long v = vt(t);
                 if (s.last() && tl.finale() == Finale.LOCKET) {
-                    // The block goes, in slow motion.
-                    burst(iceX, iceY, 70, sh * 0.0085f, v, 0xFFFFF2C8);
+                    // The block holds, cracking gold, for LOCKET_BREAK - it goes below.
+                    burst(strikeX, strikeY, 26, sh * 0.005f, v, 0xFFFFF2C8);
                 } else {
                     burst(strikeX, strikeY, 7 + i * 2, sh * 0.0035f, v, 0xFFE8F8FF);
                 }
@@ -405,10 +431,14 @@ public class ThawScreen extends Screen {
             switch (tl.finale()) {
                 case CRASH -> {
                     SbcsAudio.onThawCrash();
-                    // A little rubble off the bottom of the block, and nothing else.
-                    burst(iceX, iceY + iceSize * 0.42f, 10, sh * 0.0022f, t, 0xFFA8B8C8);
+                    // A little rubble off the bottom of the block, and whatever this corpse's ice does.
+                    burst(iceX, iceY + iceSize * 0.42f, fate == Fate.DULL ? 10 : 5, sh * 0.0022f, t, 0xFFA8B8C8);
+                    fateBurst(sh, t);
                 }
-                case REVEAL -> burst(strikeX, strikeY, 18, sh * 0.0045f, t, 0xFFE8F8FF);
+                case REVEAL -> {
+                    burst(strikeX, strikeY, 18, sh * 0.0045f, t, 0xFFE8F8FF);
+                    fateBurst(sh, t);
+                }
                 case EXPLODE -> {
                     SbcsAudio.onThawExplode();
                     burst(iceX, iceY, 70, sh * 0.0085f, t, 0xFFE8F8FF);
@@ -422,6 +452,16 @@ public class ThawScreen extends Screen {
         }
         if (n == 0 || t < tl.finaleStart()) return;
         long u = t - tl.finaleStart();
+
+        if (tl.finale() == Finale.LOCKET && !breakFired && u >= LOCKET_BREAK) {
+            breakFired = true;
+            long v = vt(t);
+            SbcsAudio.onThawExplode();
+            // All of it at once: a cloud of chips, a white spray, and big chunks that hang in the slow motion.
+            burst(iceX, iceY, 150, sh * 0.011f, v, 0xFFFFF2C8);
+            burst(iceX, iceY, 60, sh * 0.007f, v, 0xFFE8F8FF);
+            chunks(iceX, iceY, 24, sh, v, 0xFFF4FAFF);
+        }
 
         if (tl.finale() == Finale.SPECIAL) {
             long drain = tl.specialDrain();
@@ -499,6 +539,142 @@ public class ThawScreen extends Screen {
         }
     }
 
+    /** Big pieces of the block: slow, spinning, long-lived - the Locket's break and a chipped corner. */
+    private void chunks(float x, float y, int count, int sh, long t, int argb) {
+        for (int i = 0; i < count; i++) {
+            double a = rng.nextDouble() * Math.PI * 2;
+            float v = sh * 0.0055f * (0.35f + rng.nextFloat());
+            shards.add(new Shard(x + (float) Math.cos(a) * iceSize * 0.15f, y + (float) Math.sin(a) * iceSize * 0.15f,
+                    (float) Math.cos(a) * v, (float) Math.sin(a) * v - sh * 0.003f, rng.nextFloat() * 6.28f,
+                    (rng.nextFloat() - 0.5f) * 0.012f, sh * (0.022f + rng.nextFloat() * 0.035f), t, 1300 + rng.nextInt(900), argb));
+        }
+    }
+
+    /** What a worse drop's ice does at the landing, by this corpse's fate. */
+    private void fateBurst(int sh, long t) {
+        switch (fate) {
+            case HOLE -> burst(strikeX, strikeY, 16, sh * 0.004f, t, 0xFFD8ECFA);
+            case CHIP -> {
+                // The top corner nearest the pick cracks off and drops, turning.
+                float cx = iceX + iceSize * 0.30f, cy = iceY - iceSize * 0.36f;
+                shards.add(new Shard(cx, cy, sh * 0.0009f, -sh * 0.0012f, 0.4f, 0.006f, sh * 0.075f, t, 1500, 0xFFE4F2FC));
+                burst(cx, cy, 12, sh * 0.003f, t, 0xFFE8F8FF);
+            }
+            default -> { }
+        }
+    }
+
+    /** A worse drop's fate, over the ice from the landing: the hole, the drips. */
+    private void drawFate(GuiGraphicsExtractor g, int sw, int sh, long t, float master) {
+        if (n == 0 || t < tl.finaleStart() || (tl.finale() != Finale.CRASH && tl.finale() != Finale.REVEAL)) return;
+        long u = t - tl.finaleStart();
+        float out = t >= tl.outroStart() ? 1f - clamp01((t - tl.outroStart()) / 500f) : 1f;
+        float a = master * out;
+        if (a <= 0.02f) return;
+        float cell = Math.max(1f, Math.round(sh / 180f));
+        switch (fate) {
+            case HOLE -> {
+                // A ragged dark hole, a rim of crushed white ice round it, punched out over 140 ms.
+                float r = sh * 0.024f * easeOutBack(clamp01(u / 140f));
+                int cells = Math.round(r / cell) + 2;
+                for (int yy = -cells; yy <= cells; yy++) {
+                    for (int xx = -cells; xx <= cells; xx++) {
+                        double ang = Math.atan2(yy, xx);
+                        float edge = r * (0.82f + 0.18f * (float) Math.sin(ang * 5 + variant) * (float) Math.cos(ang * 3));
+                        float d = (float) Math.hypot(xx * cell, yy * cell);
+                        int col;
+                        if (d < edge - cell) col = d < edge * 0.5f ? 0x060A12 : 0x0E1A2A;
+                        else if (d < edge + cell * 0.6f) col = 0xEAF6FF;
+                        else continue;
+                        g.fill(Math.round(strikeX + xx * cell), Math.round(strikeY + yy * cell),
+                                Math.round(strikeX + xx * cell + cell), Math.round(strikeY + yy * cell + cell), argb(a * 0.92f, col));
+                    }
+                }
+                // A drop gathering on the lip and falling, every 700 ms.
+                long cycle = 700, k = u % cycle;
+                if (u > 300) drop(g, strikeX, strikeY + r, k, cycle, sh, cell, a);
+            }
+            case DRIP -> {
+                // Drops off the bottom edge, staggered, splashing a little way below.
+                float bottom = iceY + iceSize * 0.43f;
+                for (int i = 0; i < 6; i++) {
+                    float x = iceX + (i / 5f - 0.5f) * iceSize * 0.62f + (i % 2) * cell * 2f;
+                    long cycle = 520 + 90L * ((i * 7 + variant) % 5), k = (u + 173L * i) % cycle;
+                    if (u < 200L + 90L * i) continue;
+                    drop(g, x, bottom, k, cycle, sh, cell, a);
+                }
+                // The wet sheen along the bottom edge.
+                g.fill(Math.round(iceX - iceSize * 0.36f), Math.round(bottom - cell), Math.round(iceX + iceSize * 0.36f), Math.round(bottom),
+                        argb(a * 0.35f * clamp01(u / 400f), 0x9FD4FF));
+            }
+            default -> { }
+        }
+    }
+
+    /** One drop: swelling on its edge for the first third of its cycle, then falling, then a splash of three. */
+    private void drop(GuiGraphicsExtractor g, float x, float y, long k, long cycle, int sh, float cell, float a) {
+        long hang = cycle / 3;
+        float fall = sh * 0.17f;
+        int col = 0x9FD4FF;
+        if (k < hang) {
+            float grow = k / (float) hang;
+            g.fill(Math.round(x), Math.round(y), Math.round(x + cell), Math.round(y + cell * (1 + grow)), argb(a * (0.4f + 0.5f * grow), col));
+            return;
+        }
+        float s = (k - hang) / (float) (cycle - hang);
+        float dy = fall * Math.min(1f, s * s * 2.2f);
+        if (s * s * 2.2f < 1f) {
+            g.fill(Math.round(x), Math.round(y + dy), Math.round(x + cell), Math.round(y + dy + cell * 2), argb(a * 0.9f, col));
+            return;
+        }
+        float sp = Math.min(1f, (s - 0.674f) / 0.326f);
+        for (int i = -1; i <= 1; i++) {
+            float sx = x + i * cell * (1 + 3 * sp), sy = y + fall - cell * 2.5f * sp * (1 - sp) * 4 * (i == 0 ? 1.3f : 0.8f);
+            g.fill(Math.round(sx), Math.round(sy), Math.round(sx + cell), Math.round(sy + cell), argb(a * 0.8f * (1 - sp), col));
+        }
+    }
+
+    /** The Locket's block before it goes: gold light leaking out through it, and two shockwaves when it does. */
+    private void drawLocketBreak(GuiGraphicsExtractor g, int sw, int sh, long t, float master) {
+        if (tl.finale() != Finale.LOCKET || n == 0 || t < tl.finaleStart()) return;
+        long u = t - tl.finaleStart();
+        Identifier ray = TextureBank.id(ThawArt.TEX_RAY), aura = TextureBank.id(ThawArt.TEX_AURA);
+        if (ray == null || aura == null) return;
+        Matrix3x2fStack pose = g.pose();
+        if (u < LOCKET_BREAK + 120) {
+            // Shafts of gold out of the cracks, longer and brighter until it bursts.
+            float p = clamp01(u / (float) LOCKET_BREAK);
+            float a = master * (u < LOCKET_BREAK ? 0.3f + 0.6f * p : 0.9f * (1f - (u - LOCKET_BREAK) / 120f));
+            Random r = new Random(variant * 31L + 7);
+            for (int i = 0; i < 9; i++) {
+                float len = sh * (0.08f + 0.35f * p) * (0.6f + 0.6f * r.nextFloat()), w = sh * (0.012f + 0.02f * r.nextFloat());
+                pose.pushMatrix();
+                pose.translate(iceX, iceY);
+                pose.rotate(r.nextFloat() * 6.283f);
+                blit(g, ray, 0f, -w / 2f, len, w, argb(a, FLARE_GOLD));
+                pose.popMatrix();
+            }
+            float gs = iceSize * (0.8f + 0.9f * p);
+            blit(g, aura, iceX - gs / 2f, iceY - gs / 2f, gs, gs, argb(master * 0.55f * p, FLARE_GOLD));
+        }
+        // Two rings racing out from where the block was: gold, then white.
+        for (int ring = 0; ring < 2; ring++) {
+            long since = u - LOCKET_BREAK - 110L * ring;
+            if (since < 0 || since > 900) continue;
+            float f = since / 900f;
+            float rad = sh * (0.08f + 0.85f * easeOutCubic(f));
+            float a = master * (1f - f) * (ring == 0 ? 0.8f : 0.55f);
+            int col = ring == 0 ? FLARE_GOLD : 0xFFFFFF;
+            int dots = 36;
+            float ds = sh * (0.05f - 0.02f * f);
+            for (int i = 0; i < dots; i++) {
+                double ang = i * Math.PI * 2 / dots + ring * 0.09;
+                float x = iceX + (float) Math.cos(ang) * rad, y = iceY + (float) Math.sin(ang) * rad * 0.72f;
+                blit(g, aura, x - ds / 2f, y - ds / 2f, ds, ds, argb(a, col));
+            }
+        }
+    }
+
     // ================================================================== the block
 
     /** How many crack stages the front face has reached. */
@@ -512,7 +688,8 @@ public class ThawScreen extends Screen {
     /** Whether the block has been blown apart and should no longer be drawn. */
     private boolean shattered(long t) {
         return switch (tl.finale()) {
-            case EXPLODE, LOCKET -> t >= tl.finaleStart() + 40;
+            case EXPLODE -> t >= tl.finaleStart() + 40;
+            case LOCKET -> t >= tl.finaleStart() + LOCKET_BREAK;
             case SPECIAL -> t >= tl.finaleStart() + tl.specialDrain();
             default -> false;
         };
@@ -587,7 +764,20 @@ public class ThawScreen extends Screen {
         r = mix(r, fc >> 16 & 255, glow * 0.18f);
         gr = mix(gr, fc >> 8 & 255, glow * 0.18f);
         b = mix(b, fc & 255, glow * 0.18f);
-        if (tl.finale() == Finale.CRASH && t >= tl.finaleStart()) {
+        if (tl.finale() == Finale.LOCKET && t >= tl.finaleStart()) {
+            // Gold from the inside out while it holds.
+            float gold = 0.55f * clamp01((t - tl.finaleStart()) / (float) LOCKET_BREAK);
+            r = mix(r, FLARE_GOLD >> 16 & 255, gold);
+            gr = mix(gr, FLARE_GOLD >> 8 & 255, gold);
+            b = mix(b, FLARE_GOLD & 255, gold);
+        }
+        if (tl.finale() == Finale.CRASH && t >= tl.finaleStart() && fate == Fate.DRIP) {
+            // Melting rather than dulling: wetter, bluer.
+            float wet = ease(clamp01((t - tl.finaleStart()) / 600f));
+            r = mix(r, 170, wet);
+            gr = mix(gr, 210, wet);
+            b = mix(b, 245, wet);
+        } else if (tl.finale() == Finale.CRASH && t >= tl.finaleStart()) {
             float dull = ease(clamp01((t - tl.finaleStart()) / 420f));
             r = mix(r, 150, dull);
             gr = mix(gr, 160, dull);
@@ -1196,7 +1386,7 @@ public class ThawScreen extends Screen {
         if (shard == null || aura == null) return;
         long orbit = tl.paced(LOCKET_ORBIT);
         float cx = sw / 2f, cy = sh * SHOW_Y;
-        float fly = easeOutCubic(clamp01((u - 120) / (float) Math.max(1L, orbit)));
+        float fly = easeOutCubic(clamp01((u - LOCKET_BREAK) / (float) Math.max(1L, orbit)));
         if (fly <= 0f) return;
         float p = clamp01((u - orbit) / (float) Math.max(1L, snap - orbit));
         float radius = sh * 0.24f * (float) Math.pow(1f - p, 1.4);
@@ -1526,6 +1716,17 @@ public class ThawScreen extends Screen {
             float force = sh * 0.018f * (float) Math.exp(-dt / 260.0);
             x += force * (float) Math.sin(dt / 23.0);
             y += force * 0.8f * (float) Math.sin(dt / 17.0 + 0.6);
+        }
+        if (tl.finale() == Finale.LOCKET && n > 0 && t >= tl.finaleStart() + LOCKET_BREAK) {
+            float dt = t - tl.finaleStart() - LOCKET_BREAK;
+            float force = sh * 0.034f * (float) Math.exp(-dt / 240.0);
+            x += force * (float) Math.sin(dt / 21.0);
+            y += force * 0.85f * (float) Math.sin(dt / 15.0 + 0.4);
+        } else if (tl.finale() == Finale.LOCKET && n > 0 && t >= tl.finaleStart()) {
+            // While it holds, trembling harder until it goes.
+            float p = (t - tl.finaleStart()) / (float) LOCKET_BREAK;
+            x += sh * 0.006f * p * (float) Math.sin(t / 9.0);
+            y += sh * 0.004f * p * (float) Math.sin(t / 7.0 + 1.3);
         }
         if (big >= 0 && t >= big) {
             float dt = t - big;
