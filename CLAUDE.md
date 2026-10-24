@@ -1849,6 +1849,14 @@ it in is `ui.json` plus the `.ttf`.
 Offline suites, both runnable without the game: `tools/VgTest.java` (parser, 52 checks
 including all three real messages) and `tools/ThawTest.java` (timeline, flare and climb, 15).
 
+## The history page (2026-10-24)
+
+`docs/history/index.html` is every commit on every branch as one interactive page (branch graph, grouped by PR,
+search, each commit's files). `tools/gen_history.py` writes it from `docs/history/template.html` - edit the template,
+never index.html. `.github/workflows/history.yml` regenerates it on every push (any branch) and branch deletion and
+commits it to main as "Update the history page"; the generator leaves those commits out of the page. Open the file
+in a browser to view it (GitHub shows HTML as source).
+
 ## Layout
 
 ```

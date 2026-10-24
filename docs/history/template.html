@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Generated into index.html by tools/gen_history.py; edit this file, not index.html. -->
+<title>SBCS Commit History</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one long ledger of commits, graph rail on the left, controls pinned on top. */
+:root{
+  --bg:#f3f1ec; --panel:#fbfaf7; --fg:#22201c; --muted:#6d685e; --line:#dcd7cc; --hover:#ece8df;
+  --accent:#a8740c; --add:#2f7d3a; --del:#b3362b;
+  --display:"Silkscreen",ui-monospace,monospace;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --l0:#a8740c; --l1:#2f6fb3; --l2:#8a3fa8; --l3:#2f8a6a; --l4:#c2512f; --l5:#5a6b7d; --l6:#b0306a;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#16171a; --panel:#1d1f23; --fg:#e9e5dc; --muted:#9a958a; --line:#2f3238; --hover:#25282d;
+  --accent:#e2b04a; --add:#6cc77a; --del:#ef7a6c;
+  --l0:#e2b04a; --l1:#6aa8ec; --l2:#c286e0; --l3:#5fc9a0; --l4:#ee8a62; --l5:#9aabbd; --l6:#e86fa6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16171a; --panel:#1d1f23; --fg:#e9e5dc; --muted:#9a958a; --line:#2f3238; --hover:#25282d;
+  --accent:#e2b04a; --add:#6cc77a; --del:#ef7a6c;
+  --l0:#e2b04a; --l1:#6aa8ec; --l2:#c286e0; --l3:#5fc9a0; --l4:#ee8a62; --l5:#9aabbd; --l6:#e86fa6; color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-end;justify-content:space-between}
+h1{font-family:var(--display);font-weight:400;font-size:26px;margin:0;letter-spacing:.02em;text-wrap:balance}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin-top:4px}
+.sub a{color:inherit}
+.stats{display:flex;flex-wrap:wrap;gap:6px 22px;font-variant-numeric:tabular-nums}
+.stat b{display:block;font-size:20px;font-weight:600}
+.stat small{color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:10.5px}
+.stat .add{color:var(--add)} .stat .del{color:var(--del)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.controls{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;margin-top:18px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.row1{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#q{flex:1 1 260px;min-width:0;font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg)}
+#q:focus-visible,button:focus-visible,.commit:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:var(--panel);color:var(--muted);padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:12.5px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:999px;padding:3px 10px 3px 8px;cursor:pointer}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.chip .n{color:var(--muted);font-variant-numeric:tabular-nums}
+.count{color:var(--muted);font-size:12.5px;margin-left:auto}
+label.tog{display:inline-flex;gap:6px;align-items:center;color:var(--muted);font-size:13px;cursor:pointer}
+
+.list{margin-top:4px}
+.commit{display:grid;grid-template-columns:var(--gw) minmax(0,1fr);cursor:pointer;border-radius:4px}
+.commit:hover .main{background:var(--hover)}
+.commit.dim{opacity:.28}
+.commit.hide{display:none}
+.graph{position:relative;grid-row:1 / span 2}
+.graph svg{display:block}
+.graph .top{height:40px}
+.graph .ext{position:absolute;top:40px;bottom:0;left:0;width:100%;height:calc(100% - 40px)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:4px 14px;align-items:center;padding:0 10px;min-height:40px;border-radius:4px}
+.subj{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.commit.merge .subj{color:var(--muted)}
+.tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:4px;margin-right:6px;color:var(--c);border:1px solid var(--c);vertical-align:1px}
+.ref{font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:4px;margin-right:6px;background:var(--fg);color:var(--bg);vertical-align:1px}
+.ref.trunk{background:var(--accent)}
+.who,.when{color:var(--muted);font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.who.claude::before{content:"✦ ";color:var(--accent)}
+.hash{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.detail{grid-column:2;padding:4px 10px 18px;display:none}
+.commit.open .detail{display:block}
+.commit.open .subj{white-space:normal}
+.body{white-space:pre-wrap;max-width:75ch;margin:0 0 12px;color:var(--fg)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--muted);font-size:12.5px;margin-bottom:10px}
+.meta a{color:var(--accent)}
+.files{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);overflow-x:auto;max-height:340px;overflow-y:auto}
+.files div{display:grid;grid-template-columns:minmax(0,1fr) 56px 56px 80px;gap:10px;padding:3px 10px;white-space:nowrap}
+.files div:nth-child(odd){background:var(--hover)}
+.files .p{overflow:hidden;text-overflow:ellipsis;direction:rtl;text-align:left}
+.files .a{color:var(--add);text-align:right} .files .d{color:var(--del);text-align:right}
+.bar{display:flex;align-items:center;height:100%}
+.bar span{height:7px}
+.bar .ba{background:var(--add)} .bar .bd{background:var(--del)}
+mark{background:color-mix(in srgb,var(--accent) 35%,transparent);color:inherit;border-radius:2px}
+
+.pr{border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-top:12px}
+.pr>summary{list-style:none;cursor:pointer;padding:12px 14px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center}
+.pr>summary::-webkit-details-marker{display:none}
+.pr h3{margin:0;font-size:15px;font-weight:600;text-wrap:balance}
+.pr .pm{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
+.pr .num{font-family:var(--display);font-size:14px;color:var(--c)}
+.pr .inner{padding:0 6px 8px;border-top:1px solid var(--line)}
+.pr .commit{grid-template-columns:14px minmax(0,1fr)}
+.pr .dot{width:8px;height:8px;border-radius:50%;background:var(--c);margin:16px 0 0 4px}
+@media (max-width:640px){
+  .main{grid-template-columns:minmax(0,1fr) auto;padding-block:6px}
+  .who{display:none}
+  .hash{display:none}
+  .files div{grid-template-columns:minmax(0,1fr) 44px 44px}
+  .files .bar{display:none}
+  .count{margin-left:0}
+}
+@media (prefers-reduced-motion:no-preference){.commit .main{transition:background .12s}}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>SBCS <span>/</span> history</h1>
+    <div class="sub"><a href="https://github.com/MatejPechoucek/SkyBlockCutScenes" target="_blank" rel="noopener">MatejPechoucek/SkyBlockCutScenes</a> · every branch on GitHub · last commit <span id="snap"></span></div>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="controls">
+  <div class="row1">
+    <input id="q" type="search" placeholder="Search messages, files or hashes" autocomplete="off">
+    <div class="seg" id="view" role="group" aria-label="View">
+      <button data-v="graph" aria-pressed="true">Graph</button><button data-v="pr" aria-pressed="false">By pull request</button>
+    </div>
+    <div class="seg" id="who" role="group" aria-label="Author">
+      <button data-a="" aria-pressed="true">Everyone</button><button data-a="Matej" aria-pressed="false">Matej</button><button data-a="Claude" aria-pressed="false">Claude</button>
+    </div>
+  </div>
+  <div class="row1">
+    <div class="chips" id="chips"></div>
+    <label class="tog"><input type="checkbox" id="only"> Hide non-matches</label>
+    <span class="count" id="count"></span>
+  </div>
+</div>
+
+<div class="list" id="list"></div>
+</div>
+
+<script>
+const DATA = __DATA__;
+const SNAP = "__SNAP__";
+const REPO = "https://github.com/MatejPechoucek/SkyBlockCutScenes";
+const LANE = 16, ROWH = 40, PAD = 10, PALETTE = 7;
+
+const byHash = new Map(DATA.map((c, i) => (c.i = i, [c.h, c])));
+const short = h => h.slice(0, 7);
+const isClaude = c => c.a === "Claude";
+const fmtDate = iso => new Date(iso).toLocaleString(undefined, {month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"});
+const esc = s => s.replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+document.getElementById("snap").textContent = SNAP;
+
+// ---- Pull requests: each merge owns what its branch brought that the base did not have yet.
+function ancestors(h) {
+  const seen = new Set(), st = [h];
+  while (st.length) { const x = st.pop(); if (seen.has(x) || !byHash.has(x)) continue; seen.add(x); st.push(...byHash.get(x).p); }
+  return seen;
+}
+const prs = [];
+const merges = DATA.filter(c => c.p.length > 1).reverse(); // oldest first, so nested PRs keep their own commits
+for (const m of merges) {
+  const mm = m.s.match(/#(\d+) from \S+?\/(\S+)/);
+  const base = ancestors(m.p[0]);
+  const pr = {n: mm ? +mm[1] : 0, branch: mm ? mm[2] : "", title: m.b.split("\n")[0] || m.s, merge: m, commits: []};
+  for (const h of ancestors(m.p[1])) { const c = byHash.get(h); if (!base.has(h) && c.pr == null) c.pr = pr; }
+  m.pr = pr;
+  prs.push(pr);
+}
+const direct = {n: 0, title: "Committed straight to main", branch: "main", commits: []};
+for (const c of DATA) { if (!c.pr) c.pr = direct; c.pr.commits.push(c); }
+const groups = [...prs.sort((a, b) => b.n - a.n), direct];
+groups.forEach((g, i) => g.color = `var(--l${i % PALETTE})`);
+
+// ---- Stats
+const numOr0 = v => v === "-" ? 0 : +v;
+let adds = 0, dels = 0; const files = new Set();
+for (const c of DATA) if (c.p.length < 2) for (const [p, a, d] of c.f) { adds += numOr0(a); dels += numOr0(d); files.add(p); }
+const branches = DATA.flatMap(c => c.r).length;
+const days = new Set(DATA.map(c => c.d.slice(0, 10)));
+document.getElementById("stats").innerHTML = [
+  [DATA.length, "commits"], [prs.length, "pull requests"], [branches, "branches"], [days.size, "days"],
+  [`<span class="add">+${adds.toLocaleString()}</span>`, "lines added"], [`<span class="del">−${dels.toLocaleString()}</span>`, "lines removed"], [files.size, "files touched"],
+].map(([v, l]) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`).join("");
+
+// ---- Graph layout: one lane per open edge, collapsed where edges meet their parent.
+const rows = DATA.map(() => ({segs: [], col: 0, out: []}));
+let lanes = [], maxLanes = 1;
+const laneColor = [];
+const free = () => { const i = lanes.indexOf(null); return i < 0 ? lanes.length : i; };
+DATA.forEach((c, r) => {
+  const row = rows[r];
+  let col = lanes.indexOf(c.h);
+  if (col < 0) col = free();
+  row.col = col;
+  lanes.forEach((x, k) => {
+    if (x === c.h) { row.segs.push({t: "in", k, col, color: laneColor[k]}); lanes[k] = null; }
+    else if (x != null) row.segs.push({t: "pass", k, color: laneColor[k]});
+  });
+  c.p.forEach((p, pi) => {
+    if (!byHash.has(p)) return;
+    const j = pi === 0 && lanes[col] == null ? col : free();
+    lanes[j] = p;
+    laneColor[j] = pi === 0 ? c.pr.color : byHash.get(p).pr.color;
+    row.segs.push({t: "out", k: j, col, color: laneColor[j]});
+  });
+  while (lanes.length && lanes[lanes.length - 1] == null) lanes.pop();
+  row.out = lanes.map((x, k) => x != null ? {k, color: laneColor[k]} : null).filter(Boolean);
+  maxLanes = Math.max(maxLanes, lanes.length, col + 1);
+});
+const GW = PAD + maxLanes * LANE;
+const lx = k => PAD / 2 + k * LANE + LANE / 2;
+
+function graphSvg(c, r) {
+  const row = rows[r], mid = ROWH / 2, x = lx(row.col);
+  let s = "";
+  for (const g of row.segs) {
+    if (g.t === "pass") s += `<path d="M${lx(g.k)} 0V${ROWH}" stroke="${g.color}"/>`;
+    else if (g.t === "in") s += g.k === g.col ? `<path d="M${x} 0V${mid}" stroke="${g.color}"/>`
+      : `<path d="M${lx(g.k)} 0C${lx(g.k)} ${mid} ${x} ${mid * .4} ${x} ${mid}" stroke="${g.color}"/>`;
+    else s += g.k === g.col ? `<path d="M${x} ${mid}V${ROWH}" stroke="${g.color}"/>`
+      : `<path d="M${x} ${mid}C${x} ${ROWH - mid * .4} ${lx(g.k)} ${mid} ${lx(g.k)} ${ROWH}" stroke="${g.color}"/>`;
+  }
+  s += c.p.length > 1
+    ? `<circle cx="${x}" cy="${mid}" r="5" fill="var(--bg)" stroke="${c.pr.color}" stroke-width="2.5"/>`
+    : `<circle cx="${x}" cy="${mid}" r="4.5" fill="${c.pr.color}" stroke="var(--bg)" stroke-width="1.5"/>`;
+  const ext = row.out.map(o => `<path d="M${lx(o.k)} 0V100" stroke="${o.color}" vector-effect="non-scaling-stroke"/>`).join("");
+  return `<svg class="top" width="${GW}" height="${ROWH}" fill="none" stroke-width="2" aria-hidden="true">${s}</svg>`
+    + `<svg class="ext" viewBox="0 0 ${GW} 100" preserveAspectRatio="none" fill="none" stroke-width="2" aria-hidden="true">${ext}</svg>`;
+}
+
+// ---- Rendering
+let state = {q: "", who: "", pr: null, only: false, view: "graph"};
+try { const v = localStorage.getItem("sbcs-history-view"); if (v === "pr" || v === "graph") state.view = v; } catch (e) {}
+const open = new Set();
+
+function hl(text) {
+  const t = esc(text);
+  if (!state.q) return t;
+  const re = new RegExp(state.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), "gi");
+  return t.replace(re, m => `<mark>${m}</mark>`);
+}
+function matches(c) {
+  if (state.who && (state.who === "Claude") !== isClaude(c)) return false;
+  if (state.pr && c.pr !== state.pr) return false;
+  if (!state.q) return true;
+  const q = state.q.toLowerCase();
+  return c.h.startsWith(q) || c.s.toLowerCase().includes(q) || c.b.toLowerCase().includes(q) || c.f.some(f => f[0].toLowerCase().includes(q));
+}
+function fileRows(c) {
+  if (!c.f.length) return `<div><span class="p">No file changes</span></div>`;
+  const max = Math.max(1, ...c.f.map(f => numOr0(f[1]) + numOr0(f[2])));
+  const fs = [...c.f].sort((a, b) => (numOr0(b[1]) + numOr0(b[2])) - (numOr0(a[1]) + numOr0(a[2])));
+  return fs.map(([p, a, d]) => {
+    const wa = a === "-" ? 0 : Math.max(a > 0 ? 1 : 0, Math.round(numOr0(a) / max * 80)), wd = d === "-" ? 0 : Math.max(d > 0 ? 1 : 0, Math.round(numOr0(d) / max * 80));
+    return `<div><span class="p" title="${esc(p)}"><bdi>${hl(p)}</bdi></span><span class="a">${a === "-" ? "bin" : "+" + a}</span><span class="d">${d === "-" ? "" : "−" + d}</span><span class="bar"><span class="ba" style="width:${wa}px"></span><span class="bd" style="width:${wd}px"></span></span></div>`;
+  }).join("");
+}
+function detail(c) {
+  let fa = 0, fd = 0; c.f.forEach(f => { fa += numOr0(f[1]); fd += numOr0(f[2]); });
+  const parents = c.p.map(p => `<a href="#" data-jump="${p}">${short(p)}</a>`).join(", ") || "none (first commit)";
+  return `<div class="meta"><span>${esc(c.a)} · ${new Date(c.d).toLocaleString()}</span><span>${c.f.length} files, <span style="color:var(--add)">+${fa}</span> <span style="color:var(--del)">−${fd}</span>${c.p.length > 1 ? " (against first parent)" : ""}</span><span>Parents: ${parents}</span><a href="${REPO}/commit/${c.h}" target="_blank" rel="noopener">Open on GitHub ↗</a>${c.pr.n ? `<a href="${REPO}/pull/${c.pr.n}" target="_blank" rel="noopener">PR #${c.pr.n} ↗</a>` : ""}</div>`
+    + (c.b ? `<p class="body">${hl(c.b)}</p>` : "")
+    + `<div class="files">${fileRows(c)}</div>`;
+}
+function commitRow(c, withGraph) {
+  const refs = c.r.map(r => `<span class="ref${r === "main" ? " trunk" : ""}">${esc(r)}</span>`).join("");
+  const tag = c.pr.n ? `<span class="tag" style="--c:${c.pr.color}">#${c.pr.n}</span>` : "";
+  const g = withGraph ? `<div class="graph">${graphSvg(c, c.i)}</div>` : `<div><div class="dot" style="--c:${c.pr.color}"></div></div>`;
+  return `<div class="commit${c.p.length > 1 ? " merge" : ""}${open.has(c.h) ? " open" : ""}" data-h="${c.h}" tabindex="0" role="button" aria-expanded="${open.has(c.h)}">${g}
+    <div class="main"><div class="subj">${refs}${withGraph ? tag : ""}${hl(c.s)}</div><span class="who${isClaude(c) ? " claude" : ""}">${esc(c.a)}</span><span class="when">${fmtDate(c.d)}</span><span class="hash">${short(c.h)}</span></div>
+    <div class="detail">${open.has(c.h) ? detail(c) : ""}</div></div>`;
+}
+function render() {
+  const list = document.getElementById("list");
+  document.querySelector(".wrap").style.setProperty("--gw", GW + "px");
+  let shown = 0;
+  if (state.view === "graph") {
+    list.innerHTML = DATA.map(c => commitRow(c, true)).join("");
+    list.querySelectorAll(".commit").forEach(el => {
+      const ok = matches(byHash.get(el.dataset.h)); if (ok) shown++;
+      el.classList.toggle("dim", !ok && !state.only); el.classList.toggle("hide", !ok && state.only);
+    });
+  } else {
+    list.innerHTML = groups.filter(g => !state.pr || g === state.pr).map(g => {
+      const cs = g.commits.filter(matches); shown += cs.length;
+      if (!cs.length) return "";
+      let a = 0, d = 0; g.commits.forEach(c => { if (c.p.length < 2) c.f.forEach(f => { a += numOr0(f[1]); d += numOr0(f[2]); }); });
+      const first = g.commits[g.commits.length - 1].d.slice(0, 10), last = g.commits[0].d.slice(0, 10);
+      return `<details class="pr" style="--c:${g.color}" open><summary><span class="num">${g.n ? "#" + g.n : "—"}</span><div><h3>${esc(g.title)}</h3><div class="pm">${esc(g.branch)} · ${g.commits.length} commits · ${first === last ? first : first + " → " + last}</div></div><span class="pm"><span style="color:var(--add)">+${a.toLocaleString()}</span> <span style="color:var(--del)">−${d.toLocaleString()}</span></span></summary><div class="inner">${cs.map(c => commitRow(c, false)).join("")}</div></details>`;
+    }).join("");
+  }
+  document.getElementById("count").textContent = shown === DATA.length ? `${DATA.length} commits` : `${shown} of ${DATA.length} commits match`;
+}
+function renderChips() {
+  document.getElementById("chips").innerHTML = groups.map((g, i) =>
+    `<button class="chip" data-g="${i}" style="--c:${g.color}" aria-pressed="${state.pr === g}" title="${esc(g.title)}"><i></i>${g.n ? "#" + g.n : "main"} <span class="n">${g.commits.length}</span></button>`).join("");
+}
+function setSeg(id, attr, val) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", b.dataset[attr] === val)); }
+
+document.getElementById("q").addEventListener("input", e => { state.q = e.target.value.trim(); render(); });
+document.getElementById("only").addEventListener("change", e => { state.only = e.target.checked; render(); });
+document.getElementById("who").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; state.who = b.dataset.a; setSeg("who", "a", state.who); render(); });
+document.getElementById("view").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; state.view = b.dataset.v; setSeg("view", "v", state.view); try { localStorage.setItem("sbcs-history-view", state.view); } catch (err) {} render(); });
+document.getElementById("chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; const g = groups[+b.dataset.g]; state.pr = state.pr === g ? null : g; renderChips(); render(); });
+function toggle(el) {
+  const h = el.dataset.h, c = byHash.get(h);
+  if (open.has(h)) { open.delete(h); el.classList.remove("open"); }
+  else { open.add(h); el.classList.add("open"); el.querySelector(".detail").innerHTML = detail(c); }
+  el.setAttribute("aria-expanded", open.has(h));
+}
+document.getElementById("list").addEventListener("click", e => {
+  const j = e.target.closest("[data-jump]");
+  if (j) { e.preventDefault(); const t = document.querySelector(`.commit[data-h="${j.dataset.jump}"]`); if (t) { if (!open.has(t.dataset.h)) toggle(t); t.scrollIntoView({block: "center"}); t.focus(); } return; }
+  if (e.target.closest("a, .detail")) return;
+  const el = e.target.closest(".commit"); if (el) toggle(el);
+});
+document.getElementById("list").addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("commit")) { e.preventDefault(); toggle(e.target); }
+});
+setSeg("view", "v", state.view);
+renderChips(); render();
+</script>
