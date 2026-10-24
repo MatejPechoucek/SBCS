@@ -1,0 +1,42 @@
+name: History page
+
+# Regenerates docs/history/index.html (every commit on every branch) and commits it to main.
+# Pushes made with GITHUB_TOKEN start no workflows, so the page's own commit does not loop.
+on:
+  push:
+  delete:
+  workflow_dispatch:
+
+concurrency:
+  group: history-page
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Fetch every branch
+        run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Regenerate the page
+        run: |
+          if [ ! -f tools/gen_history.py ]; then echo "main has no generator yet"; exit 0; fi
+          python3 tools/gen_history.py
+      - name: Commit it to main
+        run: |
+          if git diff --quiet -- docs/history/index.html; then echo "Page unchanged"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/history/index.html
+          git commit -m "Update the history page" -m "[skip ci]"
+          for i in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase origin main
+          done
+          exit 1
