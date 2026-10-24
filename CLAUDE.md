@@ -1209,6 +1209,14 @@ physics: the dice tumble) - their call.
   - The Paragon Shard's head is the real one (captured by `HeadCapture`, in `slayer_heads.json`); the pixel
     stand-in is gone.
 
+**The stage and the clicks (2026-10-23, a friend: "get rid of the towers, make the blaze a little bigger and have you be
+able to click it or just have it automatic")** - both options, the classic is the default. `blazeStage` 1:
+`HellionScene.noPillars` (no pillars, the blaze 1.25x and a little higher, the "6s 8 Hits" tag over its head - `tag()`).
+`blazeClick`: `HellionScreen.hits()` holds the `SceneClock` (`holdAt`/`release`) just short of each hit (every odd
+`STEPS` index, where the tag's hits come off) until the attack key goes down (`options.keyAttack.isDown()`, a click up to
+300 ms early counts) or 1.5 s has passed; `HellionScene.waitingForHit` shows "Left click to hit!". Only the pace changes;
+a skip jumps past every hold.
+
 ## The Seraph's Glyph (the Enderman slayer, Voidgloom Seraph tier IV) - 0.2.63
 
 Pitched 2026-10-03; the designer approved it with three calls: **End Crystals at the sides**, the
@@ -1528,6 +1536,19 @@ reserved (ideas only); Skyblocker/SkyHanni strings are used as facts.
   lowest BIN); the outcome only picks which pool item is best, the priciest jackpot for "jackpot". With no market price an
   item falls back to its wiki added cost (or 60k), so a band a floor cannot reach plays its nearest real item. The old
   made-up filler prices (40k + 70k x n) were the "Recombobulator 180k" Matej saw. Config `dungeon*`, stats key "dungeon".
+- **One big wheel (2026-10-23, Matej's friends: "the whole 4 levers is not it ... one big wheel that looks super cool with
+  loads of light")**: the drums, the levers and the Wither Throne are gone; every floor is one prize wheel
+  (`OssuaryTimeline.SEGMENTS` 16, `VEILS` {0, 6, 11}). The stop is always a veiled segment, chosen by the pull alone, so it
+  stays honest; filler is fixed per segment. The face is one CPU image (`OssuaryScene.face`, 128 texels, gold rim, bulb
+  sockets, studs, the tell lighting the stop's segment) drawn through the camera's affine map, its outline the silhouette
+  stamped 8 times - **two RasterImages in `OssuaryRoll`** (face and ink), as an upload is once a frame. Bulbs (two a
+  segment) chase idle, race rainbow while spinning, flash the tell and land on the truth; a bust's go out one by one. The
+  flapper at the top kicks on every peg. Master Mode: red, barred with an iron bar held by the seals; M7: five dragon gems
+  on stalks crown it. The hand grips the rim and hauls it down; drag the wheel down to spin it. **Bigger drops, more
+  excitement**: one shockwave ring per band, a coin fountain from gold up, a bigger showcase and a punch on arrival, the
+  fanfare from gold. **Each drop its own flourish** (`fxOf`/`itemFx`): glyphs for books, a turning gold ring for the
+  Recombobulator, imploding rings, warp flecks, a shield hexagon, splashes for the fish, blade strokes for weapons, a
+  hexagon for armour, stars for pets, rings and stars, motes for essence. OssuaryTest hashes the face image too.
 - Next: Matej's records (2-3 runs, one Master Mode, Croesus, a Kismet reroll) - fix the strings, then watch it in game.
 
 ## The Vault (the Crystal Nucleus loot bundle, 2026-10-22) - unverified in game
@@ -1580,6 +1601,9 @@ or vault". Never call anything "Butcher": the mod is SBCS.
   the edge (`seam`) and swings at `SWING`; a Flawless gem knocks three times from inside (`KNOCKS`, `knock`,
   `Voices.vaultKnock`) and blows at `BLOW`; the Alloy pours every 420 ms, holds white hot for over a second, trembling
   harder, and melts at `MELT`; the Dye's frozen world has four heartbeats, the last followed by silence (`THAW`).
+- **Friends' feedback (2026-10-23)**: the dial and the bolts clipped the gems - `SOCKET_R` 6, the dial smaller, slimmer
+  bolts, `VaultScene.clearance()` checked by VaultTest. The door varies by seed after the reveal: a bust creaks a crack,
+  swings open on nothing or jams (`BustStyle`); a rare roll swings or slams wide (`OpenStyle`).
 - Next: whether the cover sits right on the next run.
 - **Compiling offline without Gradle**: the cloud cannot reach Mojang or Fabric, but the designer's Modrinth install has
   the **unobfuscated** 26.2 client jar (`ModrinthApp/meta/versions/26.2-0.19.5/26.2-0.19.5.jar`) and fabric-api's nested
@@ -1707,6 +1731,11 @@ The Dye's grey is a fill drawn *over* the tray; the pink crack is drawn after it
 only colour on screen. The Locket's price comes from `market/LivePrice` - Coflnet's
 `/api/item/price/SHATTERED_PENDANT/bin`, requested when the loot message is read, read
 (never waited for) when the counter starts, NPC 5M if it has not arrived. Off in the menu.
+
+**The ice's fate (2026-10-23, Matej's friends: exaggerate the Locket's break; small variations for worse drops)**:
+`ThawScreen.Fate` - after the landing a lesser drop's ice gets, by seed, a small hole knocked through, water drips, or a
+crack; the Locket's ice shatters hard at `LOCKET_BREAK` (chunks, a burst, a shake) with a gold tint before it. All after
+the landing, so ThawTest's honesty holds.
 
 **The flare's size is settled - do not enlarge it.** 0.1.34 made it much bigger (a screen
 wash, `ThawArt.aura()`, saturated colours, 42% into the ice); the designer found it too big and too

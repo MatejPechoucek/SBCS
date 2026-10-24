@@ -26,6 +26,9 @@ public final class HellionPreview {
     public static void main(String[] args) throws Exception {
         String out = args[0];
         long seed = Long.parseLong(args[1]);
+        // -DnoPillars=true: the menu's "No pillars, bigger blaze" stage; -Dwaiting=true: the click prompt up.
+        HellionScene.noPillars = Boolean.getBoolean("noPillars");
+        HellionScene.waitingForHit = Boolean.getBoolean("waiting");
         int fps = Integer.getInteger("fps", 30);
         String van = System.getProperty("vanilla"), skins = System.getProperty("skins");
         Map<String, BufferedImage> tex = new HashMap<>();

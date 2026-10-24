@@ -10,8 +10,8 @@ import java.util.List;
  * chain when they like - so the host asks every frame for what fell due between the last frame and this one
  * ({@link #between}). Pure: no Minecraft, so OssuaryTest can check the honesty.
  *
- * <b>Nothing before the reveal depends on the outcome</b>: the chain, the drums' ticks, the stops, the seals, the
- * levers and the tell's steps only read the timeline's pre-reveal state, which OssuaryTest shows is the same for every
+ * <b>Nothing before the reveal depends on the outcome</b>: the wheel's pull, its ticks, the stop, the seals, the
+ * Livids and the tell's steps only read the timeline's pre-reveal state, which OssuaryTest shows is the same for every
  * chest. At the reveal everything is cut ({@link Cue#cut}) and the outcome speaks.
  */
 public final class OssuarySound {
@@ -90,7 +90,8 @@ public final class OssuarySound {
             if (due(arrive, from, to)) {
                 out.add(new Cue(false, Voices.hellionArrive(e != Ending.WIN, seed + 150)));
                 if (e == Ending.JACKPOT) out.add(new Cue(false, Voices.hellionJackpot(seed + 155)));
-                if (e != Ending.WIN) out.add(new Cue(false, Voices.fanfare()));
+                // Bigger drops, more noise: gold gets the fanfare a jackpot has.
+                if (e != Ending.WIN || tl.band() == OssuaryTimeline.Band.GOLD) out.add(new Cue(false, Voices.fanfare()));
             }
             if (due(arrive + 300, from, to)) out.add(new Cue(false, Voices.hellionGlow(Math.max(0.5f,
                     (tl.total() - arrive - 300) / 1000f), seed + 160)));

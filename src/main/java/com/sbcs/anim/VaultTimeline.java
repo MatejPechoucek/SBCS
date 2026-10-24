@@ -212,6 +212,42 @@ public final class VaultTimeline {
     }
 
     public Prize prize() { return prize; }
+
+    // ------------------------------------------------------------------ variations (after the reveal only)
+
+    /**
+     * How a bust goes, by seed (Matej's friends, 2026-10-23: "the door could also just open normally if worse drop, or
+     * have some variation"). Only ever read after the reveal, so it tells nothing the dial has not said.
+     */
+    public enum BustStyle {
+        /** It creaks open a crack on an empty vault and dust puffs out. */
+        CRACK,
+        /** It just swings open, slowly, on an empty vault - a cobweb and a single moth. */
+        SWING,
+        /** It lurches, the bolts slam back home, and it stays shut - smoke off the edge. */
+        JAM
+    }
+
+    /** How a rare roll's door goes, by seed. */
+    public enum OpenStyle {
+        /** Unlatched, held a crack with light round it, then swung wide. */
+        SWING,
+        /** Kicked open from inside: it bangs against the safe's side and bounces, sparks off the hinges. */
+        SLAM
+    }
+
+    public BustStyle bustStyle() {
+        return BustStyle.values()[(int) Math.floorMod(seed * 7 + 3, 3L)];
+    }
+
+    public OpenStyle openStyle() {
+        return OpenStyle.values()[(int) Math.floorMod((seed >> 2) * 5 + 1, 2L)];
+    }
+
+    /** A jammed bust: when bolt {@code k} slams back home. */
+    public static long jamBolt(int k) {
+        return REVEAL + 620 + 70L * k;
+    }
     public Ending ending() { return prize.ending; }
     public long seed() { return seed; }
 
@@ -293,6 +329,15 @@ public final class VaultTimeline {
         return ease((t - from) / (float) BOLT_MS);
     }
 
+    /** Bolt {@code k} now, for this prize: a jammed bust's slam back home after the reveal. */
+    public float boltNow(int k, long t) {
+        float b = bolt(k, t);
+        if (prize.ending == Ending.BUST && bustStyle() == BustStyle.JAM && t >= jamBolt(k)) {
+            return b * (1f - ease((t - jamBolt(k)) / 70f));
+        }
+        return b;
+    }
+
     /** Which wind-up step {@code t} is in, -1 before the first. */
     public static int step(long t) {
         int k = -1;
@@ -359,15 +404,38 @@ public final class VaultTimeline {
         if (t < REVEAL) return 0f;
         long p = phys(t);
         return switch (prize.ending) {
-            // A creak open a crack, and a settle back a little.
-            case BUST -> 0.24f * ease((p - REVEAL - 150) / 950f) - 0.03f * ease((p - REVEAL - 1100) / 300f);
-            // Unlatched a crack, held there with light round its edge, then swung wide.
-            case OPEN -> 0.07f * ease((p - REVEAL - HOLD) / 220f) + 1.68f * backOut((p - SWING) / 820f);
+            case BUST -> switch (bustStyle()) {
+                // A creak open a crack, and a settle back a little.
+                case CRACK -> 0.24f * ease((p - REVEAL - 150) / 950f) - 0.03f * ease((p - REVEAL - 1100) / 300f);
+                // Just opens, as a door does: slowly, all the way.
+                case SWING -> 1.45f * ease((p - REVEAL - 250) / 1500f);
+                // A lurch out, and shoved back shut as the bolts slam home.
+                case JAM -> 0.16f * ease((p - REVEAL - 120) / 260f) * (1f - ease((p - jamBolt(0) + 80) / 110f))
+                        + 0.03f * (float) Math.max(0, Math.sin((p - jamBolt(0) - 30) / 40.0)) * (float) Math.exp(-Math.max(0, p - jamBolt(0)) / 160.0);
+            };
+            case OPEN -> openStyle() == OpenStyle.SLAM
+                    // Kicked open: past wide, off the safe's side, back, and settling.
+                    ? 0.07f * ease((p - REVEAL - HOLD) / 220f) + slam((p - SWING) / 1000f)
+                    // Unlatched a crack, held there with light round its edge, then swung wide.
+                    : 0.07f * ease((p - REVEAL - HOLD) / 220f) + 1.68f * backOut((p - SWING) / 820f);
             // Pushed out further on every knock; blown off after (doorFlight).
             case BLOWN -> 0.025f * knocked(t) + 0.03f * knock(t);
             case ALLOY -> 0f;
             case DYE -> 0.11f * ease((p - REVEAL) / 260f);
         };
+    }
+
+    /** A slammed door, seconds since the kick: flung to 1.9 rad in 150 ms, bounced off the safe's side, settled at 1.68. */
+    static float slam(float s) {
+        if (s <= 0f) return 0f;
+        if (s < 0.15f) return 1.9f * ease(s / 0.15f);
+        float u = s - 0.15f;
+        return 1.68f + 0.22f * (float) (Math.exp(-u * 5) * Math.cos(u * 22));
+    }
+
+    /** When a slammed door hits the safe's side - its sparks and bang. */
+    public static long slamHit() {
+        return SWING + 150;
     }
 
     /** How many of a Flawless gem's knocks have landed, 0..3. */
@@ -421,7 +489,8 @@ public final class VaultTimeline {
         long p = phys(t);
         float k = ease((p - REVEAL) / 400f);
         return switch (prize.ending) {
-            case BUST -> 0.12f * k;
+            case BUST -> bustStyle() == BustStyle.SWING ? 0.18f * ease((p - REVEAL - 250) / 1500f)
+                    : bustStyle() == BustStyle.JAM ? 0.08f * k * (1f - ease((p - jamBolt(0)) / 200f)) : 0.12f * k;
             case OPEN -> 0.35f * ease((p - REVEAL - HOLD) / 220f) + 0.65f * ease((p - SWING) / 400f);
             case BLOWN -> t < BLOW ? 0.12f * knocked(t) + 0.3f * knock(t) : ease((p - BLOW + 60) / 200f);
             case ALLOY -> 0.6f * heat(t) + 0.4f * melt(t);
@@ -512,6 +581,12 @@ public final class VaultTimeline {
         long b = blowAt();
         if (t >= b && t < b + 450) s += 0.016f * (1f - (t - b) / 450f);
         s += 0.007f * knock(t);
+        if (prize.ending == Ending.BUST && bustStyle() == BustStyle.JAM && t >= jamBolt(0) && t < jamBolt(0) + 400) {
+            s += 0.008f * (1f - (t - jamBolt(0)) / 400f);
+        }
+        if (prize.ending == Ending.OPEN && openStyle() == OpenStyle.SLAM && t >= slamHit() && t < slamHit() + 380) {
+            s += 0.013f * (1f - (t - slamHit()) / 380f);
+        }
         if (prize.ending == Ending.ALLOY) {
             // The white-hot hold trembles harder the longer it lasts.
             float held = t > POURS[4] + 400 && t < MELT ? (t - POURS[4] - 400) / (float) (MELT - POURS[4] - 400) : 0f;

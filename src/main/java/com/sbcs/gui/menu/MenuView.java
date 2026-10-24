@@ -670,8 +670,8 @@ public final class MenuView {
     private void dungeonRows(List<Row> rows, PatternConfig cfg) {
         if (!group(rows, "dungeon", "Dungeons - The Ossuary", "Reward chests, before you see what is in them", "skeleton_skull", OSSUARY,
                 cfg.dungeonAnimation, () -> { cfg.dungeonAnimation = !cfg.dungeonAnimation; cfg.save(); })) return;
-        rows.add(new NoticeRow("A reward chest's menu is covered the moment it opens, and the floor's boss deals: the drum lands, "
-                + "the lantern's colour is the chest's best item. You still open the chest yourself afterwards."));
+        rows.add(new NoticeRow("A reward chest's menu is covered the moment it opens and the floor's boss spins the wheel: it stops on a "
+                + "veiled prize, and the colour its lights land on is the chest's best item. You still open the chest yourself afterwards."));
         rows.add(new SectionRow("Which chests"));
         for (com.sbcs.detect.dungeon.ChestTier tier : com.sbcs.detect.dungeon.ChestTier.values()) {
             int bit = tier.bit();
@@ -684,9 +684,9 @@ public final class MenuView {
         if (cr == 2) rows.add(new NoticeRow("A run's page rolls its best chest, and each chest's own page rolls too if it has not yet."));
         rows.add(new NoticeRow("A chest that has rolled - in the boss room or at Croesus - never rolls again (72 hours, as Croesus keeps it)."));
         rows.add(new SectionRow("The roll"));
-        rows.add(toggle("Pull the chain yourself", cfg.dungeonChain, () -> cfg.dungeonChain = !cfg.dungeonChain, cfg));
-        rows.add(new NoticeRow(cfg.dungeonChain ? "Drag the chain down and let go - harder spins longer. Left alone, a skeleton's hand pulls it for you."
-                : "Just watch: the skeleton's hand pulls every chain at an even pace."));
+        rows.add(toggle("Spin the wheel yourself", cfg.dungeonChain, () -> cfg.dungeonChain = !cfg.dungeonChain, cfg));
+        rows.add(new NoticeRow(cfg.dungeonChain ? "Drag the wheel down and let go - harder spins longer. Left alone, a skeleton's hand spins it for you."
+                : "Just watch: the skeleton's hand spins the wheel at an even pace."));
         rows.add(toggle("Master Mode: the red chest and its seals", cfg.dungeonMasterRed, () -> cfg.dungeonMasterRed = !cfg.dungeonMasterRed, cfg));
         rows.add(new SectionRow("The endings"));
         rows.add(toggle("RARE REWARD! banner", cfg.dungeonBanner, () -> cfg.dungeonBanner = !cfg.dungeonBanner, cfg));
@@ -715,6 +715,13 @@ public final class MenuView {
             rows.add(new SliderRow("blaze_hide", "Hide the HUD below", cfg.blazeHidePct, 0, 30, 1,
                     v -> cfg.blazeHidePct = v, v -> v == 0 ? "Off" : v + "% HP"));
             rows.add(new NoticeRow("The HUD and chat fade out when your Demonlord gets this low, so nothing gives the drop away."));
+            rows.add(new SectionRow("The fight"));
+            String[] stages = {"Fire pillars", "No pillars, bigger blaze"};
+            int st = Math.max(0, Math.min(1, cfg.blazeStage));
+            rows.add(new ValueRow("Stage", stages[st], st != 0, () -> { cfg.blazeStage = 1 - st; cfg.save(); },
+                    () -> { cfg.blazeStage = 1 - st; cfg.save(); }));
+            rows.add(toggle("Land the hits yourself (left click)", cfg.blazeClick, () -> cfg.blazeClick = !cfg.blazeClick, cfg));
+            if (cfg.blazeClick) rows.add(new NoticeRow("Each hit waits for your click; leave it and the fight carries on by itself. The drop is the same either way."));
             rows.add(new SectionRow("The endings"));
             rows.add(toggle("Drop banner (RARE DROP! and up)", cfg.blazeBanner, () -> cfg.blazeBanner = !cfg.blazeBanner, cfg));
             rows.add(toggle("Show the price", cfg.blazePrice, () -> cfg.blazePrice = !cfg.blazePrice, cfg));
