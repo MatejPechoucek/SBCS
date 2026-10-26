@@ -50,6 +50,12 @@ public final class ModelRaster {
     public int w, h;
     public float x, y, scale;
     private float[] z = new float[0];
+    /**
+     * Each pixel's world height, kept only while {@link #heights} is on (the water mythics' dye floods the models from
+     * the bottom up by it); NaN where the face had none.
+     */
+    public float[] wy = new float[0];
+    public boolean heights;
     private boolean[] cover = new boolean[0], across = new boolean[0];
     /** The most image pixels a frame may cost: the scale drops for a model that fills a large screen. */
     public static final int BUDGET = 600_000;
@@ -99,6 +105,7 @@ public final class ModelRaster {
             cover = new boolean[n];
             across = new boolean[n];
         }
+        if (heights && wy.length < n) wy = new float[n];
         Arrays.fill(px, 0, n, 0);
         Arrays.fill(z, 0, n, Float.NEGATIVE_INFINITY);
         Arrays.fill(cover, 0, n, false);
@@ -211,6 +218,7 @@ public final class ModelRaster {
                 z[i] = d;
                 cover[i] = true;
                 px[i] = out;
+                if (heights) wy[i] = Float.isNaN(wy0) ? Float.NaN : wy0 + s * wyu + t * wyv;
             }
         }
     }
