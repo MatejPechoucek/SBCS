@@ -271,7 +271,7 @@ public final class EruptionTimeline {
     public static final long B_LEAP_MS = 520;
     // Squid Boots: Plhlegblast's ink squirts up out of the vent three times and spreads over the lava, then the boots.
     public static final long[] I_SQUIRTS = {R + 250, R + 560, R + 820};
-    public static final long I_INK = R + 250, I_INK_TO = R + 1500;
+    public static final long I_INK = R + 250, I_INK_TO = R + 1100;
     // The Taurus Helmet: it surges out and charges at the camera twice, hooves shaking the ground.
     public static final long[] C_CHARGES = {R + 1350, R + 1800};
     public static final long C_CHARGE_MS = 300;

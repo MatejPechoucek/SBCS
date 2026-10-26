@@ -203,13 +203,11 @@ public final class LavaRigs implements EruptionScene.Rigs {
         ll.xRot = -1.4137167f;
         ll.yRot = -0.31415927f;
         ll.zRot = -0.07853982f;
-        ModelPart head = piglinRoot.getChild("head");
-        head.visible = false;
-        // On the pig's back: the passenger's seat, 0.56 blocks lower than the horse's.
+        // On the pig's back: the passenger's seat, 0.56 blocks lower than the horse's. Its own head (and ears) left
+        // out - ModelPart.visit walks invisible parts too, so it is skipped by path.
         PoseStack man = living(yaw);
         man.translate(0f, -0.16f, 0.1f);
-        emit(piglinRoot, man, 0, out);
-        head.visible = true;
+        emit(piglinRoot, man, 0, out, "head");
         // The helmet where the head was: the skull's head cube sits at the humanoid head's own origin.
         emit(skullRoot, man, helmetSlot, out);
         return out;
@@ -263,8 +261,14 @@ public final class LavaRigs implements EruptionScene.Rigs {
 
     /** Every polygon of {@code root} under {@code ps}, into {@code out} with texture {@code slot}. */
     private static void emit(ModelPart root, PoseStack ps, int slot, List<float[]> out) {
+        emit(root, ps, slot, out, null);
+    }
+
+    /** As above, leaving out every part whose path names {@code skip} (its children too: the path runs through it). */
+    private static void emit(ModelPart root, PoseStack ps, int slot, List<float[]> out, String skip) {
         Vector3f v = new Vector3f();
         root.visit(ps, (pose, path, index, cube) -> {
+            if (skip != null && path.contains(skip)) return;
             Matrix4f m = pose.pose();
             for (ModelPart.Polygon poly : cube.polygons) {
                 ModelPart.Vertex[] vs = poly.vertices();

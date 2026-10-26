@@ -641,6 +641,11 @@ public final class EruptionScene {
         return EruptionTimeline.backOut(t / 450f);
     }
 
+    /** For tools/EruptionTest. */
+    public static float jawbusRiseForTest(long t) {
+        return jawbusRise(t);
+    }
+
     /** Jawbus's sinking after his entrance: later than the others', done by the same moment. */
     static float jawbusSink(long t) {
         return ease((t - 650) / (float) (EruptionTimeline.SINK_TO - 650));
