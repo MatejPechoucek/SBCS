@@ -37,7 +37,9 @@ final class LedgerView {
     static final int W = 412, H = 250;
     private static final int COVER = 5, PAGE_W = 190, SPINE = 10;
     private static final int LEFT = COVER, SPINE_X = COVER + PAGE_W, RIGHT = SPINE_X + SPINE, BOOK_R = RIGHT + PAGE_W + COVER;
-    private static final int TAB_X = BOOK_R - 6, TAB_W = 15, TAB_H = 24, TAB_GAP = 2, TAB_TOP = 10;
+    private static final int TAB_X = BOOK_R - 6, TAB_W = 15, TAB_GAP = 2, TAB_TOP = 10;
+    /** As tall as the tabs can be and still all fit down the edge: 24 for nine chapters, 19 for eleven. */
+    private static final int TAB_H = Math.min(24, (H - TAB_TOP - 8) / Chapter.values().length - TAB_GAP);
     private static final int COLS = 4, ROWS = 3, PER_PAGE = COLS * ROWS;
     /** A folded page corner, and how far round it a click or a drag picks the page up. */
     private static final int CORNER = 7, CORNER_HOVER = 12, CORNER_HIT = 26;
@@ -660,6 +662,9 @@ final class LedgerView {
             case ERUPTION -> "do NOT swim here";
             case FIN -> "need a bigger boat";
             case WISP -> "boo.";
+            case SERAPH -> "don't look it in the eye";
+            case REVENANT -> "bring a nose peg";
+            case TARANTULA -> "check your boots";
             default -> "back soon";
         };
         d.push();
@@ -692,7 +697,7 @@ final class LedgerView {
     }
 
     /** One doodle per chapter, in Chapter order: dice, a worm, a snowflake, the moon, a flame, a volcano, a fin, a ghost,
-     *  an eye. */
+     *  an eye, a gravestone, a spider on its thread. */
     private static final String[][] DOODLES = {
             {"#########", "#.......#", "#.#...#.#", "#.......#", "#...#...#", "#.......#", "#.#...#.#", "#.......#", "#########"},
             {"...........##", "..##......#.#", ".#..#....#...", "#....#..#....", "......##....."},
@@ -703,6 +708,8 @@ final class LedgerView {
             {"....#......", "...##......", "..#.#......", ".#..#......", "#...#......", "#####......", ".#.#.#.#.#.", "#.#.#.#.#.#"},
             {"..#####..", ".#.....#.", "#..#.#..#", "#.......#", "#.......#", "#.#.#.#.#", ".#.#.#.#."},
             {"...#####...", ".##.....##.", "#...###...#", "#..#####..#", "#...###...#", ".##.....##.", "...#####..."},
+            {"...###...", "..#...#..", ".#..#..#.", ".#.###.#.", ".#..#..#.", ".#..#..#.", ".#.....#.", "#########"},
+            {"....#....", "....#....", "#...#...#", ".#.###.#.", "..#####..", "###.#.###", "..#####..", ".#.###.#.", "#...#...#"},
     };
 
     /** The counted stamp nearest its next grade, with its bar: something to go for. */
@@ -763,6 +770,9 @@ final class LedgerView {
             case ERUPTION -> source(out, f, "lava", "Kills");
             case FIN -> source(out, f, "shark", "Sharks");
             case WISP -> out.add(row("Drops", f.drops("ghost")));
+            case SERAPH -> source(out, f, "seraph", "Bosses");
+            case REVENANT -> source(out, f, "zombie", "Bosses");
+            case TARANTULA -> source(out, f, "spider", "Bosses");
             default -> { }
         }
         return out;

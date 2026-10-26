@@ -17,7 +17,7 @@ public final class Facts {
     public long dianaKills;
     public Map<String, Integer> dianaKillsBy = new HashMap<>();
     public Map<String, Integer> dianaDrops = new HashMap<>();
-    // The later sources ("blaze", "lava", "shark", "ghost", "seraph"): kills, worst dry run, drops by name.
+    // The later sources ("blaze", "lava", "shark", "ghost", "seraph", "zombie", "spider"): kills, worst dry run, drops by name.
     public Map<String, Long> kills = new HashMap<>();
     public Map<String, Long> worstDry = new HashMap<>();
     public Map<String, Map<String, Integer>> drops = new HashMap<>();

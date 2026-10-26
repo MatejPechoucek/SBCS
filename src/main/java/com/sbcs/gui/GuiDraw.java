@@ -40,7 +40,22 @@ public final class GuiDraw implements Draw {
 
     @Override public int width(String s, boolean bold) { return font.width(component(s, bold)); }
 
-    @Override public void item(String id, int x, int y) { g.item(stack(id), x, y); }
+    @Override
+    public void item(String id, int x, int y) {
+        if (id.startsWith("pack:")) {
+            // An icon from Hypixel's pack ("pack:path:fallback"), drawn as the game would draw the item; without the
+            // pack, the vanilla fallback.
+            String[] p = id.split(":", 3);
+            int[] size = p.length == 3 ? packIcon(p[1]) : NO_ICON;
+            if (size.length == 2) {
+                // A strip of animation frames (taller than wide) shows its first frame.
+                g.blit(RenderPipelines.GUI_TEXTURED, packId(p[1]), x, y, 0f, 0f, 16, 16, 16, 16 * size[1] / size[0], 0xFFFFFFFF);
+                return;
+            }
+            id = p.length == 3 ? p[2] : "paper";
+        }
+        g.item(stack(id), x, y);
+    }
 
     @Override
     public void modIcon(int x, int y, int size) {
@@ -65,6 +80,29 @@ public final class GuiDraw implements Draw {
 
     private static Component component(String s, boolean bold) {
         return bold ? Component.literal(s).withStyle(ChatFormatting.BOLD) : Component.literal(s);
+    }
+
+    private static final int[] NO_ICON = {};
+    /** Each pack icon's size (width, height), or {@link #NO_ICON} when the pack does not have it - asked once each. */
+    private static final Map<String, int[]> PACK = new HashMap<>();
+
+    private static Identifier packId(String path) {
+        return Identifier.fromNamespaceAndPath("hypixel_skyblock", "textures/item/" + path + ".png");
+    }
+
+    /** The size of {@code hypixel_skyblock:textures/item/<path>.png}, read off its PNG header, or NO_ICON. */
+    private static int[] packIcon(String path) {
+        return PACK.computeIfAbsent(path, k -> {
+            try (java.io.InputStream in = net.minecraft.client.Minecraft.getInstance().getResourceManager().open(packId(k))) {
+                byte[] head = in.readNBytes(24);
+                if (head.length < 24) return NO_ICON;
+                java.nio.ByteBuffer b = java.nio.ByteBuffer.wrap(head);
+                int w = b.getInt(16), h = b.getInt(20);
+                return w > 0 && h >= w ? new int[]{w, h} : NO_ICON;
+            } catch (Exception e) {
+                return NO_ICON;
+            }
+        });
     }
 
     /** The cards', tabs' and stamps' icons: vanilla items by registry path, or a SkyBlock head ("head:set:name"). */
@@ -208,6 +246,10 @@ public final class GuiDraw implements Draw {
             case "stick" -> Items.STICK;
             case "trident" -> Items.TRIDENT;
             case "wither_skeleton_skull" -> Items.WITHER_SKELETON_SKULL;
+            case "paper" -> Items.PAPER;
+            case "pumpkin_pie" -> Items.PUMPKIN_PIE;
+            case "string" -> Items.STRING;
+            case "zombie_head" -> Items.ZOMBIE_HEAD;
             default -> Items.PAPER;
         });
     }

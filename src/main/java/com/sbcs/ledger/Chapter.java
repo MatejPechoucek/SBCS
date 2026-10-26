@@ -14,7 +14,11 @@ public enum Chapter {
     ERUPTION("Eruption", "Lava fishing", 0xFFFF8C2E, 0xFFA8381A, "magma_cream"),
     FIN("Fin", "Fishing Festival", 0xFF3FB0D0, 0xFF1F7896, "tropical_fish"),
     WISP("Wisp", "Dwarven Mines Ghosts", 0xFFA9E4EE, 0xFF3E8C9A, "ghast_tear"),
-    SERAPH("The Seraph", "Voidgloom Seraph IV", 0xFFA36BF5, 0xFF6A3CB0, "ender_pearl");
+    SERAPH("The Seraph", "Voidgloom Seraph", 0xFFA36BF5, 0xFF6A3CB0, "ender_pearl"),
+    // The other two slayers (2026-10-26), after the Seraph so every older chapter keeps its place (a stamp's shape
+    // and the chapter's doodle are picked by its ordinal).
+    REVENANT("Exhumed", "Revenant Horror", 0xFF6FBF4A, 0xFF3E7A22, "rotten_flesh"),
+    TARANTULA("The Brood", "Tarantula Broodfather", 0xFFC8423A, 0xFF8A2420, "spider_eye");
 
     public final String title, subtitle, icon;
     public final int colour, ink;

@@ -877,7 +877,7 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   page), `Grade` (Select, Choice, Prime, A5 Wagyu and their ring colours), `Stamp`, `Facts` (what the stats say -
   `SbcsStats.facts()` fills it), `LedgerData` (saved inside stats.json as `ledger`: entries {grade, at, value},
   event `flags` {id -> kill}, `seen`, the House's own counters, the last 60 drops), `Ledger` (value, gradeFor,
-  refresh, award, run, drop, corpseWorth). `tools/LedgerTest` (219 checks) also reads the drop enums' source to
+  refresh, award, run, drop, corpseWorth). `tools/LedgerTest` (1,232 checks since 0.4.0) also reads the drop enums' source to
   check every name a stamp looks for is spelled as the stats write it.
 - **Counted in SbcsStats**: every `on*` ends in `Ledger.run` (the House's cutscenes and bust run), `Ledger.drop`
   for a win (hot streak, night shift 3-5 AM local, the 777th kill of a source, Scatha back to back, the first pet's
@@ -955,6 +955,16 @@ maybe like a binder", a chapter per animation, old stats backfilled. They edited
   PLAYER_HEAD with a resolved profile (`GuiDraw.head`); the ones still vanilla are listed in `docs/TODO.md`.
 - Saving the sheet with openpyxl drops Excel's extension-form dropdowns (the Chapter list): re-add it as a plain
   `DataValidation` (`=Chapters!$A$2:$A$10`, B2:B140) after any scripted edit.
+- **The slayer chapters (0.4.0, 2026-10-26)**: `Chapter.REVENANT` ("Exhumed") and `TARANTULA` ("The Brood") come after
+  `SERAPH` so every older chapter keeps its ordinal (shapes and doodles are picked by it); 12 stamps each, the Seraph 12 too,
+  one page apiece, read from the stats' "zombie", "spider" and "seraph" sources by drop title. `Maintenance.SERAPH_LEDGER`
+  is false and `Ledger.refresh` no longer skips the Seraph. Secrets: Full Autopsy (every Revenant drop with an ending),
+  Back From the Dead (two Revenant drops in 5 min) and Trick or Treat (31 October) in `timed`, Food Chain (the three
+  bugs), Eight Legs (a drop on the day's 8th Tarantula, `killsToday`), Staring Contest (a Core and a Summoning Eye). The
+  divider tabs shrink to fit (`TAB_H` from the chapter count: 19 for eleven). Full Menu still means Scatha to Wisp.
+  Icons: `pack:<path>:<fallback>` is a Hypixel pack icon (see docs/TODO.md). Offline stills of the book:
+  `/mnt/project-files/0.4.0/ledger/LedgerStills.java` (package com.sbcs.gui.menu) drives the real `LedgerView.book` through a Java2D Draw with the game's
+  ascii font; stills in `/mnt/project-files/0.4.0/ledger/`.
 - **`/sbcs test ledger`** (developers only - it hangs off `test`, so `Dev.allowed()`; `SbcsClient.ledgerTestNode`):
   `popup <id> [grade]` (only the pop-up, `StampPopup.queueTest`, shown even with pop-ups off; `popup burst` queues
   six to see the cap), `give <id> [grade]` / `take <id>`, `info <id>` (what `Ledger.value` counts now, the grade it
@@ -1420,8 +1430,8 @@ rise round the beacon, eyes fly in one by one, the portal opens; camera tilts do
 teleports, pillar tops then the showcase), Enchant Rune `RUNE` (an enchanting table, the game's sga glyphs stream in and
 form the rune), Paragon Shard `SHARD` (the beacon core cracks, crystal shards spiral in and fuse), End Stone Idol `IDOL`
 ("Set in Stone": the Seraph turns to end stone by gild, cracks and shatters; it never dies). The Upgrade keeps the
-jackpot, the Core the Eye, the Dye the Dragon. `Maintenance.SERAPH` is false; the Ledger chapter stays taped through
-`Maintenance.SERAPH_LEDGER` (no stamps yet). **Matej fights tier III**: `[Lv534]  Voidgloom Seraph III 0/50M❤` (current /
+jackpot, the Core the Eye, the Dye the Dragon. `Maintenance.SERAPH` is false; the Ledger chapter was taped through
+`Maintenance.SERAPH_LEDGER` until it got its stamps (0.4.0). **Matej fights tier III**: `[Lv534]  Voidgloom Seraph III 0/50M❤` (current /
 max; tier IV shows /210M too now). `SeraphWatcher` takes III and IV (`tierOf` - "II" is inside "III"), the max from the
 nametag, and claims a boss from `SLAYER BOSS! The Voidgloom Seraph III spawned!` (16 blocks, -2 s .. +5 s) - none of his 17
 bosses on 2026-10-25 had a "Spawned by" tag recorded. The replay of that file opens all 16 kills. A tier III shows its own
