@@ -58,7 +58,7 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
     private static final RasterImage IMAGE = new RasterImage("eruption_models");
     private static final RasterImage FLOOR = new RasterImage("eruption_floor");
 
-    private boolean texturesSet, creatureSet;
+    private boolean texturesSet, creatureSet, helmetSet;
     /** Whether Hypixel's pack has the bust's guaranteed drop (asked once). */
     private Boolean sureIcon;
     private String dropPixelsFor;
@@ -77,18 +77,22 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
         this.drop = drop == null ? Drop.BUST : drop;
         this.test = test;
         this.seed = System.nanoTime() ^ clock.openedAt();
+        EruptionTimeline.jawbusIntro = SbcsClient.config == null || SbcsClient.config.lavaJawbusIntro;
         this.tl = new EruptionTimeline(creature, this.drop, seed);
         this.cues = EruptionSound.schedule(tl);
         requestPrice();
         // Start the skins coming now: the creature's for the sinking, every head drop's for the reveal.
         skinName(creature);
         for (Drop d : Drop.values()) if (d.head && d.from(creature)) HeadSkins.LAVA.pixels(d.art);
+        if (creature == Creature.TAURUS) HeadSkins.LAVA.pixels(Drop.TAURUS_HELMET.art);
         count();
         shortBust();
     }
 
     /** "your 3rd", once counted; null for tests and busts. */
     private String nth;
+    /** Under a Jawbus bust's Magma Lord Fragment: which Jawbus this was. Null otherwise. */
+    private String bustNote;
     private boolean counted;
 
     /** Counted once the outcome is known - never for a test. */
@@ -98,6 +102,12 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
         com.sbcs.config.SbcsStats st = com.sbcs.config.SbcsStats.get();
         st.onSource(SOURCE, drop.win() ? drop.title : null);
         if (drop.win()) nth = "your " + ChopScreen.ordinal(st.sourceDropCount(SOURCE, drop.title));
+        int mine = st.onLavaKill(creature.name());
+        // Every Jawbus is an event, even a dry one: "your 14th Lord Jawbus · 0 Vials".
+        if (!drop.win() && creature == Creature.JAWBUS) {
+            int vials = st.sourceDropCount(SOURCE, Drop.VIAL.title);
+            bustNote = "your " + ChopScreen.ordinal(mine) + " " + creature.title + " \u00b7 " + vials + (vials == 1 ? " Vial" : " Vials");
+        }
         if (drop.win() && creature == Creature.JAWBUS) st.award("lava_jaw_dropping", st.source(SOURCE).kills);
     }
 
@@ -166,6 +176,7 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
         sounds(t);
         textures();
         EruptionScene.nthNote = nth;
+        EruptionScene.bustNote = bustNote;
         ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
         com.sbcs.render.Punch.set(t >= EruptionTimeline.REVEAL, tl.drop().win(), tl.price());
         EruptionScene.showBanner = SbcsClient.config == null || SbcsClient.config.lavaBanner;
@@ -222,10 +233,23 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
             set(EruptionScene.SLOT_HORSE, "textures/entity/horse/horse_skeleton.png");
             set(EruptionScene.SLOT_SADDLE, "textures/entity/equipment/skeleton_horse_saddle/saddle.png");
             switch (creature) {
+                case TAURUS -> {
+                    // A zombified piglin on a saddled pig; its head is the Taurus Helmet's skin (SLOT_HELMET, below).
+                    set(EruptionScene.SLOT_CREATURE, "textures/entity/piglin/zombified_piglin.png");
+                    set(EruptionScene.SLOT_HORSE, "textures/entity/pig/pig_temperate.png");
+                    set(EruptionScene.SLOT_SADDLE, "textures/entity/equipment/pig_saddle/saddle.png");
+                }
                 case JAWBUS -> set(EruptionScene.SLOT_CREATURE, "textures/entity/iron_golem/iron_golem.png");
                 case THUNDER -> set(EruptionScene.SLOT_CREATURE, "textures/entity/guardian/guardian_elder.png");
                 case PLHLEGBLAST -> set(EruptionScene.SLOT_CREATURE, "textures/entity/squid/squid.png");
                 default -> { }
+            }
+        }
+        if (!helmetSet && creature == Creature.TAURUS) {
+            BufferedImage img = HeadSkins.LAVA.pixels(Drop.TAURUS_HELMET.art);
+            if (img != null) {
+                EruptionScene.RASTER.texture(EruptionScene.SLOT_HELMET, img);
+                helmetSet = true;
             }
         }
         if (!creatureSet) {
@@ -244,7 +268,10 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
         if (!drop.win()) {
             EruptionScene.dropPixels = null;
         } else if (!drop.art.equals(dropPixelsFor)) {
-            BufferedImage img = drop.head ? HeadSkins.LAVA.pixels(drop.art) : SbcsClient.readGameTexture("textures/item/" + drop.art + ".png");
+            BufferedImage img = drop.head ? HeadSkins.LAVA.pixels(drop.art) : packIcon(drop);
+            if (img == null && !drop.head) img = SbcsClient.readGameTexture("textures/item/" + drop.art + ".png");
+            int dye = EruptionTimeline.artTint(drop);
+            if (img != null && dye >= 0) img = LavaArt.tint(img, dye);
             EruptionScene.dropPixels = null;
             if (img != null) {
                 EruptionScene.dropPixels = LavaArt.pixels(img);
@@ -252,6 +279,19 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
                 EruptionScene.dropH = img.getHeight();
                 dropPixelsFor = drop.art;
             }
+        }
+    }
+
+    /** The drop's icon in Hypixel's pack, when it is loaded (Bobbin' Scriptures is paper without it); else null. */
+    private static BufferedImage packIcon(Drop d) {
+        if (d.packIcon == null) return null;
+        Identifier id = Identifier.fromNamespaceAndPath("hypixel_skyblock", d.packIcon);
+        var res = Minecraft.getInstance().getResourceManager().getResource(id);
+        if (res.isEmpty()) return null;
+        try (java.io.InputStream in = res.get().open()) {
+            return javax.imageio.ImageIO.read(in);
+        } catch (Exception e) {
+            return null;
         }
     }
 

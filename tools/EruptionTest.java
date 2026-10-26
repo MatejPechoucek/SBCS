@@ -82,7 +82,7 @@ public final class EruptionTest {
 
     public static void main(String[] a) {
         EruptionScene.rigs = new com.sbcs.render.LavaRigs();
-        for (int slot = 0; slot < 8; slot++) EruptionScene.RASTER.texture(slot, pattern(64, 64, 100 + slot), 64, 64);
+        for (int slot = 0; slot < 12; slot++) EruptionScene.RASTER.texture(slot, pattern(64, 64, 100 + slot), 64, 64);
         EruptionScene.rasterScale = 1f;
         EruptionScene.lavaPixels = pattern(16, 320, 77);
 
@@ -147,9 +147,45 @@ public final class EruptionTest {
         check("the dye is offered after the eye opens", EruptionTimeline.K_RISE >= EruptionTimeline.K_EYE_TO);
         check("the Carmine Dye is the grandest: the longest ending",
                 dye.total() >= new EruptionTimeline(Creature.RAGNAROK, Drop.BURNT_TEXTS, 1).total());
-        for (Drop d : Drop.values()) check(d + ": Plhlegblast drops nothing but the dye (or a bust)",
-                d.from(Creature.PLHLEGBLAST) == (d == Drop.BUST || d == Drop.CARMINE));
+        for (Drop d : Drop.values()) check(d + ": Plhlegblast drops only the dye, Squid Boots and Bobbin' Scriptures (or a bust)",
+                d.from(Creature.PLHLEGBLAST) == (d == Drop.BUST || d == Drop.CARMINE || d == Drop.SQUID_BOOTS || d == Drop.BOBBIN));
+        for (Drop d : Drop.values()) check(d + ": Taurus drops only its Helmet and the dye (or a bust)",
+                d.from(Creature.TAURUS) == (d == Drop.BUST || d == Drop.CARMINE || d == Drop.TAURUS_HELMET));
+        check("Plhlegblast and Taurus never open on a kill, the rest do", !Creature.PLHLEGBLAST.onKill && !Creature.TAURUS.onKill
+                && Creature.JAWBUS.onKill && Creature.THUNDER.onKill && Creature.RAGNAROK.onKill && Creature.SCUTTLER.onKill);
+        check("the small wins land red, under the Pincer",
+                Drop.BOBBIN.heat == EruptionTimeline.Heat.RED && Drop.SQUID_BOOTS.heat == EruptionTimeline.Heat.RED && Drop.TAURUS_HELMET.heat == EruptionTimeline.Heat.RED);
+        check("Taurus's dye is 1 in 2,500,000", Drop.CARMINE.oneIn(Creature.TAURUS) == 2_500_000);
         check("only the Carmine Dye comes from any creature", Drop.CARMINE.from == null);
+
+        // ---- the 0.4.0 endings
+        EruptionTimeline bob = new EruptionTimeline(Creature.JAWBUS, Drop.BOBBIN, 1);
+        check("Bobbin': the fish leaps twice, both before the scriptures are named",
+                EruptionTimeline.B_LEAPS[0] + EruptionTimeline.B_LEAP_MS <= EruptionTimeline.B_LEAPS[1]
+                        && EruptionTimeline.B_LEAPS[1] + EruptionTimeline.B_LEAP_MS <= bob.arrive());
+        check("Bobbin': the fish is out of the lava mid-leap", bob.leap(EruptionTimeline.B_LEAPS[0] + 200, 0) > 0f && bob.leap(EruptionTimeline.REVEAL, 0) < 0f);
+        EruptionTimeline boots = new EruptionTimeline(Creature.PLHLEGBLAST, Drop.SQUID_BOOTS, 1);
+        check("Squid Boots: the ink has spread before the boots rise", boots.ink(boots.riseFrom()) > 0.99f && boots.ink(EruptionTimeline.REVEAL) == 0f);
+        check("Squid Boots: three squirts, in order, before the rise",
+                EruptionTimeline.I_SQUIRTS[0] < EruptionTimeline.I_SQUIRTS[1] && EruptionTimeline.I_SQUIRTS[1] < EruptionTimeline.I_SQUIRTS[2]
+                        && EruptionTimeline.I_SQUIRTS[2] < boots.riseFrom());
+        EruptionTimeline helm = new EruptionTimeline(Creature.TAURUS, Drop.TAURUS_HELMET, 1);
+        check("the Taurus Helmet: up first, then two charges, both done before it is named",
+                helm.riseTo() <= EruptionTimeline.C_CHARGES[0] && EruptionTimeline.C_CHARGES[0] + EruptionTimeline.C_CHARGE_MS <= EruptionTimeline.C_CHARGES[1]
+                        && EruptionTimeline.C_CHARGES[1] + EruptionTimeline.C_CHARGE_MS <= helm.arrive());
+        check("the Taurus Helmet: a charge lunges and comes back", helm.charge(EruptionTimeline.C_CHARGES[0] + 100) > 0.5f
+                && helm.charge(EruptionTimeline.C_CHARGES[0] + EruptionTimeline.C_CHARGE_MS + 10) == 0f);
+        // Jawbus's entrance: his own cues, the same for every Jawbus drop (the honesty check above covers it), none for anyone else.
+        boolean jawIntro = false, otherIntro = false;
+        for (EruptionSound.Cue cue : EruptionSound.schedule(new EruptionTimeline(Creature.JAWBUS, Drop.BUST, 2))) jawIntro |= cue.at == 220;
+        for (EruptionSound.Cue cue : EruptionSound.schedule(new EruptionTimeline(Creature.THUNDER, Drop.BUST, 2))) otherIntro |= cue.at == 220;
+        check("Jawbus roars on his entrance, Thunder does not", jawIntro && !otherIntro);
+        EruptionTimeline.jawbusIntro = false;
+        boolean off = false;
+        for (EruptionSound.Cue cue : EruptionSound.schedule(new EruptionTimeline(Creature.JAWBUS, Drop.BUST, 2))) off |= cue.at == 220;
+        EruptionTimeline.jawbusIntro = true;
+        check("the entrance switched off, he does not", !off);
+        check("Jawbus is under the lava at the start and up by 450 ms", EruptionScene.jawbusRiseForTest(0) == 0f && EruptionScene.jawbusRiseForTest(450) == 1f);
 
         // ---- the other endings' beats come in order
         check("the Vial: green, then Jawbus up, then freed, then he sinks",

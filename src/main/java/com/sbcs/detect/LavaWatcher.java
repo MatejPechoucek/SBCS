@@ -38,8 +38,10 @@ import java.util.Set;
  *   <li><b>The drop</b>: real logs put the drop line in the same second as the kill. A win within
  *       {@link #DROP_WAIT_MS} resolves it; none, and it is a bust. A win that came first (up to
  *       {@link #EARLY_MS} before) is the outcome already.</li>
- *   <li><b>Plhlegblast only plays for the Carmine Dye</b>: its kills open nothing, but a
- *       Carmine Dye line opens Eruption with the outcome known.</li>
+ *   <li><b>Plhlegblast and Taurus only play for their own wins</b> ({@link Creature#onKill} false): their kills open
+ *       nothing, but a win of theirs - the Carmine Dye, Squid Boots, Bobbin' Scriptures, the Taurus Helmet - opens
+ *       Eruption with the outcome known, for the one of ours that died within {@link #DROP_ONLY_MS} (either order).
+ *       The Taurus Helmet needs no death: nothing else drops it.</li>
  * </ul>
  *
  * Every decision is narrated into the DecisionLog.
@@ -69,7 +71,7 @@ public final class LavaWatcher {
 
     private static final double SCAN_RADIUS = 48, CLAIM_REACH = 20, DEATH_REACH = 32, TELEPORT = 12, ARM_RADIUS = 24;
     private static final long CLAIM_BEFORE_MS = 2_000, CLAIM_AFTER_MS = 6_000, SHARE_MS = 2_000, DROP_WAIT_MS = 3_000,
-            EARLY_MS = 1_500, ARM_MS = 2_500, MIN_SEEN_MS = 300;
+            EARLY_MS = 1_500, ARM_MS = 2_500, MIN_SEEN_MS = 300, DROP_ONLY_MS = 10_000;
     private static final double GONE_FRACTION = 0.05;
 
     private static final class Mob {
@@ -181,9 +183,11 @@ public final class LavaWatcher {
                 if (d.from(pendingCreature)) {
                     pendingSince = -1;
                     listener.resolve(d, s);
-                } else {
-                    log.note("§8Lava: " + d.title + " cannot come from " + pendingCreature.title + " - not this kill's");
+                    return;
                 }
+                log.note("§8Lava: " + d.title + " cannot come from " + pendingCreature.title + " - not this kill's");
+                // A Taurus or a Plhlegblast of ours can still have dropped it alongside.
+                dropOnly(d, s, now);
                 return;
             }
             // Someone else's creature that just died, a loot share with it, and now its win: that kill.
@@ -204,14 +208,37 @@ public final class LavaWatcher {
                 sharedCreature = null;
                 return;
             }
-            // The dye from any of them: plays even with no kill pending (Plhlegblast's only way in).
+            // The dye from any of them: plays even with no kill pending (Plhlegblast's and Taurus's only way in).
             if (d == Drop.CARMINE) {
-                Creature from = lastDead != null && now - lastDeadAt <= 10_000 ? lastDead : Creature.PLHLEGBLAST;
+                Creature from = lastDead != null && now - lastDeadAt <= DROP_ONLY_MS ? lastDead : Creature.PLHLEGBLAST;
                 log.note("§aLava: the Carmine Dye - opening (from " + from.title + ")");
                 listener.killKnown(from, d, s);
                 bestDrop = null;
+                return;
             }
+            dropOnly(d, s, now);
         }
+    }
+
+    /**
+     * A win with no kill of ours pending: one of the creatures that only play for their wins (Taurus, Plhlegblast)
+     * died just now and can drop it - that kill's. The Taurus Helmet needs no death seen: only Taurus drops it, and a
+     * RARE DROP! line is only ever our own. Otherwise it waits {@link #EARLY_MS} for the death (see {@link #died}).
+     */
+    private void dropOnly(Drop d, String line, long now) {
+        if (lastDead != null && !lastDead.onKill && now - lastDeadAt <= DROP_ONLY_MS && d.from(lastDead)) {
+            log.note("§aLava: " + d.title + " from your " + lastDead.title + " that just died - opening");
+            listener.killKnown(lastDead, d, line);
+            bestDrop = null;
+            return;
+        }
+        if (d == Drop.TAURUS_HELMET) {
+            log.note("§aLava: the Taurus Helmet - only Taurus drops it; opening (\"" + line + "\")");
+            listener.killKnown(Creature.TAURUS, d, line);
+            bestDrop = null;
+            return;
+        }
+        log.note("§8Lava: " + d.title + " with no kill of yours to give it to - waiting " + EARLY_MS + " ms for one");
     }
 
     // ------------------------------------------------------------------ the world
@@ -365,9 +392,14 @@ public final class LavaWatcher {
         if (pendingSince >= 0 && now - pendingSince < 1_000 && pendingCreature == c) return;
         lastDead = c;
         lastDeadAt = now;
-        if (c == Creature.PLHLEGBLAST) {
-            log.note("§7Lava: your Plhlegblast died - " + how + "; it only plays for the Carmine Dye");
-            if (bestDrop == Drop.CARMINE && now - bestAt <= EARLY_MS) listener.killKnown(c, Drop.CARMINE, bestLine);
+        if (!c.onKill) {
+            if (bestDrop != null && bestDrop.win() && bestDrop.from(c) && now - bestAt <= EARLY_MS) {
+                log.note("§aLava: your " + c.title + " died - " + how + "; its " + bestDrop.title + " came just before - opening");
+                listener.killKnown(c, bestDrop, bestLine);
+                bestDrop = null;
+                return;
+            }
+            log.note("§7Lava: your " + c.title + " died - " + how + "; it only plays for its own good drops, nothing opens yet");
             return;
         }
         if (bestDrop != null && bestDrop.win() && bestDrop.from(c) && now - bestAt <= EARLY_MS) {
@@ -412,7 +444,7 @@ public final class LavaWatcher {
         if (pct <= 0) return;
         // Only our own: hiding the HUD for every party member's creature hid it half the time.
         for (Mob m : mobs.values()) {
-            if (m.dead || !m.owned || m.creature == Creature.PLHLEGBLAST) continue;
+            if (m.dead || !m.owned || !m.creature.onKill) continue;
             if (m.distSq > ARM_RADIUS * ARM_RADIUS || now - m.firstSeen < MIN_SEEN_MS) continue;
             if (m.hp < 0 || m.maxHp <= 0 || m.hp > m.maxHp * pct / 100.0) continue;
             if (now >= armedUntil) log.note("§7Lava: " + m.creature.title + " is at " + fmt(m.hp) + " - hiding the HUD");

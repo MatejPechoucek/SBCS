@@ -36,7 +36,7 @@ public final class SlayerRecorder {
      * seen, everything standing round it is recorded once as {@code lava_model} - entity types, heads and their
      * skins - because Ragnarok's and the Fiery Scuttler's in-game models are not documented anywhere.
      */
-    private static final String[] LAVA = {"Lord Jawbus", "Thunder", "Ragnarok", "Fiery Scuttler", "Plhlegblast"};
+    private static final String[] LAVA = {"Lord Jawbus", "Thunder", "Ragnarok", "Fiery Scuttler", "Plhlegblast", "Taurus"};
 
     private static final class Seen {
         String name = "";

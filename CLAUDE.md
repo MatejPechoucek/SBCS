@@ -1548,6 +1548,26 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
 - **Next:** the designer's lava session with records on - check the nametag format and the catch lines, and write
   `LavaDetectTest` / a replay against them as Hellion's were.
 
+**Every lava creature (0.4.0, docs/ideas/04-lava-fishing-more.md)** - unverified in game, no real line for any of it seen yet.
+- `Creature.TAURUS` (Epic, "Taurus and his steed emerge." - `ofCatch` reads "emerge", the plural) and `Creature.onKill`:
+  Taurus and Plhlegblast **never open on a kill** and never arm the hide; they play only for a win of their own, outcome
+  known (`LavaWatcher.dropOnly`: a win from the one of ours that died within `DROP_ONLY_MS` 10 s, or a death within
+  `EARLY_MS` after the line). The Taurus Helmet needs no death - only Taurus drops it. The Carmine Dye from Taurus reads
+  "1 in ~2,500,000 Taurus kills" (`Drop.oneIn(creature)`).
+- Taurus is drawn as the game builds it, roughly: `LavaRigs.pigRider` - vanilla PigModel + its saddle layer (CubeDeformation
+  0.5), a zombified piglin in the passenger pose with its own head **left out by path** (`ModelPart.visit` walks invisible
+  parts, so `visible = false` does nothing there) and the skull in the Taurus Helmet's NEU skin (`SLOT_HELMET` 11) in its
+  place. NEU's bestiary head for Taurus is the helmet's skin.
+- Three small wins, red, below the Pincer: **Bobbin' Scriptures** (`BOBBIN`, from Jawbus, Ragnarok and Plhlegblast -
+  `Drop.also`; a pixel Silver Magmafish leaps over it twice, `MAGMAFISH`; Hypixel's pack icon via `Drop.packIcon`, paper
+  without it), **Squid Boots** (`INK`, Plhlegblast; three ink squirts and an ink stain over the lava in `floorGild`; leather
+  boots dyed `artTint`), **Taurus Helmet** (`CHARGE`; it lunges at the camera twice, grit rings and nostril steam).
+- **Jawbus's entrance** (`EruptionTimeline.jawbusIntro`, menu "Jawbus's entrance", `lavaJawbusIntro`): he heaves up out of
+  the lava with his arms up and a roar before sinking (`jawbusRise`/`jawbusSink`, his sink ends with everyone's). Same for
+  every Jawbus, so EruptionTest's honesty holds. A dry Jawbus says "your 14th Lord Jawbus · 0 Vials" under the fragment
+  (`SbcsStats.lavaKills`, `EruptionScene.bustNote`).
+- Not done: the Lord Jawbus Shard (no NEU item and no line known), the Enchanted Ink Sac (cheap). Taurus has `lavaTaurus`.
+
 ## The Ossuary (dungeon reward chests, 2026-10-22) - unverified in game
 
 Matej's ask: a roll for F1-F7 / M1-M7 reward chests, plan artifact claude.ai/artifact/3AS1UWyfaMuB4Hzo7Wuvk1. His calls:
