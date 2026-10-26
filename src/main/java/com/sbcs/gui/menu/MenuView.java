@@ -763,9 +763,9 @@ public final class MenuView {
             curGrouped = false;
             curGroup = "seraph";
             rows.add(new TapedRow("Voidgloom Seraph - The Seraph's Glyph", "Back soon - still being sharpened", "ender_pearl"));
-        } else if (group(rows, "seraph", "Voidgloom Seraph - The Seraph's Glyph", "Every kill of your own tier IV Seraph", "ender_pearl", SERAPH, cfg.seraphAnimation,
+        } else if (group(rows, "seraph", "Voidgloom Seraph - The Seraph's Glyph", "Every kill of your own tier III or IV Seraph", "ender_pearl", SERAPH, cfg.seraphAnimation,
                 () -> { cfg.seraphAnimation = !cfg.seraphAnimation; cfg.save(); })) {
-            rows.add(new NoticeRow("Plays on every kill of your own tier IV Seraph (the one spawned by you), the moment it dies; the drop decides the ending."));
+            rows.add(new NoticeRow("Plays on every kill of your own tier III or IV Seraph (the one spawned by you), the moment it dies; the drop decides the ending."));
             rows.add(new SectionRow("Hiding the drop"));
             rows.add(new SliderRow("seraph_hide", "Hide the HUD below", cfg.seraphHidePct, 0, 30, 1,
                     v -> cfg.seraphHidePct = v, v -> v == 0 ? "Off" : v + "% HP"));
@@ -1043,7 +1043,7 @@ public final class MenuView {
         sourceGroup(rows, st, "blaze", "Hellion - Inferno Demonlord IV", "blaze_rod", BLAZE, "kill", "Bosses killed",
                 titles(com.sbcs.anim.HellionTimeline.Drop.values()));
         if (!com.sbcs.Maintenance.SERAPH) {
-            sourceGroup(rows, st, "seraph", "The Seraph - Voidgloom Seraph IV", "ender_pearl", SERAPH, "kill", "Bosses killed",
+            sourceGroup(rows, st, "seraph", "The Seraph - Voidgloom Seraph", "ender_pearl", SERAPH, "kill", "Bosses killed",
                     titles(com.sbcs.anim.SeraphTimeline.Drop.values()));
         }
         sourceGroup(rows, st, "lava", "Eruption - lava fishing", "magma_cream", LAVA, "kill", "Rare creatures killed",

@@ -43,12 +43,18 @@ public final class SeraphScene {
             TEX_END_SKY = "seraph_end_sky", TEX_END_STONE = "seraph_end_stone", TEX_WHITE = "seraph_white";
     /** The vanilla paths, in the same order as {@link #ADOPT}. */
     public static final String[] ADOPT = {TEX_ENDERMAN, TEX_EYES, TEX_BEACON, TEX_OBSIDIAN, TEX_GLASS, TEX_BEAM, TEX_CRYSTAL,
-            TEX_CRYSTAL_BEAM, TEX_END_SKY, TEX_END_STONE};
+            TEX_CRYSTAL_BEAM, TEX_END_SKY, TEX_END_STONE, SeraphEndings.TEX_FRAME_TOP, SeraphEndings.TEX_FRAME_SIDE,
+            SeraphEndings.TEX_FRAME_EYE, SeraphEndings.TEX_PORTAL, SeraphEndings.TEX_TABLE_TOP, SeraphEndings.TEX_TABLE_SIDE,
+            SeraphEndings.TEX_TABLE_BOTTOM};
     public static final String[] ADOPT_PATH = {"textures/entity/enderman/enderman.png", "textures/entity/enderman/enderman_eyes.png",
             "textures/block/beacon.png", "textures/block/obsidian.png", "textures/block/glass.png", "textures/entity/beacon/beacon_beam.png",
             "textures/entity/end_crystal/end_crystal.png", "textures/entity/end_crystal/end_crystal_beam.png",
-            "textures/environment/end_sky.png", "textures/block/end_stone.png"};
-    public static final int[][] ADOPT_SIZE = {{64, 32}, {64, 32}, {16, 16}, {16, 16}, {16, 16}, {16, 16}, {128, 64}, {16, 256}, {128, 128}, {16, 16}};
+            "textures/environment/end_sky.png", "textures/block/end_stone.png",
+            "textures/block/end_portal_frame_top.png", "textures/block/end_portal_frame_side.png", "textures/block/end_portal_frame_eye.png",
+            "textures/entity/end_portal/end_portal.png", "textures/block/enchanting_table_top.png", "textures/block/enchanting_table_side.png",
+            "textures/block/enchanting_table_bottom.png"};
+    public static final int[][] ADOPT_SIZE = {{64, 32}, {64, 32}, {16, 16}, {16, 16}, {16, 16}, {16, 16}, {128, 64}, {16, 256}, {128, 128}, {16, 16},
+            {16, 16}, {16, 16}, {16, 16}, {256, 256}, {16, 16}, {16, 16}, {16, 16}};
 
     // ---- the Ender Dragon (the Byzantium Dye's ending), posed by the game's own model
 
@@ -150,6 +156,7 @@ public final class SeraphScene {
         ChopScene.gild = null;
         if (e == Ending.DRAGON && !dragonBehind) dragon(c, layer, tl, t, h);
         groundBeacon(c, tl, t, pt, glass);
+        SeraphEndings.models(c, layer, tl, t, h);
         if (e == Ending.EYE) {
             // The red rays behind the core, before it: drawn with the words they covered it (the review, S6).
             if (t >= SeraphTimeline.E_RISE) {
@@ -176,7 +183,9 @@ public final class SeraphScene {
 
     static void camera(SeraphTimeline tl, long t, int w, int h) {
         double yaw = Math.toRadians(YAW0 + 4f * (float) Math.sin(t / 1800.0));
-        double pitch = Math.toRadians(-10f);
+        // The Summoning looks down into its ring of frames while the eyes go in and the portal opens.
+        float down = tl.ending() == Ending.ALTAR ? ease((t - SeraphTimeline.A_FRAMES) / 700f) * (1f - ease((t - SeraphTimeline.A_LIFT) / 800f)) : 0f;
+        double pitch = Math.toRadians(-10f - 20f * down);
         ChopScene.cy = (float) Math.cos(yaw);
         ChopScene.sy = (float) Math.sin(yaw);
         ChopScene.cp = (float) Math.cos(pitch);
@@ -187,13 +196,20 @@ public final class SeraphScene {
         ChopScene.fy = 2f;
         ChopScene.fz = 0f;
         ChopScene.sx0 = w / 2f;
-        ChopScene.sy0 = h * 0.54f;
+        ChopScene.sy0 = h * (0.54f - 0.1f * down);
 
         // A win's camera drifts over towards the glyph, where the drop will stand.
         float pan = tl.pan(t);
         Ending e = tl.ending();
+        // Etherwarp needs the whole arena in the shot until its last warp.
+        if (e == Ending.WARP) pan *= ease((t - SeraphTimeline.warpAt(SeraphTimeline.W_JUMPS - 1) + 200) / 600f);
         if (pan > 0f && e != Ending.EYE && e != Ending.DRAGON) {
             float tx = BX, tz = BZ;
+            float[] own = SeraphEndings.panTarget(tl);
+            if (own != null) {
+                tx = own[0];
+                tz = own[1];
+            }
             if (e == Ending.SKIN) {
                 tx = SKIN_HX;
                 tz = SKIN_HZ;
@@ -594,7 +610,13 @@ public final class SeraphScene {
                 part.alpha *= 1f - ease((pull - 0.75f) / 0.25f);
             }
         }
+        if (tl.stone(t) > 0f) {
+            // Set in Stone: the gild turns it texel by texel, and its eyes go out as the stone takes the head.
+            ChopScene.gild = SeraphEndings.stoneGild(tl, t);
+            for (Part part : parts) if (TEX_EYES.equals(part.tex)) part.alpha *= 1f - ease((tl.stone(t) - 0.8f) / 0.15f);
+        }
         drawRig(c, parts, p.alpha > 0.6f && pull < 0.05f);
+        if (tl.stone(t) > 0f) ChopScene.gild = null;
         if (carried != null && t >= SeraphTimeline.APPEAR) {
             // The glyph's stub of beam while it is held: the colour of the moment, fading upwards.
             float[] top = beaconAt(carried, 8f, 16f, 8f);
@@ -835,7 +857,7 @@ public final class SeraphScene {
             }
             ChopScene.inkWidth = 0f;
             ChopScene.gildCells = 16;
-            if (blow >= 0f) continue;
+            if (blow >= 0f || tl.crystalsGone(t)) continue;
             float ca = 1f - sink;
             if (ca < 0.02f) continue;
             // The crystal's base (the bedrock plinth) and the crystal: core, inner glass, outer glass.
@@ -844,6 +866,11 @@ public final class SeraphScene {
                     CRYSTAL_BASE_UV, 1, 1, 1, 0, ca, c);
             float[] ctr = crystalAt(side, pt, sink);
             ctr[1] -= lift;
+            float[] shake = SeraphEndings.crystalShake(tl, t, side);
+            if (shake != null) {
+                ctr[0] += shake[0];
+                ctr[1] += shake[1];
+            }
             float pull = tl.eyePull(t);
             if (pull > 0f) {
                 List<Part> one = new ArrayList<>();
@@ -899,7 +926,7 @@ public final class SeraphScene {
     static void crystalBeams(ChopScene.Canvas c, SeraphTimeline tl, long t, long pt) {
         if (t < SeraphTimeline.TELEPORT_IN + 250) return;
         float a = ease((t - SeraphTimeline.TELEPORT_IN - 250) / 300f);
-        if (tl.crystalsBlow(t) >= 0f) return;
+        if (tl.crystalsBlow(t) >= 0f || tl.crystalsGone(t)) return;
         if (!tl.drop().win() && t >= SeraphTimeline.REVEAL) a *= 1f - ease((t - SeraphTimeline.REVEAL - 100) / 150f);
         float wide = 1f + 0.5f * SeraphTimeline.hit(t);
         if (tl.ending() == Ending.EYE) a *= 1f - ease((t - SeraphTimeline.E_PULL) / 300f);
@@ -1113,6 +1140,7 @@ public final class SeraphScene {
         if (e == Ending.ESPRESSO) espresso(layer, tl, t, g, h);
         if (e == Ending.JACKPOT) jackpot(c, layer, tl, t, w, h, g);
         if (e == Ending.DRAGON) dragonEffects(c, layer, tl, t, w, h, g);
+        SeraphEndings.effects(c, layer, tl, t, w, h);
     }
 
     // ================================================================== the drop and its words
@@ -1121,6 +1149,8 @@ public final class SeraphScene {
     /** Where the drop comes to rest, for the camera to centre on; null when there is no drop to show. */
     static float[] showTarget(SeraphTimeline tl) {
         if (!tl.drop().win()) return null;
+        float[] own = SeraphEndings.showTarget(tl);
+        if (own != null) return own;
         return switch (tl.ending()) {
             case EYE -> new float[]{BX, FEET + 8f + 6f + 14f, BZ};
             case SKIN -> new float[]{SKIN_HX, FEET + 4f, SKIN_HZ};
@@ -1137,6 +1167,7 @@ public final class SeraphScene {
     }
 
     static void drop(ChopScene.Canvas c, CrystalVeins.Fill layer, SeraphTimeline tl, long t, int w, int h) {
+        if (SeraphEndings.drop(c, tl, t, h)) return;
         Ending e = tl.ending();
         float ts = Math.min(1.35f, h / 300f);
         if (e == Ending.SKIN || e == Ending.DICE) {
@@ -1188,8 +1219,9 @@ public final class SeraphScene {
         if (na > 0.02f) c.name(x, below + 8f * ts, 1.6f * ts, ChopScene.alpha(na) | tl.drop().colour, tl.letters(t));
         float la = tl.lineAlpha(t) * ChopScene.sceneAlpha;
         if (la > 0.02f) {
-            if (tl.drop().oneIn > 0) {
-                c.text("1 in ~" + String.format("%,d", tl.drop().oneIn) + " tier IV bosses" + (nthNote == null ? "" : " \u00b7 " + nthNote), x, below + 22f * ts, ts, ChopScene.alpha(la) | 0xC8C8C8);
+            int oneIn = oddsFor(tl.drop(), bossTier);
+            if (oneIn > 0) {
+                c.text("1 in ~" + String.format("%,d", oneIn) + (bossTier == 3 ? " tier III bosses" : " tier IV bosses") + (nthNote == null ? "" : " \u00b7 " + nthNote), x, below + 22f * ts, ts, ChopScene.alpha(la) | 0xC8C8C8);
             }
             long price = tl.price();
             if (price > 0 && t >= tl.countStart()) {
@@ -1204,6 +1236,19 @@ public final class SeraphScene {
 
     /** The menu's banner switch, set by the screen each frame. */
     public static boolean showBanner = true;
+    /** The tier of the boss that dropped it (3 or 4), set by the screen each frame: a tier III has its own odds. */
+    public static int bossTier = 4;
+
+    /** The wiki's odds for the boss's tier: a tier III drops only the Summoning Eye (1 in 167.75) and the Dye. */
+    static int oddsFor(SeraphTimeline.Drop d, int tier) {
+        if (tier != 3) return d.oneIn;
+        return switch (d) {
+            case SUMMONING_EYE -> 168;
+            case BYZANTIUM_DYE -> 1_000_000;
+            default -> d.oneIn;
+        };
+    }
+
     /** "your 3rd" after the odds, set by the screen each frame; null for a test. */
     public static String nthNote;
     /** The drop line's own tier word and its colour, set by the screen each frame; null: Hypixel's top word. */

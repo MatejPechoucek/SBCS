@@ -37,7 +37,7 @@ sound files to download.
 | Crimson Isle lava fishing | **Eruption** | You kill Lord Jawbus, a Thunder, a Ragnarok or a Fiery Scuttler (Plhlegblast only gets one for the Carmine Dye). |
 | Fishing Festival | **Fin** | A quick pop-up when a Great White Shark gives you a Megalodon or a Shark Tooth, and an even quicker one when it doesn't. |
 | Dwarven Mines | **Wisp** | A quick pop-up when a Ghost drops Sorrow or Plasma. |
-| Voidgloom Seraph IV | **The Seraph's Glyph** | 🚧 *Under maintenance.* It's being polished and is switched off in this release. |
+| Voidgloom Seraph III and IV | **The Seraph's Glyph** | Your own Seraph dies. The glyph's beam lands, and every good drop has its own ending: the Judgement Core's eye opens, the Byzantium Dye brings the Ender Dragon. |
 
 Every slayer card has a **Plays for** setting: Very Rare drops and up, Crazy Rare and up, or RNGesus drops only.
 

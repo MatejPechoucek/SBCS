@@ -78,13 +78,16 @@ public final class SeraphSound {
         out.add(new Cue(R, true, Voices.seraphPowerUp(d.lands.ordinal(), seed + 600)));
         long arrive = tl.arrive();
         Ending e = d.ending;
-        boolean dies = e != Ending.JACKPOT && e != Ending.EYE && e != Ending.DRAGON;
+        boolean dies = e != Ending.JACKPOT && e != Ending.EYE && e != Ending.DRAGON && e != Ending.IDOL;
         if (dies) {
             out.add(new Cue(SeraphTimeline.SHATTER, false, Voices.seraphShatter(seed + 610)));
             out.add(new Cue(SeraphTimeline.CRYSTALS_BLOW, false, Voices.seraphCrystalsBlow(seed + 620)));
             out.add(new Cue(SeraphTimeline.DEATH, false, Voices.seraphDeath(seed + 630)));
             out.add(new Cue(SeraphTimeline.POOF, false, Voices.seraphPoof(seed + 640)));
-            out.add(new Cue(R + 300, false, Voices.seraphRise((arrive - R - 300) / 1000f)));
+            // The plain ones rise all the way; the item endings have their own business before the showcase.
+            long riseEnd = e == Ending.ALTAR ? SeraphTimeline.A_FRAMES : e == Ending.WARP ? SeraphTimeline.W_FROM
+                    : e == Ending.RUNE ? SeraphTimeline.R_TABLE : e == Ending.SHARD ? SeraphTimeline.S_CRACK : arrive;
+            out.add(new Cue(R + 300, false, Voices.seraphRise(Math.max(200, riseEnd - R - 300) / 1000f)));
         }
         switch (e) {
             case CHALICE -> {
@@ -169,9 +172,60 @@ public final class SeraphSound {
                 // The rearing roar as the dye is shown.
                 out.add(new Cue(arrive - 150, false, Voices.seraphRoar(2.4f, false, 1.15f, seed + 768)));
             }
+            case ALTAR -> {
+                // The frames grind up out of the ground; seven eyes click in, a step up each; the eighth is the drop.
+                out.add(new Cue(SeraphTimeline.A_FRAMES, false, Voices.seraphPillars(seed + 850)));
+                for (int k = 0; k < SeraphTimeline.A_FRAMES_N - 1; k++) {
+                    out.add(new Cue(SeraphTimeline.A_EYES + k * SeraphTimeline.A_EYE_STEP, false, Voices.vaultSocket(k, seed + 851 + k)));
+                }
+                out.add(new Cue(SeraphTimeline.A_SEAT, false, Voices.seraphVwoop(1.2f, seed + 860)));
+                out.add(new Cue(SeraphTimeline.A_SEATED, false, Voices.vaultSocket(7, seed + 861)));
+                out.add(new Cue(SeraphTimeline.A_SEATED, false, Voices.seraphHeartboom(seed + 862)));
+                // The portal opening, and far off, the dragon answering.
+                out.add(new Cue(SeraphTimeline.A_OPEN, false, Voices.seraphCoreHum((SeraphTimeline.A_CLOSE - SeraphTimeline.A_OPEN) / 1000f)));
+                out.add(new Cue(SeraphTimeline.A_OPEN + 250, false, Voices.seraphRoar(1.6f, true, 0.55f, seed + 863)));
+                out.add(new Cue(SeraphTimeline.A_LIFT, false, Voices.seraphRise((arrive - SeraphTimeline.A_LIFT) / 1000f)));
+            }
+            case WARP -> {
+                for (int k = 0; k < SeraphTimeline.W_JUMPS; k++) {
+                    long aim = SeraphTimeline.W_FROM + k * SeraphTimeline.W_STEP;
+                    out.add(new Cue(aim, false, Voices.seraphGlance(seed + 870 + k)));
+                    out.add(new Cue(SeraphTimeline.warpAt(k), false, Voices.seraphVwoop(1.0f + 0.12f * k, seed + 880 + k)));
+                }
+            }
+            case RUNE -> {
+                out.add(new Cue(SeraphTimeline.R_TABLE, false, Voices.seraphLand(seed + 890)));
+                out.add(new Cue(SeraphTimeline.R_STREAM, false,
+                        Voices.chiShimmer((SeraphTimeline.R_FORM - SeraphTimeline.R_STREAM) / 1000f, seed + 891)));
+                out.add(new Cue(SeraphTimeline.R_FORM, false, Voices.chiOpen(seed + 892)));
+                out.add(new Cue(SeraphTimeline.R_FORM, false, Voices.seraphRise((arrive - SeraphTimeline.R_FORM) / 1000f)));
+            }
+            case SHARD -> {
+                out.add(new Cue(SeraphTimeline.S_CRACK, false,
+                        Voices.seraphCrack((SeraphTimeline.S_BURST - SeraphTimeline.S_CRACK) / 1000f, 0.12f, seed + 900)));
+                out.add(new Cue(SeraphTimeline.S_BURST, false, Voices.seraphShatter(seed + 901)));
+                out.add(new Cue(SeraphTimeline.S_BURST, false, Voices.seraphCrystalsBlow(seed + 902)));
+                out.add(new Cue(SeraphTimeline.S_BURST + 150, false,
+                        Voices.seraphImplode((SeraphTimeline.S_FUSE - SeraphTimeline.S_BURST - 150) / 1000f)));
+                out.add(new Cue(SeraphTimeline.S_FUSE, false, Voices.relicIgnite()));
+            }
+            case IDOL -> {
+                out.add(new Cue(R + 100, false, Voices.score(138.59f, HARMONIC_MINOR, (SeraphTimeline.I_SHATTER - R - 100) / 1000f)));
+                out.add(new Cue(SeraphTimeline.I_STONE, false, Voices.seraphFreeze(seed + 910)));
+                out.add(new Cue(SeraphTimeline.I_STONE + 100, false,
+                        Voices.midasCreep((SeraphTimeline.I_STONED - SeraphTimeline.I_STONE) / 1000f, seed + 911)));
+                out.add(new Cue(SeraphTimeline.I_STONED, false, Voices.midasClank(seed + 912)));
+                out.add(new Cue(SeraphTimeline.I_CRACK, false,
+                        Voices.seraphCrack((SeraphTimeline.I_SHATTER - SeraphTimeline.I_CRACK) / 1000f, 0.14f, seed + 913)));
+                for (int i = 0; i < 3; i++) out.add(new Cue(SeraphTimeline.I_CRACK + 200 + i * 300L, false, Voices.vaultKnock(i, seed + 914 + i)));
+                out.add(new Cue(SeraphTimeline.I_SHATTER, true, Voices.seraphShock(seed + 920)));
+                out.add(new Cue(SeraphTimeline.I_SHATTER, false, Voices.chopCrumble(seed + 921)));
+                out.add(new Cue(SeraphTimeline.I_SHATTER, false, Voices.seraphCrystalsBlow(seed + 922)));
+                out.add(new Cue(SeraphTimeline.I_SHATTER + 100, false, Voices.seraphRumble(3f, seed + 923)));
+            }
             default -> { }
         }
-        boolean big = e == Ending.JACKPOT || e == Ending.EYE || e == Ending.DRAGON;
+        boolean big = tl.big();
         out.add(new Cue(arrive, false, Voices.seraphArrive(big, seed + 800)));
         out.add(new Cue(arrive + 300, false, Voices.seraphGlow((tl.total() - arrive) / 1000f + 1.0f, big, seed + 900)));
         return sorted(out);
