@@ -64,10 +64,12 @@ public final class PairsTimeline {
     /** The cracks start cycling... */
     public static final long WIND = 1100;
     static final double STEP_RATIO = 0.84;
+    /** The shortest step: the shrinking would otherwise never reach the reveal (360 / (1 - 0.84) is 2250 ms). */
+    static final long MIN_STEP = 120;
     /** ...each step shorter than the last... */
     public static final long[] STEPS = steps(WIND, 3600);
     /** ...into a flicker... */
-    public static final long HANG = STEPS[STEPS.length - 1] + Math.round(360 * Math.pow(STEP_RATIO, STEPS.length - 1));
+    public static final long HANG = STEPS[STEPS.length - 1] + Math.max(MIN_STEP, Math.round(360 * Math.pow(STEP_RATIO, STEPS.length - 1)));
     /** ...and the answer. Nothing before this may depend on what is in the box. */
     public static final long REVEAL = 3600;
     /** A box that got away: no colours, a short grey wait. */
@@ -92,7 +94,7 @@ public final class PairsTimeline {
         while (t + d < reveal - 200) {
             out.add(Math.round(t));
             t += d;
-            d *= STEP_RATIO;
+            d = Math.max(MIN_STEP, d * STEP_RATIO);
         }
         long[] a = new long[out.size()];
         for (int i = 0; i < a.length; i++) a[i] = out.get(i);
