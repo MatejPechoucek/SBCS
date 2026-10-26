@@ -277,6 +277,23 @@ public class PatternConfig {
     /** How fast Eruption plays, in percent (50-200): the whole of it, picture and cues together. */
     public int lavaSpeed = 100;
 
+    /**
+     * "The Coil" (the Titanoboa) and "The Totem" (the Wiki Tiki): the water mythics' cutscene, their shared Aquamarine
+     * Dye the grandest. Detection is from the wiki, unverified.
+     */
+    public boolean waterAnimation = true;
+    public boolean waterTitanoboa = true, waterTiki = true;
+    /** Kills you only assisted (loot share) play too. */
+    public boolean waterLootShare = true;
+    /** The HUD and chat fade once your creature is at or below this share of its health, % (0 off). */
+    public int waterHidePct = 4;
+    public boolean waterBanner = true;
+    public boolean waterPrice = true;
+    public int waterVolume = 100;
+    public int waterSpeed = 100;
+    /** Busts: 0 the whole cutscene, 1 short, 2 none. */
+    public int waterBusts = 0;
+
     /** "The Vault": the Crystal Nucleus loot bundle's cutscene, and the black box over the bundle until it is picked up. */
     public boolean nucleusAnimation = true;
     /** The black box over the bundle in the world, so the floor does not give the haul away. */
@@ -461,6 +478,10 @@ public class PatternConfig {
         seraphSpeed = clamp(seraphSpeed, 50, 200);
         lavaVolume = clamp(lavaVolume, 0, 150);
         lavaSpeed = clamp(lavaSpeed, 50, 200);
+        waterVolume = clamp(waterVolume, 0, 150);
+        waterSpeed = clamp(waterSpeed, 50, 200);
+        waterHidePct = clamp(waterHidePct, 0, 20);
+        waterBusts = clamp(waterBusts, 0, 2);
         nucleusVolume = clamp(nucleusVolume, 0, 150);
         nucleusSpeed = clamp(nucleusSpeed, 50, 200);
         fishingVolume = clamp(fishingVolume, 0, 150);

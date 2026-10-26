@@ -89,6 +89,7 @@ public final class Safety {
             case "spider" -> "The Brood";
             case "slayer" -> "The slayer quest tracker";
             case "lava" -> "Eruption";
+            case "water" -> "The Coil and the Totem";
             case "shark" -> "Fin";
             case "ghost" -> "Wisp";
             case "nucleus" -> "The Vault";

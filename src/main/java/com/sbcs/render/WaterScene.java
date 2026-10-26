@@ -86,9 +86,15 @@ public final class WaterScene {
         originY = h * 0.5f;
         originSize = h * 0.08f;
 
+        // The creature first: the floor's foam needs this frame's crossings (a frame late, the first frame of a run
+        // showed the last run's). Its squares on the back layer are held and drawn after the floor.
+        HELD.clear();
+        crossings = 0;
+        CrystalVeins.Fill hold = (x, y, fw, fh, argb) -> HELD.add(new Square(x, y, fw, fh, argb));
+        if (tl.creature() == Creature.TITANOBOA) coil(tl, t, hold);
+        else totem(tl, t, hold);
         floor(c, tl, t);
-        if (tl.creature() == Creature.TITANOBOA) coil(tl, t, back);
-        else totem(tl, t, back);
+        for (Square q : HELD) back.fill(q.x, q.y, q.w, q.h, q.argb);
         if (flushBack != null) flushBack.run();
         rasterise(c);
         if (tl.creature() == Creature.TITANOBOA) coilFront(c, front, tl, t);
@@ -159,6 +165,10 @@ public final class WaterScene {
     /** Where the snake's body breaks the surface this frame: x, z, radius (for the ripples). */
     static final float[] CROSS = new float[3 * 64];
     static int crossings;
+    record Square(float x, float y, float w, float h, int argb) {
+    }
+
+    static final java.util.List<Square> HELD = new java.util.ArrayList<>();
 
     static void floor(ChopScene.Canvas c, WaterTimeline tl, long t) {
         boolean boa = tl.creature() == Creature.TITANOBOA;
@@ -249,7 +259,6 @@ public final class WaterScene {
         ChopScene.project(FX0, 0f, FZ1);
         float vx = ChopScene.P[0] - ox, vy = ChopScene.P[1] - oy;
         c.imageAffine(TEX_FLOOR, floorPx, FW, FH, ox, oy, ux, uy, vx, vy);
-        crossings = 0;
     }
 
     static float ringBand(float d, float r) {

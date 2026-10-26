@@ -264,6 +264,76 @@ public class SbcsClient implements ClientModInitializer {
         }
     });
 
+    /** The water mythics (Titanoboa, Wiki Tiki): a kill of ours opens the Coil or the Totem, its drop line fills it in. */
+    private static final com.sbcs.detect.FishingWatcher waterWatcher = new com.sbcs.detect.FishingWatcher(
+            decisions, new com.sbcs.detect.FishingWatcher.Listener() {
+        @Override
+        public void kill(com.sbcs.anim.WaterTimeline.Creature creature, String why) {
+            lastWaterKill = creature;
+            waterKillScreen = null;
+            if (!waterCreatureOn(creature)) {
+                decisions.note("§8Water: " + creature.title + " is turned off in the menu");
+                return;
+            }
+            if (bustsOff("water", "Water: " + creature.title)) return;
+            if (isAnimationPlaying()) {
+                decisions.note("§8Water: not opened for the kill - a cutscene is already playing (a win still plays when its drop comes)");
+                return;
+            }
+            openWater(creature, null, false);
+            waterKillScreen = currentWater;
+        }
+
+        @Override
+        public void resolve(com.sbcs.anim.WaterTimeline.Drop drop, String line) {
+            if (drop.win() && underFloor(drop.id)) drop = com.sbcs.anim.WaterTimeline.Drop.BUST;
+            boolean screen = currentWater != null && currentWater.isActive() && currentWater.pending() && !currentWater.isTest();
+            if (screen && currentWater.resolve(drop)) {
+                decisions.note("§aWater: the kill's drop is " + (drop.win() ? drop.title : "nothing the animation plays - bust"));
+                return;
+            }
+            if (drop.win() && lastWaterKill != null) {
+                killKnown(lastWaterKill, drop, line);
+            } else if (!drop.win() && !screen && lastWaterKill != null && !killCounted(waterKillScreen)) {
+                countUnplayed("water", null, "Water: " + lastWaterKill.title + "'s bust");
+            }
+            waterKillScreen = null;
+        }
+
+        @Override
+        public void killKnown(com.sbcs.anim.WaterTimeline.Creature creature, com.sbcs.anim.WaterTimeline.Drop drop, String line) {
+            com.sbcs.anim.WaterTimeline.Drop dr = drop.win() && underFloor(drop.id) ? com.sbcs.anim.WaterTimeline.Drop.BUST : drop;
+            if (drop != com.sbcs.anim.WaterTimeline.Drop.AQUAMARINE && !waterCreatureOn(creature)) {
+                countUnplayed("water", dr.win() ? dr.title : null, "Water: " + creature.title + " (turned off in the menu)");
+                return;
+            }
+            if (currentWater != null && currentWater.isActive() && currentWater.pending() && !currentWater.isTest()
+                    && currentWater.creature() == creature && currentWater.resolve(dr)) {
+                return;
+            }
+            if (!dr.win() && bustStyle("water") == 2) {
+                countUnplayed("water", null, "Water: " + creature.title + "'s bust (busts are off)");
+                return;
+            }
+            Runnable open = () -> openWater(creature, dr, false);
+            String what = "Water: " + (dr.win() ? dr.title : creature.title + "'s bust");
+            if (isAnimationPlaying()) {
+                if (!makeRoom(dr.win(), what)) waitForTurn(open, dr.win(), what, () -> countUnplayed("water", null, what));
+                else open.run();
+                return;
+            }
+            open.run();
+        }
+    });
+
+    /** The last water mythic of ours that died, opened or not: whose a late win is. */
+    private static com.sbcs.anim.WaterTimeline.Creature lastWaterKill;
+
+    private static boolean waterCreatureOn(com.sbcs.anim.WaterTimeline.Creature c) {
+        if (config == null) return true;
+        return c == com.sbcs.anim.WaterTimeline.Creature.TITANOBOA ? config.waterTitanoboa : config.waterTiki;
+    }
+
     /** The last lava creature of ours that died, opened or not: whose a late win is. */
     private static com.sbcs.anim.EruptionTimeline.Creature lastLavaKill;
 
@@ -752,6 +822,10 @@ public class SbcsClient implements ClientModInitializer {
                 lavaWatcher.lootShare = config.lavaLootShare;
                 lavaWatcher.tick(client.player, config.lavaHidePct);
             });
+            if (live && config.waterAnimation) Safety.run("water", () -> {
+                waterWatcher.lootShare = config.waterLootShare;
+                waterWatcher.tick(client.player, config.waterHidePct);
+            });
             // Slayer bosses' nametags, recorded for detection to be written against (no animation yet).
             if (client.player != null && config.recordDrops) com.sbcs.detect.SlayerRecorder.tick(client.player);
             if (client.player != null) {
@@ -1060,6 +1134,32 @@ public class SbcsClient implements ClientModInitializer {
                 lavaNode.then(dropNode);
             }
 
+            LiteralArgumentBuilder<FabricClientCommandSource> waterNode = ClientCommands.literal("water")
+                    .executes(ctx -> options(ctx, "test water",
+                            "bust", "no rare drop (add a creature: titanoboa, wiki_tiki)",
+                            "scriptures", "Bobbin' Scriptures (add a creature)",
+                            "shed", "Titanoboa Shed",
+                            "snake_eyes", "Snake Eyes (Titanoboa)",
+                            "bubble", "Troubled Bubble (Wiki Tiki)",
+                            "tiki_mask", "Tiki Mask (Wiki Tiki)",
+                            "aquamarine", "Aquamarine Dye - the Bayou Floods (add a creature)"));
+            for (com.sbcs.anim.WaterTimeline.Drop d : com.sbcs.anim.WaterTimeline.Drop.values()) {
+                com.sbcs.anim.WaterTimeline.Creature own = d.from != null ? d.from : com.sbcs.anim.WaterTimeline.Creature.TITANOBOA;
+                LiteralArgumentBuilder<FabricClientCommandSource> dropNode = ClientCommands.literal(d.name().toLowerCase(java.util.Locale.ROOT)).executes(ctx -> {
+                    Minecraft.getInstance().execute(() -> openWater(own, d, true));
+                    return 1;
+                });
+                if (d.from == null) {
+                    for (com.sbcs.anim.WaterTimeline.Creature c : com.sbcs.anim.WaterTimeline.Creature.values()) {
+                        dropNode.then(ClientCommands.literal(c.name().toLowerCase(java.util.Locale.ROOT)).executes(ctx -> {
+                            Minecraft.getInstance().execute(() -> openWater(c, d, true));
+                            return 1;
+                        }));
+                    }
+                }
+                waterNode.then(dropNode);
+            }
+
             LiteralArgumentBuilder<FabricClientCommandSource> nucleusNode = ClientCommands.literal("nucleus")
                     .executes(ctx -> options(ctx, "test nucleus",
                             "bust", "no rare roll - the door creaks open on nothing",
@@ -1114,6 +1214,7 @@ public class SbcsClient implements ClientModInitializer {
                             "ghost", "Wisp, a Ghost's Sorrow or Plasma",
                             "slayer", "the slayer bosses",
                             "lava", "Eruption, lava fishing",
+                            "water", "the Coil and the Totem, the water mythics",
                             "nucleus", "the Vault, a Crystal Nucleus bundle",
                             "dungeon", "the Ossuary, a dungeon reward chest",
                             "ledger", "the Ledger: pop-ups, stamps, the book"))
@@ -1124,6 +1225,7 @@ public class SbcsClient implements ClientModInitializer {
                     .then(ghostNode)
                     .then(slayerNode)
                     .then(lavaNode)
+                    .then(waterNode)
                     .then(nucleusNode)
                     .then(dungeonNode)
                     .then(ledgerTestNode());
@@ -1337,6 +1439,7 @@ public class SbcsClient implements ClientModInitializer {
             case "blaze" -> config.blazeBusts;
             case "seraph" -> config.seraphBusts;
             case "lava" -> config.lavaBusts;
+            case "water" -> config.waterBusts;
             case "nucleus" -> config.nucleusBusts;
             case "dungeon" -> config.dungeonBusts;
             default -> 0;
@@ -1399,6 +1502,7 @@ public class SbcsClient implements ClientModInitializer {
         for (var d : com.sbcs.anim.HellionTimeline.Drop.values()) if (d.id != null) com.sbcs.market.LivePrice.request(d.id);
         for (var d : com.sbcs.anim.SeraphTimeline.Drop.values()) if (d.priceId != null) com.sbcs.market.LivePrice.request(d.priceId);
         for (var d : com.sbcs.anim.EruptionTimeline.Drop.values()) if (d.id != null) com.sbcs.market.LivePrice.request(d.id);
+        for (var d : com.sbcs.anim.WaterTimeline.Drop.values()) if (d.id != null) com.sbcs.market.LivePrice.request(d.id);
         for (var v : com.sbcs.anim.ChopTimeline.Verdict.values()) {
             String id = com.sbcs.render.DianaItems.id(v);
             if (id != null) com.sbcs.market.LivePrice.request(id);
@@ -1449,6 +1553,7 @@ public class SbcsClient implements ClientModInitializer {
                 case "blaze" -> com.sbcs.anim.HellionTimeline.Drop.valueOf(name).win();
                 case "seraph" -> com.sbcs.anim.SeraphTimeline.Drop.valueOf(name).win();
                 case "lava" -> com.sbcs.anim.EruptionTimeline.Drop.valueOf(name).win();
+                case "water" -> !name.endsWith(":BUST");
                 case "nucleus" -> com.sbcs.anim.VaultTimeline.Prize.test(name).win();
                 case "dungeon" -> !name.endsWith(":bust");
                 default -> true;
@@ -1484,6 +1589,11 @@ public class SbcsClient implements ClientModInitializer {
                     }
                 }
                 openEruption(who, d, true);
+            }
+            case "water" -> {
+                // "TITANOBOA:SHED" - a creature and its drop.
+                String[] p = name.split(":", 2);
+                openWater(com.sbcs.anim.WaterTimeline.Creature.valueOf(p[0]), com.sbcs.anim.WaterTimeline.Drop.valueOf(p[1]), true);
             }
             case "scatha" -> triggerTest(switch (name) {
                 case "PET_RARE" -> DropResult.pet("rare");
@@ -1523,6 +1633,7 @@ public class SbcsClient implements ClientModInitializer {
         if (slayerActive()) return currentSlayer;
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
+        if (waterActive()) return currentWater;
         if (vaultActive()) return currentVault;
         return null;
     }
@@ -1564,13 +1675,14 @@ public class SbcsClient implements ClientModInitializer {
      * someone with "Busts: none" never moved.
      */
     /** The screen each source opened for its latest kill, until that kill's outcome is in. */
-    private static com.sbcs.gui.Cutscene hellionKillScreen, seraphKillScreen, lavaKillScreen;
+    private static com.sbcs.gui.Cutscene hellionKillScreen, seraphKillScreen, lavaKillScreen, waterKillScreen;
 
     /** Whether the screen opened for a kill has already put it in the stats (it gave up waiting and counted a bust). */
     private static boolean killCounted(com.sbcs.gui.Cutscene screen) {
         if (screen instanceof com.sbcs.gui.HellionScreen h) return h.counted();
         if (screen instanceof com.sbcs.gui.SeraphScreen sc) return sc.counted();
         if (screen instanceof com.sbcs.gui.EruptionScreen e) return e.counted();
+        if (screen instanceof com.sbcs.gui.WaterScreen w) return w.counted();
         return false;
     }
 
@@ -1597,6 +1709,7 @@ public class SbcsClient implements ClientModInitializer {
         if (currentSlayer != null && !currentSlayer.isActive()) currentSlayer = null;
         if (currentSeraph != null && !currentSeraph.isActive()) currentSeraph = null;
         if (currentEruption != null && !currentEruption.isActive()) currentEruption = null;
+        if (currentWater != null && !currentWater.isActive()) currentWater = null;
         if (currentVault != null && !currentVault.isActive()) {
             currentVault = null;
             announceNucleus();
@@ -1658,7 +1771,7 @@ public class SbcsClient implements ClientModInitializer {
 
     private static boolean isAnimationPlaying() {
         return animationManager.isPlaying() || (currentScope != null && currentScope.isActive()) || thawActive()
-                || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive();
+                || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || waterActive() || vaultActive();
     }
 
     /** "Eruption", lava fishing's animation, while it plays. */
@@ -1673,6 +1786,21 @@ public class SbcsClient implements ClientModInitializer {
         if (!mayOpen("lava", test)) return;
         com.sbcs.gui.EruptionScreen screen = new com.sbcs.gui.EruptionScreen(creature, drop, test);
         currentEruption = screen;
+        com.sbcs.render.CutsceneHud.show(screen);
+    }
+
+    /** "The Coil" or "The Totem", the water mythics' animation, while it plays. */
+    private static com.sbcs.gui.WaterScreen currentWater;
+
+    private static boolean waterActive() {
+        return currentWater != null && currentWater.isActive();
+    }
+
+    /** Opens the Coil or the Totem in the HUD; {@code drop} null for a real kill whose drop is still to come. */
+    public static void openWater(com.sbcs.anim.WaterTimeline.Creature creature, com.sbcs.anim.WaterTimeline.Drop drop, boolean test) {
+        if (!mayOpen("water", test)) return;
+        com.sbcs.gui.WaterScreen screen = new com.sbcs.gui.WaterScreen(creature, drop, test);
+        currentWater = screen;
         com.sbcs.render.CutsceneHud.show(screen);
     }
 
@@ -1752,6 +1880,7 @@ public class SbcsClient implements ClientModInitializer {
         if (slayerActive()) return currentSlayer;
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
+        if (waterActive()) return currentWater;
         if (vaultActive()) return currentVault;
         return thawActive() ? currentThaw : null;
     }
@@ -1766,7 +1895,7 @@ public class SbcsClient implements ClientModInitializer {
      * still running.
      */
     public static boolean cutsceneOwnsScreen() {
-        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive();
+        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || waterActive() || vaultActive();
     }
 
     /**
@@ -1912,6 +2041,7 @@ public class SbcsClient implements ClientModInitializer {
         String text = message.getString();
         if (game && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.onChatLine(text));
         if (game && config.lavaAnimation) Safety.run("lava", () -> lavaWatcher.onChatLine(text));
+        if (game && config.waterAnimation) Safety.run("water", () -> waterWatcher.onChatLine(text));
         if (game) Safety.run("slayer", () -> slayerQuest.onGameLine(text, System.currentTimeMillis()));
         if (game && seraphOn()) Safety.run("seraph", () -> seraphWatcher.onChatLine(text));
         if (game) Safety.run("slayer", () -> {
@@ -2495,6 +2625,7 @@ public class SbcsClient implements ClientModInitializer {
         if (s instanceof com.sbcs.gui.SlayerScreen sl) return sl.drop().source.key;
         if (s instanceof com.sbcs.gui.SeraphScreen) return "seraph";
         if (s instanceof com.sbcs.gui.EruptionScreen) return "lava";
+        if (s instanceof com.sbcs.gui.WaterScreen) return "water";
         if (s instanceof com.sbcs.gui.VaultScreen) return "nucleus";
         if (s instanceof com.sbcs.gui.ThawScreen) return "vanguard";
         return "scatha";
@@ -2563,11 +2694,12 @@ public class SbcsClient implements ClientModInitializer {
         currentSlayer = null;
         currentSeraph = null;
         currentEruption = null;
+        currentWater = null;
         currentVault = null;
         quietly(SbcsClient::announceNucleus);
         currentScope = null;
         currentThaw = null;
-        hellionKillScreen = seraphKillScreen = lavaKillScreen = null;
+        hellionKillScreen = seraphKillScreen = lavaKillScreen = waterKillScreen = null;
         waiting.clear();
         if (byPlayer) thawQueue.clear();
         forceHideUntil = -1;
@@ -2619,6 +2751,8 @@ public class SbcsClient implements ClientModInitializer {
         if (seraphOn() && seraphWatcher.armed()) return true;
         // Eruption: a lava creature of yours is nearly dead.
         if (config.lavaAnimation && lavaWatcher.armed()) return true;
+        // The Coil and the Totem: a water mythic of yours is nearly dead.
+        if (config.waterAnimation && waterWatcher.armed()) return true;
         if (System.currentTimeMillis() < forceHideUntil) return true;
         if (config.animationMode == AnimationMode.NONE) return false;
         int threshold = config.hideBelowHp > 0 ? config.hideBelowHp : DEFAULT_HIDE_HP;
