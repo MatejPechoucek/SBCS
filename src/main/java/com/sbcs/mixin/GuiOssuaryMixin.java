@@ -44,5 +44,10 @@ public class GuiOssuaryMixin {
         if (g == null) return;
         com.sbcs.Safety.hook(4);
         com.sbcs.Safety.run("dungeon", () -> DungeonRolls.drawOver(g));
+        // The Hunt's embers and cracks round a Superpairs menu, after it and anything drawn on it.
+        com.sbcs.Safety.run("superpairs", () -> {
+            com.sbcs.Safety.hook(6);
+            com.sbcs.detect.superpairs.PairsWatcher.drawOver(g);
+        });
     }
 }

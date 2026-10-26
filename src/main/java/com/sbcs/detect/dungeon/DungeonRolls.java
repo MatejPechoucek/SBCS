@@ -254,7 +254,7 @@ public final class DungeonRolls {
     // ================================================================== the menu's slots
 
     /** The chest's own slots (not the player's inventory) as the parsers see them. */
-    static List<SlotView> slots(AbstractContainerScreen<?> menu) {
+    public static List<SlotView> slots(AbstractContainerScreen<?> menu) {
         List<Slot> all = menu.getMenu().slots;
         int own = Math.max(0, all.size() - 36);
         List<SlotView> out = new ArrayList<>();
