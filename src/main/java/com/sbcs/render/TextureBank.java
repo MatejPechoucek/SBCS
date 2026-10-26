@@ -68,7 +68,7 @@ public final class TextureBank {
             // Written out to config/sbcs/textures/ and, if the player has
             // edited that file, replaced by theirs. See ArtOverrides for how an edit is
             // told apart from a file this mod wrote itself.
-            BufferedImage img = ArtOverrides.resolve(name, source.get());
+            BufferedImage img = Offline.hooks != null ? source.get() : ArtOverrides.resolve(name, source.get());
             Entry made = new Entry(source, upload(name, img), img.getWidth(), img.getHeight());
             UPLOADED.put(name, made);
             PENDING.remove(name);
@@ -83,6 +83,11 @@ public final class TextureBank {
     }
 
     private static Identifier upload(String name, BufferedImage img) {
+        if (Offline.hooks != null) {
+            Identifier id = Identifier.fromNamespaceAndPath(SbcsClient.MOD_ID, "generated/" + name);
+            Offline.hooks.upload(id, img);
+            return id;
+        }
         int w = img.getWidth();
         int h = img.getHeight();
         NativeImage image = new NativeImage(w, h, false);

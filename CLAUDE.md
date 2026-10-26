@@ -2011,6 +2011,20 @@ never index.html. `.github/workflows/history.yml` regenerates it on every push (
 commits it to main as "Update the history page"; the generator leaves those commits out of the page. Open the file
 in a browser to view it (GitHub shows HTML as source).
 
+## Rendering the GUI cutscenes offline (2026-10-26)
+
+Fin, Wisp and the Thaw draw straight through `GuiGraphicsExtractor`, not a Canvas, so they had no preview.
+`tools/GuiPreview` is a stand-in GUI: `J2D` subclasses `GuiGraphicsExtractor` (allocated with Unsafe) and draws every
+blit, fill and text call with Java2D, the game's ascii font included; `init()` fakes `Minecraft` (font, resource
+manager), points Fabric's config dir at a temp folder, bootstraps the registries and calls
+`SbcsClient.registerTextures()` (split out of `onInitializeClient` for this). The mod's only hook is
+`render/Offline.hooks`, null in game: set, `TextureBank` hands generated images to the preview instead of uploading
+them, `PixelLayer` hands over its buffer, and `HeadSkins.texture` decodes skins from `-Dskincache` (PNGs by hash).
+`tools/PopupPreview` (Fin, Wisp) and `tools/ThawGuiPreview` (a whole corpse haul) drive the real classes frame by
+frame and capture the synth's cues into a WAV. The classpath needs the client jar and its libraries, and a stub
+`com.ibm.icu.text.ArabicShapingException` (Font references it). Item stacks cannot be made offline (`new ItemStack`
+needs bound components), so ThawGuiPreview allocates the five vanilla ones with Unsafe.
+
 ## Layout
 
 ```
