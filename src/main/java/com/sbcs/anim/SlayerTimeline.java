@@ -205,7 +205,6 @@ public final class SlayerTimeline {
         return switch (e) {
             case PLAIN -> 1300;
             case BOOK -> 1500;
-            case COCOON -> 1900;
             case PARAGON -> 2300;
             case BEHEAD -> 2500;
             case SCYTHE -> 2400;
@@ -213,16 +212,10 @@ public final class SlayerTimeline {
             case MAGGOT -> 3000;
             case SINEW -> 2900;
             case HAND -> 3100;
-            case SWATTER -> 2700;
-            case TALISMAN -> 2700;
-            case VENOM -> 3000;
-            case DARKNESS -> 3300;
-            case WASP -> 3000;
-            case SNAIL -> 3200;
-            case MOSQUITO -> 5200;
-            case EYE -> 6400;
+            // The Tarantula's are set by its endings (render/BroodEndings, pure).
+            case COCOON, SWATTER, TALISMAN, VENOM, DARKNESS, WASP, SNAIL, MOSQUITO, EYE, BRICK -> com.sbcs.render.BroodEndings.endingMs(e);
             case WARDEN -> 7600;
-            case MATCHA, BRICK -> 8200;
+            case MATCHA -> 8200;
         };
     }
 
