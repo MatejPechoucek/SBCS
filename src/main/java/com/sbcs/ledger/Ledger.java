@@ -165,18 +165,66 @@ public final class Ledger {
             case "wisp_high_voltage" -> f.drops("ghost", "Plasma");
             case "wisp_bittersweet" -> Math.min(f.drops("ghost", "Sorrow"), f.drops("ghost", "Plasma"));
 
+            case "ser_voidwalker" -> f.kills("seraph");
+            case "ser_judgement" -> f.drops("seraph", "Judgement Core");
+            case "ser_byzantium" -> f.drops("seraph", "Byzantium Dye");
+            case "ser_upgrade" -> f.drops("seraph", "Exceedingly Rare Ender Artifact Upgrade");
+            case "ser_idol" -> f.drops("seraph", "End Stone Idol");
+            case "ser_eye" -> f.drops("seraph", "Summoning Eye");
+            case "ser_warp" -> f.drops("seraph", "Etherwarp Merger");
+            case "ser_rune" -> f.drops("seraph", "Enchant Rune I");
+            case "ser_paragon" -> f.drops("seraph", "Paragon Shard");
+            case "ser_lost" -> f.worstDry("seraph");
+            case "ser_hoarder" -> f.drops("seraph");
+            case "ser_staring_contest" -> Math.min(f.drops("seraph", "Judgement Core"), f.drops("seraph", "Summoning Eye"));
+
+            case "rev_grave_digger" -> f.kills("zombie");
+            case "rev_heart_attack" -> f.drops("zombie", "Warden Heart");
+            case "rev_matcha" -> f.drops("zombie", "Matcha Dye");
+            case "rev_heads_roll" -> f.drops("zombie", "Beheaded Horror");
+            case "rev_hand" -> f.drops("zombie", "Severed Hand");
+            case "rev_reaper" -> f.drops("zombie", "Scythe Blade");
+            case "rev_pulled_muscle" -> f.drops("zombie", "Shredded Sinew");
+            case "rev_morgue" -> f.drops("zombie");
+            case "rev_use_by" -> f.worstDry("zombie");
+            case "rev_full_autopsy" -> every(f, "zombie", REVENANT_DROPS);
+
+            case "tar_pest_control" -> f.kills("spider");
+            case "tar_eye" -> f.drops("spider", "Primordial Eye");
+            case "tar_brick" -> f.drops("spider", "Brick Red Dye");
+            case "tar_swatter" -> f.drops("spider", "Fly Swatter");
+            case "tar_snail" -> f.drops("spider", "Ensnared Snail");
+            case "tar_wasp" -> f.drops("spider", "Shriveled Wasp");
+            case "tar_mosquito" -> f.drops("spider", "Digested Mosquito");
+            case "tar_talisman" -> f.drops("spider", "Tarantula Talisman");
+            case "tar_webbed" -> f.drops("spider");
+            case "tar_rain" -> f.worstDry("spider");
+            case "tar_food_chain" -> every(f, "spider", FOOD_CHAIN);
+
             // Everything else is an event: it happened (award) or it did not. Happened, it reads as its own number
             // (Back to Back's 50, In the Black's 30M), so a numbered event stamps too - read as 1, it never did.
             default -> d.flags.containsKey(s.id()) ? s.need(s.grades()) : 0;
         };
     }
 
-    /** Diana's eight drops, as the stats name them. */
     /** Every Demonlord drop with its own ending, as the stats name them (Seventh Circle). */
     static final String[] HELLION_DROPS = {"Duplex I", "Scorched Power Crystal", "Subzero Inverter",
             "Wilson's Engineering Plans", "Paragon Shard", "Archfiend Dice", "High Class Archfiend Dice", "Flame Dye"};
+    /** Diana's eight drops, as the stats name them. */
     static final String[] DIANA_DROPS = {"Brain Food", "Chimera I", "Fateful Stinger", "Manti-core", "Crown of Greed",
             "Shimmering Wool", "Minos Relic", "Mythological Dye"};
+    /** Every Revenant drop with its own ending (Full Autopsy), as SlayerTimeline titles them. */
+    static final String[] REVENANT_DROPS = {"Beheaded Horror", "Snake Rune I", "Festering Maggot", "Scythe Blade",
+            "Shredded Sinew", "Severed Hand", "Warden Heart", "Matcha Dye"};
+    /** The Tarantula's three digested bugs (Food Chain). */
+    static final String[] FOOD_CHAIN = {"Digested Mosquito", "Shriveled Wasp", "Ensnared Snail"};
+
+    /** How many full sets of {@code titles} a source has given: the fewest of any one of them. */
+    private static long every(Facts f, String source, String[] titles) {
+        long min = Long.MAX_VALUE;
+        for (String n : titles) min = Math.min(min, f.drops(source, n));
+        return min;
+    }
 
     /** The grade a value reaches: how many of the stamp's numbers it has met. */
     public static int gradeFor(Stamp s, long value) {
@@ -196,7 +244,6 @@ public final class Ledger {
     public static List<Stamp> refresh(Facts f, LedgerData d, long now, boolean pre) {
         List<Stamp> fresh = new ArrayList<>();
         for (Stamp s : STAMPS) {
-            if (s.chapter() == Chapter.SERAPH) continue;
             long v = value(s, f, d);
             int g = gradeFor(s, v);
             LedgerData.Entry e = d.stamps.get(s.id());
@@ -246,6 +293,11 @@ public final class Ledger {
         // Natural Talent: a drop on the day's first kill of that animation (it resets every day).
         if ("scatha".equals(source) ? d.scathaDay == day(now, zone) && d.scathaDayKills == 1 : killsToday(d, source, now, zone) == 1) {
             award(d, "house_natural", kill);
+        }
+        // Eight Legs: a Tarantula drop on the day's 8th Tarantula (onSource counts the kill before the drop).
+        Stamp legs = byId("tar_eight_legs");
+        if ("spider".equals(source) && killsToday(d, source, now, zone) == (legs == null ? 8 : legs.number(8))) {
+            award(d, "tar_eight_legs", kill);
         }
         if ("blaze".equals(source)) {
             Stamp beast = byId("hellion_number_beast");
@@ -378,6 +430,8 @@ public final class Ledger {
         if ("shark".equals(source) && sameTen) award(d, "fin_feeding_frenzy", kill);
         if ("shark".equals(source) && inFrenzy >= 2) award(d, "fin_bigger_boat", kill);
         if ("lava".equals(source) && sameFive) award(d, "lava_hot_potato", kill);
+        if ("zombie".equals(source) && sameFive) award(d, "rev_back_from_dead", kill);
+        if ("zombie".equals(source) && when.getMonthValue() == 10 && when.getDayOfMonth() == 31) award(d, "rev_trick_or_treat", kill);
         if ("ghost".equals(source) && inFrenzy >= 4) award(d, "wisp_aint_afraid", kill);
         if ("ghost".equals(source)) {
             if (haunt) award(d, "wisp_double_haunting", kill);

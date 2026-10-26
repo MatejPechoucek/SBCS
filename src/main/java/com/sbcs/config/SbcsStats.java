@@ -368,11 +368,11 @@ public final class SbcsStats {
         return had;
     }
 
-    /** Every stamp at its top grade (the Seraph's chapter, under maintenance, left out). */
+    /** Every stamp at its top grade (the Seraph's chapter left out while it is taped). */
     public int testFill() {
         int n = 0;
         for (Stamp s : Ledger.STAMPS) {
-            if (s.chapter() == com.sbcs.ledger.Chapter.SERAPH) continue;
+            if (s.chapter() == com.sbcs.ledger.Chapter.SERAPH && com.sbcs.Maintenance.SERAPH_LEDGER) continue;
             testGive(s, s.grades());
             n++;
         }

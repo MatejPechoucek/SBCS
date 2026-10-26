@@ -13,6 +13,6 @@ public final class Maintenance {
     /** The Seraph's Glyph (the Voidgloom Seraph): being reworked before players see it. */
     public static final boolean SERAPH = false;
 
-    /** The Seraph's Ledger chapter: it has no stamps yet, so it stays taped while the animation itself is out. */
-    public static final boolean SERAPH_LEDGER = true;
+    /** The Seraph's Ledger chapter, taped while it had no stamps. It has its own since 2026-10-26. */
+    public static final boolean SERAPH_LEDGER = false;
 }
