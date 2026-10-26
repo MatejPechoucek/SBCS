@@ -6,16 +6,19 @@ import net.minecraft.client.model.animal.equine.AbstractEquineModel;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
 import net.minecraft.client.model.animal.equine.HorseModel;
 import net.minecraft.client.model.animal.golem.IronGolemModel;
+import net.minecraft.client.model.animal.pig.PigModel;
 import net.minecraft.client.model.animal.squid.SquidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.monster.guardian.GuardianModel;
+import net.minecraft.client.model.monster.piglin.AdultZombifiedPiglinModel;
 import net.minecraft.client.model.monster.slime.MagmaCubeModel;
 import net.minecraft.client.model.object.skull.SkullModel;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.GuardianRenderState;
 import net.minecraft.client.renderer.entity.state.IronGolemRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.state.SlimeRenderState;
 import net.minecraft.client.renderer.entity.state.SquidRenderState;
 import net.minecraft.world.phys.Vec3;
@@ -28,8 +31,8 @@ import java.util.List;
 /**
  * The lava creatures as the game builds them: the real vanilla models - the iron golem (Lord Jawbus), the elder
  * guardian (Thunder), the squid (Plhlegblast), a player in Ragnarok's skin riding a skeleton horse with its
- * saddle, the player-head skull (the Fiery Scuttler, its legs in the hat layer) and the magma cube (Kuudra and
- * its tentacles) - each built from its own layer, posed by its own {@code setupAnim} where that needs no game
+ * saddle, the player-head skull (the Fiery Scuttler, its legs in the hat layer), a zombified piglin in the Taurus
+ * Helmet riding a saddled pig (Taurus) and the magma cube (Kuudra and its tentacles) - each built from its own layer, posed by its own {@code setupAnim} where that needs no game
  * world, and walked with {@link ModelPart#visit} for every posed polygon and its UVs, the way DragonRig does
  * the Ender Dragon. The same class runs in the game and in the offline preview.
  *
@@ -50,6 +53,9 @@ public final class LavaRigs implements EruptionScene.Rigs {
     private final ModelPart skullRoot;
     private final MagmaCubeModel cube;
     private final SlimeRenderState cubeState = new SlimeRenderState();
+    private final PigModel pig, pigSaddle;
+    private final LivingEntityRenderState pigState = new LivingEntityRenderState();
+    private final ModelPart piglinRoot;
 
     public LavaRigs() {
         golem = new IronGolemModel(IronGolemModel.createBodyLayer().bakeRoot());
@@ -61,6 +67,10 @@ public final class LavaRigs implements EruptionScene.Rigs {
         saddleRoot = EquineSaddleModel.createSaddleLayer().bakeRoot();
         skullRoot = SkullModel.createHumanoidHeadLayer().bakeRoot();
         cube = new MagmaCubeModel(MagmaCubeModel.createBodyLayer().bakeRoot());
+        pig = new PigModel(PigModel.createBodyLayer(CubeDeformation.NONE).bakeRoot());
+        // PigRenderer's saddle layer: the same model half a pixel bigger, in the saddle's own texture.
+        pigSaddle = new PigModel(PigModel.createBodyLayer(new CubeDeformation(0.5f)).bakeRoot());
+        piglinRoot = AdultZombifiedPiglinModel.createBodyLayer().bakeRoot();
     }
 
     // ------------------------------------------------------------------ the creatures
@@ -162,6 +172,46 @@ public final class LavaRigs implements EruptionScene.Rigs {
         man.mulPose(Axis.XP.rotation(-tip));
         man.translate(0f, -0.72f, 0.2f);
         emit(riderRoot, man, 0, out);
+        return out;
+    }
+
+    /**
+     * Taurus: a zombified piglin (slot 0) riding a saddled pig (slot 1, its saddle slot 2), its own head swapped
+     * for the Taurus Helmet's skull ({@code helmetSlot}) - the bull's head the bestiary shows. The pig trots by
+     * QuadrupedModel's own walk; the rider sits as HumanoidModel's passenger pose has it, one arm up when it rears.
+     */
+    @Override
+    public List<float[]> pigRider(float walk, float yaw, float armRaise, int helmetSlot) {
+        pigState.walkAnimationPos = walk;
+        pigState.walkAnimationSpeed = walk == 0f ? 0f : 0.7f;
+        pigState.yRot = 0f;
+        pigState.xRot = 0f;
+        pigState.ageInTicks = walk * 4f;
+        pig.setupAnim(pigState);
+        pigSaddle.setupAnim(pigState);
+        List<float[]> out = new ArrayList<>();
+        emit(pig.root(), living(yaw), 1, out);
+        emit(pigSaddle.root(), living(yaw), 2, out);
+        resetParts(piglinRoot);
+        ModelPart rl = piglinRoot.getChild("right_leg"), ll = piglinRoot.getChild("left_leg");
+        ModelPart ra = piglinRoot.getChild("right_arm"), la = piglinRoot.getChild("left_arm");
+        ra.xRot = -0.62831855f - armRaise;
+        la.xRot = -0.62831855f;
+        rl.xRot = -1.4137167f;
+        rl.yRot = 0.31415927f;
+        rl.zRot = 0.07853982f;
+        ll.xRot = -1.4137167f;
+        ll.yRot = -0.31415927f;
+        ll.zRot = -0.07853982f;
+        ModelPart head = piglinRoot.getChild("head");
+        head.visible = false;
+        // On the pig's back: the passenger's seat, 0.56 blocks lower than the horse's.
+        PoseStack man = living(yaw);
+        man.translate(0f, -0.16f, 0.1f);
+        emit(piglinRoot, man, 0, out);
+        head.visible = true;
+        // The helmet where the head was: the skull's head cube sits at the humanoid head's own origin.
+        emit(skullRoot, man, helmetSlot, out);
         return out;
     }
 

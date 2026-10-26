@@ -266,6 +266,10 @@ public class PatternConfig {
     public boolean lavaAnimation = true;
     /** Per creature: whether its kills play (Plhlegblast only ever plays for the Carmine Dye). */
     public boolean lavaJawbus = true, lavaThunder = true, lavaRagnarok = true, lavaScuttler = true;
+    /** Taurus plays only for its own wins (the Taurus Helmet, the Carmine Dye), never on a kill. */
+    public boolean lavaTaurus = true;
+    /** Every Jawbus heaves up out of the lava with a roar before the build-up (0.4.0). */
+    public boolean lavaJawbusIntro = true;
     /** Kills you only assisted (loot share) play too. */
     public boolean lavaLootShare = true;
     /** The HUD and chat fade once your creature is at or below this share of its health, % (0 off). */

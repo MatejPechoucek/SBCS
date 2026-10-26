@@ -45,6 +45,8 @@ public final class EruptionScene {
 
         List<float[]> skull(float yaw, float pitch);
 
+        List<float[]> pigRider(float walk, float yaw, float armRaise, int helmetSlot);
+
         List<float[]> magmaCube(float squish, float yaw);
     }
 
@@ -63,6 +65,8 @@ public final class EruptionScene {
     public static final int SLOT_CUBE = 6;
     /** The drop, recoloured every frame by the quench (QUENCH_*). */
     public static final int SLOT_DROP = 7;
+    /** Taurus's bull head (the Taurus Helmet's skin) on its rider; the pig and its saddle are SLOT_HORSE / SLOT_SADDLE. */
+    public static final int SLOT_HELMET = 11;
 
     /** The drop's own pixels (its head skin, 64 x 64, or its item icon, 16 x 16), set by the screen or preview. */
     public static int[] dropPixels;
@@ -165,7 +169,8 @@ public final class EruptionScene {
         ChopScene.fz = 0f;
         ChopScene.sx0 = w / 2f;
         ChopScene.sy0 = h * 0.6f;
-        float shake = tl.shudder(t) * 1.6f + 3.5f * tl.bolt(t);
+        float shake = tl.shudder(t) * 1.6f + 3.5f * tl.bolt(t) + 3f * tl.charge(t);
+        if (EruptionTimeline.jawbusIntro && tl.creature() == Creature.JAWBUS && t < 900) shake += 3.2f * (1f - t / 900f) * ease(t / 120f);
         long erupt = tl.eruptAt();
         if (erupt >= 0 && t >= erupt && t < erupt + 500) shake += 4f * (1f - (t - erupt) / 500f);
         if (tl.ending() == Ending.KUUDRA) shake += 2.5f * tl.eye(t) * (1f - tl.eye(t)) * 4f + 2f * tl.swell(t) * (1f - tl.swell(t)) * 4f;
@@ -333,6 +338,7 @@ public final class EruptionScene {
         float frozen = tl.frozen(t);
         float terra = tl.terracotta(t);
         float crackR = tl.ending() == Ending.END_TIMES ? 360f * ease((t - EruptionTimeline.T_CRACK) / 700f) : 0f;
+        float ink = tl.ink(t) * 90f;
         Ending e = tl.ending();
         return (x, y, z, cell, now, sx, sy) -> {
             float d = (float) Math.sqrt(x * x + z * z);
@@ -355,6 +361,12 @@ public final class EruptionScene {
                 // Thin seams glowing through the crust, a dark green halo round them.
                 if (mask(x, z, 2)) return 0x40 << 24 | (dd > green - 14f ? 0xE8FFC0 : 0x9CFF50);
                 if (mask(x, z, 4)) return 0x90 << 24 | 0x1C4A10;
+            }
+            if (e == Ending.INK && ink > 0f) {
+                // Plhlegblast's ink spreading over the lava from the vent: near-black, a violet rim, and tendrils of it
+                // running out along the veins ahead of the stain. One flat colour inside, so the faces merge.
+                if (dd < ink) return 0x30 << 24 | (dd > ink - 6f ? 0x4A3A70 : 0x0E0C16);
+                if (dd < ink * 1.5f && mask(x, z, 2)) return 0x50 << 24 | 0x1A1628;
             }
             if (e == Ending.END_TIMES && crackR > 0f && crust && d < crackR && mask(x, z, 1)) {
                 return 0x28 << 24 | (d > crackR - 12f ? 0xFFF0B0 : 0xFF8A20);
@@ -578,8 +590,17 @@ public final class EruptionScene {
         float yaw = 18f + 10f * (float) Math.sin(k * 1.7);
         switch (cr) {
             // Half as big again as they were: at a tenth of the screen nobody could tell it was Jawbus (the review, E1).
-            case JAWBUS -> add(rigs.golem(k * 2.5f, yaw, 0.9f * sink + 0.3f * (float) Math.sin(k * 6)), cs,
-                    0f, -46f * cs * sink, 0f, SLOT_CREATURE);
+            case JAWBUS -> {
+                // His entrance (0.4.0): every Jawbus first heaves up out of the lava, arms flung up, before he sinks -
+                // the same on every Jawbus, so it gives nothing away.
+                float up = EruptionTimeline.jawbusIntro ? jawbusRise(t) : 1f;
+                float s = EruptionTimeline.jawbusIntro ? jawbusSink(t) : sink;
+                float arms = EruptionTimeline.jawbusIntro ? 1.3f * (1f - ease((t - 500) / 400f)) * up : 0f;
+                add(rigs.golem(k * 2.5f, yaw, 0.9f * s + 0.3f * (float) Math.sin(k * 6) + arms), cs,
+                        0f, -46f * cs * s - 70f * cs * (1f - up), 0f, SLOT_CREATURE);
+            }
+            case TAURUS -> add(rigs.pigRider(k * 3.2f, yaw - 10f, 0.9f * sink + 0.4f * (float) Math.abs(Math.sin(k * 3)), SLOT_HELMET), cs,
+                    0f, -40f * cs * sink, 0f, -1);
             case THUNDER -> add(rigs.guardian(0.5f + 0.5f * (float) Math.sin(k * 3), k * 2f, yaw, 0f, 0.3f), cs,
                     0f, (18f - 50f * sink) * cs, 0f, SLOT_CREATURE);
             case PLHLEGBLAST -> add(rigs.squid(0.4f + 0.6f * (float) Math.abs(Math.sin(k * 2.4)), -10f, yaw), 2.6f * cs,
@@ -611,7 +632,18 @@ public final class EruptionScene {
             case PLHLEGBLAST -> 1.2f;
             case RAGNAROK -> 1.3f;
             case SCUTTLER -> 1.4f;
+            case TAURUS -> 1.6f;
         };
+    }
+
+    /** Jawbus heaving up out of the lava, 0 under .. 1 up (back-out over the first 450 ms). */
+    static float jawbusRise(long t) {
+        return EruptionTimeline.backOut(t / 450f);
+    }
+
+    /** Jawbus's sinking after his entrance: later than the others', done by the same moment. */
+    static float jawbusSink(long t) {
+        return ease((t - 650) / (float) (EruptionTimeline.SINK_TO - 650));
     }
 
     /** The top of the creature on the screen this frame (its highest projected corner), for its nametag. */
@@ -1086,6 +1118,15 @@ public final class EruptionScene {
                 }
                 yaw = 25f + 40f * (float) Math.sin(t / 300.0) * (1f - rise);
             }
+            case CHARGE -> {
+                // Out of the vent in one surge, then two lunges at the camera, nose down like a bull.
+                float c = tl.charge(t);
+                y += -6f * c;
+                pitch = -8f + 22f * c;
+                scale *= 1f + 0.35f * c;
+                yaw = 25f + 20f * (float) Math.sin(t / 700.0) * rise;
+                return new float[]{rest[0], y, rest[2] + 26f * c, yaw, pitch, roll, scale};
+            }
             case FORGE -> {
                 // Drawn up out of the forge blade-first: upright (the icon's diagonal straight up), turning slowly.
                 y = -30f + (rest[1] + 30f) * EruptionTimeline.ease((t - tl.riseFrom()) / (float) (tl.riseTo() - tl.riseFrom())) + bob;
@@ -1547,6 +1588,138 @@ public final class EruptionScene {
         if (tl.ending() == Ending.END_TIMES) bookFire(layer, tl, t, g, a);
         if (tl.ending() == Ending.VIAL) meltdown(c, layer, tl, t, g, a);
         if (tl.ending() == Ending.KUUDRA) carmineRain(layer, tl, t, w, h, g, a);
+        if (tl.ending() == Ending.BOBBIN) magmafish(layer, tl, t, g, a);
+        if (tl.ending() == Ending.INK) inkSquirts(layer, tl, t, g, a);
+        if (tl.ending() == Ending.CHARGE) hooves(c, layer, tl, t, g, a);
+        if (EruptionTimeline.jawbusIntro && tl.creature() == Creature.JAWBUS && t < 1300) jawbusSplash(layer, tl, t, g, a);
+    }
+
+    /** Jawbus breaking the surface: a ring of lava thrown up round him, gobs falling back. The same on every Jawbus. */
+    static void jawbusSplash(CrystalVeins.Fill layer, EruptionTimeline tl, long t, float g, float a) {
+        float life = t / 1300f;
+        Random r = new Random(4417);
+        for (int i = 0; i < 70; i++) {
+            double ang = r.nextFloat() * Math.PI * 2;
+            float ph = r.nextFloat() * 0.25f, k = (life - ph) / 0.75f;
+            if (k <= 0f || k >= 1f) continue;
+            float out = 14f + 34f * r.nextFloat(), up = 30f + 50f * r.nextFloat();
+            float y = up * 4f * k * (1f - k);
+            ChopScene.project((float) Math.cos(ang) * out * (0.4f + 0.6f * k), 1f + y, (float) Math.sin(ang) * out * (0.4f + 0.6f * k));
+            int col = i % 4 == 0 ? 0xFFF0A0 : i % 3 == 0 ? 0xFF6A10 : 0xFFA030;
+            sq(layer, ChopScene.P[0], ChopScene.P[1], g * (i % 5 == 0 ? 2 : 1), g, Math.round(255 * a * (1f - k * k)) << 24 | col);
+        }
+    }
+
+    /**
+     * A Silver Magmafish (the catch every mythic drops a stack of) as pixel art, facing right; '#' silver, '+' its
+     * darker back, 'o' the eye. Drawn a grid cell a character with a dark outline, sheared along its arc.
+     */
+    static final String[] MAGMAFISH = {
+            "    ++      ",
+            "  ++++++  ++",
+            " ##o######+ ",
+            "  ######  ##",
+            "    ##      ",
+    };
+
+    /** Bobbin' Scriptures: the magmafish leaps out of the lava over the scriptures, twice, splashing in and out. */
+    static void magmafish(CrystalVeins.Fill layer, EruptionTimeline tl, long t, float g, float a) {
+        for (int i = 0; i < EruptionTimeline.B_LEAPS.length; i++) {
+            float k = tl.leap(t, i);
+            float dir = i % 2 == 0 ? 1f : -1f;
+            float x0 = -38f * dir, x1 = 38f * dir;
+            long out = EruptionTimeline.B_LEAPS[i], in = out + EruptionTimeline.B_LEAP_MS;
+            ChopScene.project(x0, 1f, 14f);
+            burst(layer, ChopScene.P[0], ChopScene.P[1], t - out, 420, out, 18, 16f * ChopScene.size, 0xFFF0A0, 0xFF7A20, g, a);
+            ChopScene.project(x1, 1f, 14f);
+            burst(layer, ChopScene.P[0], ChopScene.P[1], t - in, 420, in, 18, 16f * ChopScene.size, 0xFFF0A0, 0xFF7A20, g, a);
+            if (k < 0f) continue;
+            float height = 70f + 10f * i;
+            float x = x0 + (x1 - x0) * k, y = 1f + height * 4f * k * (1f - k);
+            ChopScene.project(x, y, 14f);
+            float px = ChopScene.P[0], py = ChopScene.P[1];
+            // The arc's slope on the screen: the nose up on the way out, down on the way in.
+            float slope = -(1f - 2f * k) * 0.55f;
+            float cell = g * Math.max(1, Math.round(ChopScene.size * 1.1f));
+            int rows = MAGMAFISH.length, cols = MAGMAFISH[0].length();
+            for (int pass = 0; pass < 2; pass++) {
+                for (int rr = 0; rr < rows; rr++) {
+                    for (int cc = 0; cc < cols; cc++) {
+                        char ch = MAGMAFISH[rr].charAt(cc);
+                        if (ch == ' ') continue;
+                        float lx = (cc - cols / 2f) * dir, ly = rr - rows / 2f + slope * lx;
+                        float sx = px + lx * cell, sy = py + ly * cell;
+                        if (pass == 0) {
+                            sq(layer, sx - g, sy - g, cell + 2 * g, g, Math.round(230 * a) << 24 | 0x15100E);
+                        } else {
+                            int col = ch == 'o' ? 0x101014 : ch == '+' ? 0x8A8E9A : 0xD8DCE4;
+                            sq(layer, sx, sy, cell, g, Math.round(255 * a) << 24 | col);
+                        }
+                    }
+                }
+            }
+            // A trail of drops off its tail.
+            Random r = new Random(out);
+            for (int j = 0; j < 8; j++) {
+                float b = Math.max(0f, k - 0.04f * (j + 1));
+                ChopScene.project(x0 + (x1 - x0) * b, 1f + height * 4f * b * (1f - b) - 2f * j * r.nextFloat(), 14f);
+                sq(layer, ChopScene.P[0], ChopScene.P[1], g, g, Math.round(200 * a * (1f - j / 8f)) << 24 | (j % 2 == 0 ? 0xFFB040 : 0xFF6A10));
+            }
+        }
+    }
+
+    /** Squid Boots: Plhlegblast's ink squirting up out of the vent three times, falling back as black rain. */
+    static void inkSquirts(CrystalVeins.Fill layer, EruptionTimeline tl, long t, float g, float a) {
+        for (int i = 0; i < EruptionTimeline.I_SQUIRTS.length; i++) {
+            float sec = (t - EruptionTimeline.I_SQUIRTS[i]) / 1000f;
+            if (sec < 0f || sec > 1.6f) continue;
+            Random r = new Random(9100 + i);
+            for (int j = 0; j < 90; j++) {
+                float ph = r.nextFloat() * 0.25f, life = sec - ph;
+                if (life < 0f || life > 1.3f) continue;
+                float vx = (r.nextFloat() - 0.5f) * (50f + 30f * i), vz = (r.nextFloat() - 0.5f) * 30f, vy = 110f + 90f * r.nextFloat();
+                float y = vy * life - 150f * life * life;
+                if (y < -4f) continue;
+                ChopScene.project(vx * life, 40f + y, vz * life);
+                int col = j % 6 == 0 ? 0x5A4A88 : j % 3 == 0 ? 0x2A2240 : 0x0C0A12;
+                sq(layer, ChopScene.P[0], ChopScene.P[1], g * (r.nextFloat() < 0.4f ? 2 : 1), g,
+                        Math.round(255 * a * Math.min(1f, (1.3f - life) * 3f)) << 24 | col);
+            }
+            ChopScene.project(0f, 42f, 0f);
+            burst(layer, ChopScene.P[0], ChopScene.P[1], t - EruptionTimeline.I_SQUIRTS[i], 380, 9200 + i, 16, 20f * ChopScene.size, 0x6A5AA0, 0x14101E, g, a);
+        }
+    }
+
+    /**
+     * The Taurus Helmet's charges: each lunge kicks up a ring of grit and embers off the crust where it lands and
+     * two jets of steam from its nostrils.
+     */
+    static void hooves(ChopScene.Canvas c, CrystalVeins.Fill layer, EruptionTimeline tl, long t, float g, float a) {
+        for (int i = 0; i < EruptionTimeline.C_CHARGES.length; i++) {
+            long since = t - EruptionTimeline.C_CHARGES[i] - EruptionTimeline.C_CHARGE_MS / 2;
+            if (since < 0 || since > 900) continue;
+            float k = since / 900f;
+            float[] rest = dropRest(tl);
+            float rad = 12f + 70f * (1f - (1f - k) * (1f - k));
+            int cells = Math.max(14, (int) (rad * ChopScene.size * 5f / g));
+            for (int j = 0; j < cells; j++) {
+                double ang = j * Math.PI * 2 / cells;
+                ChopScene.project(rest[0] + (float) Math.cos(ang) * rad, 1f + 6f * k * (j % 3), rest[2] + 20f + (float) Math.sin(ang) * rad * 0.7f);
+                sq(layer, ChopScene.P[0], ChopScene.P[1], g * (j % 4 == 0 ? 2 : 1), g,
+                        Math.round(220 * a * (1f - k)) << 24 | (j % 3 == 0 ? 0xFFB040 : 0x6A5A50));
+            }
+            float[] s = dropScreen(tl, t);
+            float half = 9f * ChopScene.size * dropPose(tl, t)[6];
+            for (int side = -1; side <= 1; side += 2) {
+                for (int j = 0; j < 10; j++) {
+                    float u = Math.min(1f, k * 2.2f) - j * 0.04f;
+                    if (u <= 0f) continue;
+                    float x = s[0] + side * (0.25f * half + 1.4f * half * u), y = s[1] + 0.35f * half + 6f * g * u * u;
+                    sq(layer, x, y, g * (u < 0.5f ? 2 : 1), g, Math.round(180 * a * (1f - u)) << 24 | 0xE8E4E0);
+                }
+            }
+            if (since < 120) ChopScene.glow(c, s[0], s[1], 70f * ChopScene.size, 0xFF7030, 0.5f * (1f - since / 120f));
+        }
     }
 
     static void sq(CrystalVeins.Fill layer, float x, float y, float s, float g, int argb) {
@@ -2189,6 +2362,9 @@ public final class EruptionScene {
                 long price = tl.price();
                 if (price > 0 && t >= tl.countStart())
                     c.text(String.format("%,d coins", price), ChopScene.P[0], ChopScene.P[1] + 13f * ts, ts, ChopScene.alpha(na) | 0xB8B8B8);
+                // "your 14th Lord Jawbus · 0 Vials": every Jawbus is an event, even a dry one.
+                if (bustNote != null)
+                    c.text(bustNote, ChopScene.P[0], ChopScene.P[1] + (price > 0 && t >= tl.countStart() ? 25f : 13f) * ts, 0.85f * ts, ChopScene.alpha(na) | 0xC8C8C8);
             }
             return;
         }
@@ -2234,9 +2410,10 @@ public final class EruptionScene {
         if (na > 0.02f) c.name(x, below + 8f * ts, 1.6f * ts, ChopScene.alpha(na) | tl.drop().colour, tl.letters(t));
         float la = tl.lineAlpha(t) * ChopScene.sceneAlpha;
         if (la > 0.02f) {
-            if (tl.drop().oneIn > 0) {
-                String of = tl.drop() == Drop.CARMINE ? "rare lava sea creatures" : tl.creature().title + " kills";
-                c.text("1 in ~" + String.format("%,d", tl.drop().oneIn) + " " + of + (nthNote == null ? "" : " \u00b7 " + nthNote), x, below + 22f * ts, ts, ChopScene.alpha(la) | 0xC8C8C8);
+            int oneIn = tl.drop().oneIn(tl.creature());
+            if (oneIn > 0) {
+                String of = tl.drop() == Drop.CARMINE && tl.creature() != Creature.TAURUS ? "rare lava sea creatures" : tl.creature().title + " kills";
+                c.text("1 in ~" + String.format("%,d", oneIn) + " " + of + (nthNote == null ? "" : " \u00b7 " + nthNote), x, below + 22f * ts, ts, ChopScene.alpha(la) | 0xC8C8C8);
             }
             long price = tl.price();
             if (price > 0 && t >= tl.countStart()) {
@@ -2253,4 +2430,6 @@ public final class EruptionScene {
     public static boolean showBanner = true;
     /** "your 3rd" after the odds, set by the screen each frame; null for a test. */
     public static String nthNote;
+    /** Under a bust's guaranteed drop ("your 14th Lord Jawbus · 0 Vials"), set by the screen; null for none. */
+    public static String bustNote;
 }

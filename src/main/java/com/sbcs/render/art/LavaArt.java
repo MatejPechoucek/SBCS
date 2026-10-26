@@ -47,6 +47,19 @@ public final class LavaArt {
         return out;
     }
 
+    /** A copy of {@code img} multiplied by {@code rgb}, as the game tints a dyed leather item (alpha kept). */
+    public static BufferedImage tint(BufferedImage img, int rgb) {
+        BufferedImage out = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        int tr = rgb >> 16 & 255, tg = rgb >> 8 & 255, tb = rgb & 255;
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+                int c = img.getRGB(x, y);
+                out.setRGB(x, y, (c & 0xFF000000) | ((c >> 16 & 255) * tr / 255) << 16 | ((c >> 8 & 255) * tg / 255) << 8 | (c & 255) * tb / 255);
+            }
+        }
+        return out;
+    }
+
     /** An icon's pixels as ARGB (16 x 16 expected, any size taken). */
     public static int[] pixels(BufferedImage img) {
         return img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());

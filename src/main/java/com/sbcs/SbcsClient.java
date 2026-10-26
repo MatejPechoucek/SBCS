@@ -275,6 +275,7 @@ public class SbcsClient implements ClientModInitializer {
             case RAGNAROK -> config.lavaRagnarok;
             case SCUTTLER -> config.lavaScuttler;
             case PLHLEGBLAST -> true;
+            case TAURUS -> config.lavaTaurus;
         };
     }
 
@@ -1031,6 +1032,9 @@ public class SbcsClient implements ClientModInitializer {
             LiteralArgumentBuilder<FabricClientCommandSource> lavaNode = ClientCommands.literal("lava")
                     .executes(ctx -> options(ctx, "test lava",
                             "bust", "it cools to black (add a creature: jawbus, thunder, ragnarok, scuttler)",
+                            "bobbin", "Bobbin' Scriptures (red, Jawbus / Ragnarok / Plhlegblast - the magmafish)",
+                            "squid_boots", "Squid Boots (red, Plhlegblast - the ink)",
+                            "taurus_helmet", "Taurus Helmet (red, Taurus - the charge)",
                             "chain", "Chain of the End Times (red, Ragnarok)",
                             "pincer", "Severed Pincer (red, Fiery Scuttler)",
                             "flash", "Flash I (orange, Thunder)",
@@ -1038,7 +1042,7 @@ public class SbcsClient implements ClientModInitializer {
                             "vial", "Radioactive Vial (yellow, Lord Jawbus)",
                             "shell", "Scuttler Shell (yellow, Fiery Scuttler)",
                             "texts", "Burnt Texts (white, Ragnarok - the End Times)",
-                            "carmine", "Carmine Dye (white - Kuudra; add a creature)"));
+                            "carmine", "Carmine Dye (white - Kuudra; add a creature, taurus too)"));
             for (com.sbcs.anim.EruptionTimeline.Drop d : com.sbcs.anim.EruptionTimeline.Drop.values()) {
                 String word = d == com.sbcs.anim.EruptionTimeline.Drop.BURNT_TEXTS ? "texts" : d.name().toLowerCase(java.util.Locale.ROOT);
                 com.sbcs.anim.EruptionTimeline.Creature own = d.from != null ? d.from
@@ -1050,7 +1054,7 @@ public class SbcsClient implements ClientModInitializer {
                 });
                 if (d.from == null) {
                     for (com.sbcs.anim.EruptionTimeline.Creature c : com.sbcs.anim.EruptionTimeline.Creature.values()) {
-                        if (d == com.sbcs.anim.EruptionTimeline.Drop.BUST && c == com.sbcs.anim.EruptionTimeline.Creature.PLHLEGBLAST) continue;
+                        if (d == com.sbcs.anim.EruptionTimeline.Drop.BUST && !c.onKill) continue;
                         dropNode.then(ClientCommands.literal(c.name().toLowerCase(java.util.Locale.ROOT)).executes(ctx -> {
                             Minecraft.getInstance().execute(() -> openEruption(c, d, true));
                             return 1;
@@ -1476,13 +1480,8 @@ public class SbcsClient implements ClientModInitializer {
             }
             case "lava" -> {
                 com.sbcs.anim.EruptionTimeline.Drop d = com.sbcs.anim.EruptionTimeline.Drop.valueOf(name);
-                com.sbcs.anim.EruptionTimeline.Creature who = com.sbcs.anim.EruptionTimeline.Creature.JAWBUS;
-                for (var k : com.sbcs.anim.EruptionTimeline.Creature.values()) {
-                    if (k != com.sbcs.anim.EruptionTimeline.Creature.PLHLEGBLAST && d.from(k)) {
-                        who = k;
-                        break;
-                    }
-                }
+                // The drop's own creature (a small win from Taurus or Plhlegblast too); a bust or the dye on a kill creature.
+                com.sbcs.anim.EruptionTimeline.Creature who = d.from != null ? d.from : com.sbcs.anim.EruptionTimeline.Creature.JAWBUS;
                 openEruption(who, d, true);
             }
             case "scatha" -> triggerTest(switch (name) {

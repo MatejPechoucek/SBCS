@@ -85,6 +85,19 @@ public final class SbcsStats {
     public int corpseDryStreak;
     public int worstCorpseDryStreak;
 
+    // ---------------------------------------------------------------- lava fishing
+
+    /** Eruption's kills, by creature (EruptionTimeline.Creature names): a dry Jawbus says "your 14th". Null in older files. */
+    public java.util.Map<String, Integer> lavaKills = new java.util.HashMap<>();
+
+    /** One real Eruption of {@code creature}'s: its count now. */
+    public int onLavaKill(String creature) {
+        if (lavaKills == null) lavaKills = new java.util.HashMap<>();
+        int n = lavaKills.merge(creature, 1, Integer::sum);
+        save();
+        return n;
+    }
+
     // ---------------------------------------------------------------- Diana
     // Her own grind, counted apart again: kills of the four creatures that play the cutscene, and
     // her drops by name - which also lets an ending say "your 3rd".
