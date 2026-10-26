@@ -1231,6 +1231,32 @@ reveal, and from the reveal a win raises it with its price (`set(revealed, win, 
 frame next to `ChopScene.calm`; the Scatha uses `BASE` alone. Offline tests and previews leave it at the base. Calm
 effects still zero the shakes.
 
+## Exhumed and The Brood (the Revenant and the Tarantula, 2026-10-26) - unverified in game
+
+Matej's ask (2026-10-25): other slayers' drops must not play Hellion (a Paragon Shard off a Revenant did), the Revenant,
+Tarantula and Voidgloom get their own animations for good drops only, a per-slayer tier threshold, and each drop's
+ending about its item (gore is fine).
+
+- **Which boss a drop belongs to** is `detect/SlayerQuest` (`SbcsClient.slayerQuest`, shared by every slayer watcher):
+  the "SLAYER BOSS! The X spawned!" line and the sidebar's quest. A drop line during another boss's quest is refused;
+  the Paragon Shard drops from every slayer, so it needs the quest. Matej's real lines (2026-10-24/25: 140 Revenant,
+  100 Tarantula, 17 Seraph bosses) are `tools/fixtures/slayer_lines.txt`; `tools/SlayerDetectTest` replays them. The
+  Revenant's Paragon was `RARE DROP! (Paragon Shard)` - plain RARE, so the default tier setting does not play it.
+- **The tier setting** is `zombieTier`, `spiderTier`, `blazeTier`, `seraphTier` (0 Very Rare+, 1 Crazy Rare+, 2 Pray to
+  RNGesus only), checked by `SbcsClient.belowTier(source, word)` against the line's own word. Menu "Plays for".
+- **The drop line opens it** (`detect/SlayerDropWatcher`): a bracketed slayer drop is only ever the player's own, so these
+  open with the outcome known - no kill, no tell. "SLAYER QUEST COMPLETE!" with no good drop is a dry kill for the stats.
+- `anim/SlayerTimeline` (pure: `Source`, `Tier`, `Ending`, 25 `Drop`s with odds from the wiki's weights), `render/SlayerScene`
+  (the stage: the boss falls to three blows, then `SlayerEndings` - the Revenant's - and `BroodEndings` - the Tarantula's -
+  play the drop's ending, then the showcase), `render/SlayerRigs` (the game's own Zombie with diamond armour, Spider,
+  Cave Spider, Warden with its emerge/roar animations and heart layer, Bee, Silverfish, posed by their own code and
+  rasterised with a depth buffer), `audio/SlayerSound`, `gui/SlayerScreen`. Heads are NEU's, in `slayer_heads.json`.
+- Revenant endings: Warden Heart (a Warden digs up, roars, its heart is torn out), Matcha Dye (the world stops grey, one
+  drip, the matcha floods and paints the corpse), Beheaded Horror, Severed Hand (the arm crawls off), Festering Maggot,
+  Snake Rune, Scythe Blade, Shredded Sinew, Paragon, the catalysts and Smite.
+- Offline: `tools/SlayerPreview` (frames, `-Dat=` or every frame at `-Dfps`), `tools/SlayerSoundtrack` (the WAV).
+  `ModelRaster` has 16 texture slots now.
+
 ## The Seraph's Glyph (the Enderman slayer, Voidgloom Seraph tier IV) - 0.2.63
 
 Pitched 2026-10-03; the designer approved it with three calls: **End Crystals at the sides**, the

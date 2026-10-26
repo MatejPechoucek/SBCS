@@ -31,11 +31,15 @@ sound files to download.
 | Crystal Hollows | **The Cleaver** | You kill a Scatha. Pet or pebbles, the worm gets the full treatment. |
 | Glacite Mineshafts | **The Thaw** | You open a Vanguard corpse. Ice is struck, the frost spreads, the loot is revealed, then a profit window tells you if it was worth the key. |
 | Diana's Mythological Ritual | **The Chopping Block** | A Sphinx, Minos Inquisitor, Manticore or King Minos dies, or a Minos Relic or Mythological Dye drops. Every big drop has its own ending. |
+| Revenant Horror | **Exhumed** | Your Revenant drops something good. Every drop its own ending: a Warden tears out of the ground for its heart, the Matcha Dye floods a stopped world. |
+| Tarantula Broodfather | **The Brood** | Your Tarantula drops something good, each drop its own ending. |
 | Inferno Demonlord IV | **Hellion** | Your own Demonlord dies. The shield cycles, the rods spin up, the dice get thrown. |
 | Crimson Isle lava fishing | **Eruption** | You kill Lord Jawbus, a Thunder, a Ragnarok or a Fiery Scuttler (Plhlegblast only gets one for the Carmine Dye). |
 | Fishing Festival | **Fin** | A quick pop-up when a Great White Shark gives you a Megalodon or a Shark Tooth, and an even quicker one when it doesn't. |
 | Dwarven Mines | **Wisp** | A quick pop-up when a Ghost drops Sorrow or Plasma. |
 | Voidgloom Seraph IV | **The Seraph's Glyph** | 🚧 *Under maintenance.* It's being polished and is switched off in this release. |
+
+Every slayer card has a **Plays for** setting: Very Rare drops and up, Crazy Rare and up, or RNGesus drops only.
 
 ### The rules of the house
 
