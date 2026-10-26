@@ -23,10 +23,9 @@ already, and the image's path only works on GitHub). The "Building from source" 
 **Gallery** (optional, but it is what sells a cutscene mod): a screenshot or GIF per animation, taken with "Try it" in
 the menu. The Thaw's Dye, Diana's Relic and Hellion's High Class dice are the showiest.
 
-## Version 0.4.0-alpha (draft)
+## Version 0.4.0-alpha
 
-Draft for the 0.4.0 release, written 2026-10-26. `mod_version` is not changed here: the release build sets it. Other
-0.4.0 workstreams add to this list before it ships - check `git log` since 0.3.11-alpha.
+Released 2026-10-26: all six 0.4.0 workstreams merged (PRs #10-#16).
 
 | Field | Value |
 | --- | --- |
@@ -41,7 +40,7 @@ Draft for the 0.4.0 release, written 2026-10-26. `mod_version` is not changed he
 ### Changelog
 
 ```markdown
-The big one: four new animations, the Seraph back, and a book of stamps.
+The big one: seven new animations, the Seraph back, and a book of stamps.
 
 **New animations**
 - **Exhumed** (Revenant Horror) and **The Brood** (Tarantula Broodfather): your good slayer drops each get their own
@@ -50,6 +49,16 @@ The big one: four new animations, the Seraph back, and a book of stamps.
   Dye stops the world. The bundle on the floor is covered until you've seen the cutscene.
 - **The Ossuary** (Dungeons F1-F7, M1-M7): a prize wheel rolls before you see a reward chest, in the boss room and
   at Croesus. Spin it yourself or let it spin. Read-only: it never clicks anything for you.
+
+- **The Coil and the Totem** (Titanoboa and Wiki Tiki): the water mythics' drops, with the Aquamarine Dye flooding
+  the bayou.
+- **The Hunt** (Superpairs): an ultra-rare tile is boxed in the menu so you never see it early - find its pair, then
+  the cutscene reveals what it was.
+- **Scatha pets by rarity**: a Rare, Epic and Legendary pet each get their own reveal.
+
+**Lava fishing**
+- Taurus joins Eruption (only for a drop of his own), with three new small wins: Bobbin' Scriptures, Squid Boots and
+  the Taurus Helmet. Lord Jawbus can heave up out of the lava before he sinks (menu: "Jawbus's entrance").
 
 **The Seraph's Glyph is back**
 - Out of maintenance, for tier III and IV, with every good drop its own ending (the Summoning Eye's altar, the
@@ -63,12 +72,14 @@ The big one: four new animations, the Seraph back, and a book of stamps.
 
 **The SBCS Ledger**
 - A leather-bound book of ink stamps, a chapter per animation, with secret stamps to find. Your existing stats are
-  stamped the first time you open it.
+  stamped the first time you open it. New chapters for the Revenant, the Tarantula
+  and the Seraph.
 
 **Everything else**
 - Bigger, punchier effects across every cutscene; big drops hit harder the more they are worth.
 - Fail-safes: an animation that errors three times switches itself off for the session, a cutscene stuck for 90 s
   is ended, and `/sbcs stop` gives you the screen back at once.
+- Slayer cutscenes draw faster.
 - "Try it" follows your bust setting, so you see what you will actually get.
 ```
 
