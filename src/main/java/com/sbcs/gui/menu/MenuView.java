@@ -86,7 +86,7 @@ public final class MenuView {
     /** Each animation's own colour: its card, its bar, its switches and sliders. */
     static final int SCATHA = 0xFFB27BE6, VANGUARD = 0xFF72C6F2, DIANA = 0xFFE4573F, FIN = 0xFF3FB0D0,
             WISP = 0xFFA9E4EE, LAVA = 0xFFFF8C2E, SLAYERS = 0xFFD04848, BLAZE = 0xFFFFA238, ZOMBIE = 0xFF6FBF4A, SPIDER = 0xFFC8423A, SERAPH = 0xFFA36BF5,
-            NUCLEUS = 0xFF55D8FF, OSSUARY = 0xFFD9C9A3;
+            NUCLEUS = 0xFF55D8FF, OSSUARY = 0xFFD9C9A3, PAIRS = 0xFFC77DFF;
 
     // ------------------------------------------------------------------ state (kept while the game runs)
 
@@ -478,6 +478,7 @@ public final class MenuView {
                 ghostRows(rows, cfg);
                 lavaRows(rows, cfg);
                 nucleusRows(rows, cfg);
+                pairsRows(rows, cfg);
                 dungeonRows(rows, cfg);
                 slayerRows(rows, cfg);
             }
@@ -662,6 +663,36 @@ public final class MenuView {
         speedRow(rows, "nucleus_speed", cfg.nucleusSpeed, v -> cfg.nucleusSpeed = v);
         bustsRow(rows, cfg.nucleusBusts, v -> cfg.nucleusBusts = v, cfg);
         tryRows(rows, "nucleus", VAULT_TRY, n -> com.sbcs.anim.VaultTimeline.Prize.test(n).title());
+    }
+
+    /** The Hunt's Try it outcomes, by PairsTimeline's test words. */
+    private static final java.util.Map<String, String> PAIRS_TRY = new java.util.LinkedHashMap<>();
+    static {
+        PAIRS_TRY.put("fish", "Experiment the Fish");
+        PAIRS_TRY.put("serum", "Metaphysical Serum");
+        PAIRS_TRY.put("guardian", "Legendary Guardian");
+        PAIRS_TRY.put("book", "A VII book");
+        PAIRS_TRY.put("dye", "Nadeshiko Dye");
+        PAIRS_TRY.put("missed", "A box that got away");
+        PAIRS_TRY.put("two", "Two boxes in one game");
+    }
+
+    private void pairsRows(List<Row> rows, PatternConfig cfg) {
+        if (!group(rows, "superpairs", "Superpairs - The Hunt", "Rare tiles boxed while you play, opened after", "experience_bottle", PAIRS,
+                cfg.pairsAnimation, () -> { cfg.pairsAnimation = !cfg.pairsAnimation; cfg.save(); })) return;
+        rows.add(new NoticeRow("Every tile from the rare row up (VII books, the Nadeshiko Dye, Experiment the Fish, the Serum, "
+                + "a Legendary Guardian) shows as a lettered black box. Find its pair, and the box is opened for you once the game is over."));
+        rows.add(new SectionRow("Hiding the drop"));
+        rows.add(toggle("Box the rare tiles", cfg.pairsCover, () -> cfg.pairsCover = !cfg.pairsCover, cfg));
+        rows.add(new NoticeRow("The black box and no tooltip over it. Nothing is clicked for you - the game plays as always."));
+        rows.add(toggle("Open boxes that got away", cfg.pairsShowMissed, () -> cfg.pairsShowMissed = !cfg.pairsShowMissed, cfg));
+        rows.add(new NoticeRow("A box whose pair you never found still opens, grey, so you learn what it was."));
+        rows.add(new SectionRow("The endings"));
+        rows.add(toggle("Banner", cfg.pairsBanner, () -> cfg.pairsBanner = !cfg.pairsBanner, cfg));
+        rows.add(toggle("Show the price", cfg.pairsPrice, () -> cfg.pairsPrice = !cfg.pairsPrice, cfg));
+        rows.add(new SliderRow("pairs_volume", "Volume", cfg.pairsVolume, 0, 150, 5, v -> cfg.pairsVolume = v, v -> v + "%"));
+        speedRow(rows, "pairs_speed", cfg.pairsSpeed, v -> cfg.pairsSpeed = v);
+        tryRows(rows, "superpairs", List.copyOf(PAIRS_TRY.keySet()), n -> PAIRS_TRY.getOrDefault(n, n));
     }
 
     /** The Ossuary's Try it outcomes, each on a floor that shows its own setup off. */
@@ -896,6 +927,7 @@ public final class MenuView {
         soundSlider(rows, "snd_diana", "Diana - The Chopping Block", DIANA, cfg.dianaVolume, v -> cfg.dianaVolume = v);
         soundSlider(rows, "snd_lava", "Lava fishing - Eruption", LAVA, cfg.lavaVolume, v -> cfg.lavaVolume = v);
         soundSlider(rows, "snd_nucleus", "Crystal Nucleus - The Vault", NUCLEUS, cfg.nucleusVolume, v -> cfg.nucleusVolume = v);
+        soundSlider(rows, "snd_pairs", "Superpairs - The Hunt", PAIRS, cfg.pairsVolume, v -> cfg.pairsVolume = v);
         soundSlider(rows, "snd_dungeon", "Dungeons - The Ossuary", OSSUARY, cfg.dungeonVolume, v -> cfg.dungeonVolume = v);
         soundSlider(rows, "snd_zombie", "Revenant Horror - Exhumed", ZOMBIE, cfg.zombieVolume, v -> cfg.zombieVolume = v);
         soundSlider(rows, "snd_spider", "Tarantula Broodfather - The Brood", SPIDER, cfg.spiderVolume, v -> cfg.spiderVolume = v);
@@ -1054,6 +1086,8 @@ public final class MenuView {
                 new String[]{"Quick Claw", "Fine Jasper Gemstone", "Flawless Ruby Gemstone", "Flawless Amethyst Gemstone",
                         "Flawless Jade Gemstone", "Flawless Amber Gemstone", "Flawless Sapphire Gemstone", "Flawless Topaz Gemstone",
                         "Flawless Jasper Gemstone", "Divan's Alloy", "Jade Dye"});
+        sourceGroup(rows, st, "superpairs", "The Hunt - Superpairs", "experience_bottle", PAIRS, "game", "Games played",
+                new String[]{"Nadeshiko Dye", "Experiment the Fish", "Metaphysical Serum", "Legendary Guardian"});
         sourceGroup(rows, st, "dungeon", "The Ossuary - dungeon chests", "skeleton_skull", OSSUARY, "chest", "Chests rolled",
                 dungeonDrops(st));
         sourceGroup(rows, st, "shark", "Fin - Great White Sharks", "tropical_fish", FIN, "shark", "Sharks killed",
