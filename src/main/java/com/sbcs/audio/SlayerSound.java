@@ -1,5 +1,6 @@
 package com.sbcs.audio;
 
+import com.sbcs.render.BroodEndings;
 import com.sbcs.anim.SlayerTimeline;
 import com.sbcs.anim.SlayerTimeline.Drop;
 import com.sbcs.anim.SlayerTimeline.Tier;
@@ -109,37 +110,66 @@ public final class SlayerSound {
                 out.add(new Cue(E + 5200, false, Voices.fleeceWind(1.5f, seed + 103)));
                 out.add(new Cue(E + 6700, false, Voices.paintResume()));
             }
-            // ---- the Tarantula's: rough beats until BroodEndings settles them
-            case COCOON -> out.add(new Cue(E + 1500, false, Voices.chopCrumble(seed + 100)));
-            case SWATTER -> out.add(new Cue(E + 1500, false, Voices.labSlam()));
-            case TALISMAN -> out.add(new Cue(E + 2000, false, Voices.chime(3, 523.25f)));
+            // ---- the Tarantula's, on BroodEndings' beats
+            case COCOON -> {
+                for (int i = 0; i < 3; i++) out.add(new Cue(E + 300 + i * 380, false, Voices.hellionHeart(i)));
+                out.add(new Cue(E + BroodEndings.C_SPLIT, false, Voices.chopSplit()));
+                out.add(new Cue(E + BroodEndings.C_SPLIT + 40, false, Voices.chopCrumble(seed + 100)));
+            }
+            case SWATTER -> {
+                out.add(new Cue(E + BroodEndings.SWAT - 250, false, Voices.stingWhoosh(0.3f, seed + 100)));
+                out.add(new Cue(E + BroodEndings.SWAT, false, Voices.labSlam()));
+                out.add(new Cue(E + BroodEndings.SWAT + 220, false, Voices.paintSplash(seed + 101)));
+            }
+            case TALISMAN -> {
+                for (int i = 0; i < 9; i++) out.add(new Cue(E + BroodEndings.TL_FIRST + i * BroodEndings.TL_STEP, false, Voices.stingClick(i, false, seed + 100 + i)));
+                out.add(new Cue(E + BroodEndings.TL_TENTH, false, Voices.stingImpact(seed + 110)));
+                out.add(new Cue(E + BroodEndings.TL_TENTH + 60, false, Voices.chime(3, 523.25f)));
+            }
             case VENOM -> {
-                out.add(new Cue(E + 600, false, Voices.stingHiss(1.6f, seed + 100)));
-                out.add(new Cue(E + 2300, false, Voices.stingClick(0, false, seed + 101)));
+                for (int i = 0; i < 6; i++) out.add(new Cue(E + BroodEndings.V_DRIP + i * 300, false, Voices.paintPlip(i)));
+                out.add(new Cue(E + BroodEndings.V_DRIP, false, Voices.stingHiss(1.6f, seed + 100)));
+                out.add(new Cue(E + BroodEndings.V_CORK, false, Voices.stingClick(0, false, seed + 101)));
             }
             case DARKNESS -> {
-                out.add(new Cue(E + 300, true, Voices.labSnuff(seed + 100)));
-                out.add(new Cue(E + 1000, false, Voices.seraphScream(1.2f, seed + 101)));
-                out.add(new Cue(E + 2600, false, Voices.labIgnite(1.0f)));
+                out.add(new Cue(E + BroodEndings.D_DARK, true, Voices.labSnuff(seed + 100)));
+                out.add(new Cue(E + BroodEndings.D_EYES, false, Voices.seraphScream(1.2f, seed + 101)));
+                out.add(new Cue(E + BroodEndings.D_IGNITE, false, Voices.labIgnite(1.0f)));
             }
-            case WASP, SNAIL -> out.add(new Cue(E + 1500, false, Voices.stingClick(1, false, seed + 100)));
+            case WASP -> {
+                out.add(new Cue(E + 100, false, Voices.stingWhoosh(0.5f, seed + 100)));
+                out.add(new Cue(E + BroodEndings.WS_CAUGHT, false, Voices.stingCreak(0.8f, 140f, 220f, seed + 101)));
+                for (int i = 0; i < 4; i++) out.add(new Cue(E + BroodEndings.WS_DRAIN + i * 320, false, Voices.stingDrip(seed + 102 + i)));
+                out.add(new Cue(E + BroodEndings.WS_GLINT, false, Voices.chime(2, 659.25f)));
+            }
+            case SNAIL -> {
+                out.add(new Cue(E + BroodEndings.SN_SHOT, false, Voices.stingWhoosh(0.3f, seed + 100)));
+                out.add(new Cue(E + BroodEndings.SN_SHOT + 150, false, Voices.stingCreak(0.7f, 120f, 200f, seed + 101)));
+                out.add(new Cue(E + BroodEndings.SN_GHOST, false, Voices.seraphSwirl(1.0f, seed + 102)));
+                out.add(new Cue(E + BroodEndings.SN_DIVE + 150, false, Voices.stingImpact(seed + 103)));
+            }
             case MOSQUITO -> {
                 out.add(new Cue(E + 200, false, Voices.seraphSwirl(1.0f, seed + 100)));
-                out.add(new Cue(E + 1900, false, Voices.chopSplit()));
-                out.add(new Cue(E + 2100, false, Voices.brainHum(2.2f)));
-                out.add(new Cue(E + 4500, false, Voices.stingImpact(seed + 101)));
+                out.add(new Cue(E + BroodEndings.MQ_LAND, false, Voices.stingClick(1, false, seed + 101)));
+                out.add(new Cue(E + BroodEndings.MQ_SNAP, false, Voices.chopSplit()));
+                out.add(new Cue(E + BroodEndings.MQ_XRAY, false, Voices.brainHum(2.2f)));
+                out.add(new Cue(E + BroodEndings.MQ_SPIT, false, Voices.stingWhoosh(0.4f, seed + 102)));
+                out.add(new Cue(E + BroodEndings.MQ_SPLAT, false, Voices.paintSplash(seed + 103)));
             }
             case EYE -> {
-                out.add(new Cue(E + 400, false, Voices.seraphDrone(3.4f, seed + 100)));
-                out.add(new Cue(E + 4000, false, Voices.seraphEyeOpen(seed + 101)));
+                out.add(new Cue(E + BroodEndings.E_DARK, false, Voices.seraphDrone(3.4f, seed + 100)));
+                out.add(new Cue(E + BroodEndings.E_BULGE, false, Voices.heartbeat(seed + 101)));
+                out.add(new Cue(E + BroodEndings.E_PULL, false, Voices.stingCreak(1.2f, 70f, 240f, seed + 102)));
+                out.add(new Cue(E + BroodEndings.E_SNAP, false, Voices.stingImpact(seed + 103)));
+                out.add(new Cue(E + BroodEndings.E_SNAP + 80, false, Voices.seraphEyeOpen(seed + 104)));
             }
             case BRICK -> {
-                out.add(new Cue(E + 200, true, Voices.paintFreeze(seed + 100)));
+                out.add(new Cue(E + BroodEndings.B_FREEZE, true, Voices.paintFreeze(seed + 100)));
                 out.add(new Cue(E + 400, false, Voices.paintDrone(1.6f)));
-                for (int i = 0; i < 8; i++) out.add(new Cue(E + 2000 + i * 280, false, Voices.huntThud(i, false, seed + 110 + i)));
-                out.add(new Cue(E + 4800, false, Voices.vaultHeat(1.1f, seed + 120)));
-                out.add(new Cue(E + 5900, false, Voices.eruptionBoom(3, 0.8f, seed + 121)));
-                out.add(new Cue(E + 6000, false, Voices.paintResume()));
+                for (int i = 0; i < 12; i++) out.add(new Cue(E + BroodEndings.B_RAIN + i * ((BroodEndings.B_CLOSED - BroodEndings.B_RAIN) / 12), false, Voices.huntThud(i, false, seed + 110 + i)));
+                out.add(new Cue(E + BroodEndings.B_FIRE, false, Voices.vaultHeat(1.6f, seed + 130)));
+                out.add(new Cue(E + BroodEndings.B_BLOW, false, Voices.eruptionBoom(3, 0.8f, seed + 131)));
+                out.add(new Cue(E + BroodEndings.B_BLOW + 100, false, Voices.paintResume()));
             }
         }
 

@@ -968,7 +968,7 @@ public final class BroodEndings {
 
     /** The web strung across the corpse's raised legs, and where the wasp hangs in it. */
     static float[] webCentre() {
-        return new float[]{BELLY[0] - 4f, BELLY[1] + 26f, BELLY[2] + 8f};
+        return new float[]{BELLY[0] - 4f, BELLY[1] + 17f, BELLY[2] + 8f};
     }
 
     static float[] waspPos(long u) {
@@ -1026,7 +1026,7 @@ public final class BroodEndings {
 
     static float[] snailPos(long u) {
         float k = clamp(u / (float) SN_SHOT);
-        return new float[]{CHEST[0] - 62f + 18f * k, 0f, CHEST[2] + 30f};
+        return new float[]{CHEST[0] - 40f + 14f * k, 0f, CHEST[2] + 30f};
     }
 
     static void snail(SlayerTimeline tl, long u) {
@@ -1072,7 +1072,7 @@ public final class BroodEndings {
         // Its trail of slime, glinting.
         if (u < SN_SHOT + 400) {
             for (int i = 0; i < 14; i++) {
-                float[] q = SlayerScene.screen(CHEST[0] - 62f - 6f + i * 1.4f * Math.min(1f, u / (float) SN_SHOT) * 1.4f, 0.3f, CHEST[2] + 30f);
+                float[] q = SlayerScene.screen(CHEST[0] - 40f - 6f + i * 1.4f * Math.min(1f, u / (float) SN_SHOT) * 1.4f, 0.3f, CHEST[2] + 30f);
                 square(layer, q[0], q[1], G, ChopScene.alpha(a * 0.5f * (1f - span(u, SN_SHOT, 400))) | ((i + u / 120) % 5 == 0 ? 0xF0FFF0 : 0x9AB0A0));
             }
         }
