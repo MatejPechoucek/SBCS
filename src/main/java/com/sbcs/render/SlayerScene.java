@@ -562,11 +562,11 @@ public final class SlayerScene {
     }
 
     static float restY() {
-        return H * 0.42f;
+        return H * 0.4f;
     }
 
     static float restSize() {
-        return H * (TL.drop().dye() ? 0.2f : (TL.drop().tier == SlayerTimeline.Tier.RNGESUS ? 0.18f : 0.15f));
+        return H * (TL.drop().dye() ? 0.3f : (TL.drop().tier == SlayerTimeline.Tier.RNGESUS ? 0.27f : 0.22f));
     }
 
     /** The drop: wherever its ending has it until it rises, then into the showcase. */

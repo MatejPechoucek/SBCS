@@ -66,7 +66,7 @@ final class SlayerEndings {
             case PLAIN, BOOK, COCOON -> 1f - span(t, ENDING + 200, 500);
             case PARAGON -> 1f - span(t, ENDING + 900, 500);
             case WARDEN -> 1f - span(t, ENDING, 700);
-            case MATCHA -> 1f - span(t, ENDING + 3700, 1500);
+            case MATCHA -> 1f - span(t, ENDING + 5600, 1000);
             case BRICK -> t < ENDING + 5900 ? 1f : 0f;
             case SNAIL, TALISMAN, VENOM, WASP, MOSQUITO, EYE, DARKNESS, SWATTER -> 1f - span(t, tl.arrive() - 500, 400);
             default -> 1f - span(t, tl.arrive() - 600, 500);
@@ -316,7 +316,7 @@ final class SlayerEndings {
         float roll = u < H_LAND ? (u - H_TEAR) * 0.7f : 12f * (float) Math.sin(u / 60.0);
         float pitch = u < H_LAND ? (u - H_TEAR) * 0.4f : -90f + 8f * (float) Math.sin(u / 45.0);
         float grow = u > H_LEAP ? 1f + 1.4f * clamp((u - H_LEAP) / 300f) : 1f;
-        SlayerScene.add(rigs.zombiePart(SlayerScene.LOSE_RIGHT_ARM, u < H_LAND ? 70f : -25f, pitch, roll), s * 1.25f * grow, p[0], p[1], p[2], -1, 0xFFFFFF, 0, POLYS);
+        SlayerScene.add(rigs.zombiePart(SlayerScene.LOSE_RIGHT_ARM, u < H_LAND ? 70f : 150f, pitch, roll), s * 1.25f * grow, p[0], p[1], p[2], -1, 0xFFFFFF, 0, POLYS);
     }
 
     // ------------------------------------------------------------------ Festering Maggot
@@ -1225,7 +1225,7 @@ final class SlayerEndings {
     static void matchaPool(CrystalVeins.Fill layer, SlayerTimeline tl, long u, float a) {
         if (u < M_SPLASH) return;
         float k = ease((u - M_SPLASH) / 1800f) * (1f - span(u, tl.arrive() - ENDING - 300, 700));
-        pool(layer, CHEST[0], CHEST[2], 54f * k, 0x6E9A2A, 0x8AC23A, a, tl, 77);
+        pool(layer, CHEST[0], CHEST[2], 34f * k, 0x6E9A2A, 0x8AC23A, a, tl, 77);
     }
 
     static void matchaFront(ChopScene.Canvas c, CrystalVeins.Fill layer, SlayerTimeline tl, long u, float a) {
