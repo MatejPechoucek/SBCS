@@ -53,6 +53,8 @@ public final class ModelRaster {
     private boolean[] cover = new boolean[0], across = new boolean[0];
     /** The most image pixels a frame may cost: the scale drops for a model that fills a large screen. */
     public static final int BUDGET = 600_000;
+    /** This raster's own cap, {@link #BUDGET} unless its scene sets less. */
+    public int budget = BUDGET;
 
     /** The surface glow: parts within {@code range} world units above {@code y} take {@code rgb}, at most {@code strength}. */
     private float glowY = Float.NaN, glowRange = 1f, glowStrength;
@@ -87,7 +89,9 @@ public final class ModelRaster {
         x = (float) Math.floor(x0);
         y = (float) Math.floor(y0);
         float area = Math.max(1f, (x1 - x) * (y1 - y));
-        scale = Math.min(scale, (float) Math.sqrt(BUDGET / area));
+        // A lower budget never takes the image below one pixel a GUI pixel where the usual one would not.
+        float floor = Math.min(Math.min(scale, 1f), (float) Math.sqrt(BUDGET / area));
+        scale = Math.max(Math.min(scale, (float) Math.sqrt(budget / area)), floor);
         this.scale = scale = Math.max(0.5f, scale);
         w = Math.max(0, (int) Math.ceil((x1 - x) * scale));
         h = Math.max(0, (int) Math.ceil((y1 - y) * scale));

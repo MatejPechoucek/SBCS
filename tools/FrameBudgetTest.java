@@ -1,10 +1,12 @@
 import com.sbcs.anim.ChopTimeline;
 import com.sbcs.anim.HellionTimeline;
 import com.sbcs.anim.SeraphTimeline;
+import com.sbcs.anim.SlayerTimeline;
 import com.sbcs.anim.VaultTimeline;
 import com.sbcs.render.ChopScene;
 import com.sbcs.render.HellionScene;
 import com.sbcs.render.SeraphScene;
+import com.sbcs.render.SlayerScene;
 import com.sbcs.render.VaultScene;
 
 import java.util.ArrayList;
@@ -17,7 +19,8 @@ import java.util.Locale;
  * Seraph's Dragon once reached 80,000 calls a frame and "killed frames just like the scatha did" (CLAUDE.md, 0.2.67);
  * since then each new ending was counted by hand once. This counts them all, every run, and fails on any frame over
  * {@link #CALL_BUDGET}. Pixel-layer squares are counted apart: they go into one image, not one call each.
- * (Eruption has its own count in EruptionTest.)
+ * (Eruption has its own count in EruptionTest.) The Revenant's and Tarantula's need the client jar on the classpath:
+ * their bosses are the game's own models (SlayerRigs).
  *
  *   javac -d out -cp <fabric+mc classpath> -sourcepath "src/main/java:tools" tools/FrameBudgetTest.java
  */
@@ -108,6 +111,19 @@ public final class FrameBudgetTest {
                 SeraphScene.draw(c, c::layer, tl, t, 640, 360);
                 SeraphScene.under = null;
             });
+        }
+        // Every slot a plain 64 x 64 white: the raster is one image a frame whatever it holds, but empty slots draw nothing.
+        java.awt.image.BufferedImage white = new java.awt.image.BufferedImage(64, 64, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++) white.setRGB(x, y, 0xFFFFFFFF);
+        for (int slot = 0; slot <= SlayerScene.SLOT_WHITE; slot++) {
+            SlayerScene.RASTER.texture(slot, white);
+            SlayerScene.INSIDE.texture(slot, white);
+        }
+        SlayerScene.rigs = new com.sbcs.render.SlayerRigs();
+        for (SlayerTimeline.Drop d : SlayerTimeline.Drop.values()) {
+            SlayerTimeline tl = new SlayerTimeline(d, 1);
+            tl.price(1_000_000L, "bazaar instant sell");
+            measure("Slayer " + d, tl.total(), (c, t) -> SlayerScene.draw(c, c::layer, c::layer, tl, t, 640, 360));
         }
         List<String> words = new ArrayList<>(VaultTimeline.Prize.testWords());
         for (String w : words) {

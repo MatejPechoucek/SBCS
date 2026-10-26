@@ -58,6 +58,14 @@ public final class SlayerScene {
 
     /** The 3D layer, and the one drawn over it. Their slots are set by the screen or the preview: see SLOT_*. */
     public static final ModelRaster RASTER = new ModelRaster(), INSIDE = new ModelRaster();
+    /**
+     * Half the usual pixel cap (0.4.0): the bosses stand large and their faces overlap, so at 600k a frame the dyes'
+     * endings spent 20-28 ms a frame rasterising at a 960 x 540 GUI (FrameBudgetTest's timings). The image drops below
+     * 2 px a GUI pixel only while a model fills most of the screen, and never below 1 (ModelRaster.begin).
+     */
+    static {
+        RASTER.budget = INSIDE.budget = 300_000;
+    }
     public static final int SLOT_BOSS = 0, SLOT_ARMOUR = 1, SLOT_WARDEN = 2, SLOT_HEART = 3, SLOT_BEE = 4,
             SLOT_SKULL = 5, SLOT_FLOOR = 6, SLOT_EYES = 7, SLOT_SILVERFISH = 8, SLOT_COBWEB = 9, SLOT_BRICKS = 10,
             SLOT_SCULK = 11, SLOT_CAVE_SPIDER = 12, SLOT_WHITE = 13;
