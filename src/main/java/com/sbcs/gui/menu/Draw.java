@@ -17,7 +17,8 @@ public interface Draw {
     /** How wide {@link #text} draws {@code s}. */
     int width(String s, boolean bold);
 
-    /** A vanilla item's 16 x 16 icon, by its registry path ("amethyst_shard"). */
+    /** A 16 x 16 item icon: a vanilla item by its registry path ("amethyst_shard"), a SkyBlock head
+     *  ("head:set:name"), or a Hypixel pack icon ("pack:path:fallback" - the fallback without the pack). */
     void item(String id, int x, int y);
 
     /** The mod's own icon, {@code size} pixels square. */

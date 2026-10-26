@@ -33,14 +33,16 @@ public final class StampArt {
         return all[(i + s.chapter().ordinal() * 2) % all.length];
     }
 
-    /** The stamp's own item: a SkyBlock head ("head:set:name" - the drop itself, from the bundled NEU skins) or a
-     *  vanilla item's registry path (GuiDraw knows them all); the chapter's if it has none. */
+    /** The stamp's own item: a SkyBlock head ("head:set:name" - the drop itself, from the bundled NEU skins), an icon
+     *  from Hypixel's resource pack ("pack:path:fallback" - textures/item/path.png in hypixel_skyblock, drawn only when
+     *  the pack is loaded, else the vanilla fallback), or a vanilla item's registry path (GuiDraw knows them all); the
+     *  chapter's if it has none. */
     public static String item(Stamp s) {
         return ITEMS.getOrDefault(s.id(), s.chapter().icon);
     }
 
-    /** One item per stamp: the SkyBlock item where its skin is bundled, else a vanilla stand-in (docs/TODO.md lists
-     *  those). A vanilla one must also be in GuiDraw's list, or it draws as paper. On 26.2 coloured items (wool,
+    /** One item per stamp: the SkyBlock item where its skin is bundled or Hypixel's pack draws it, else a vanilla
+     *  stand-in (docs/TODO.md lists those). A vanilla one must also be in GuiDraw's list, or it draws as paper. On 26.2 coloured items (wool,
      *  dyes) and copper ones (lightning rods...) are collections, not single items: wool is {@code WOOL.pick(colour)}
      *  in GuiDraw, and the copper family is avoided - one of them in the switch breaks GuiDraw's ItemStack. */
     static final Map<String, String> ITEMS = Map.ofEntries(
@@ -51,7 +53,7 @@ public final class StampArt {
             Map.entry("house_jackpot_777", "emerald"), Map.entry("house_well_done", "cooked_beef"),
             Map.entry("house_collector", "item_frame"), Map.entry("house_big_ticket", "diamond"),
 
-            Map.entry("scatha_worm_food", "rotten_flesh"), Map.entry("scatha_rare_cut", "head:scatha:pet"),
+            Map.entry("scatha_worm_food", "pack:uncategorized/worm_membrane:rotten_flesh"), Map.entry("scatha_rare_cut", "head:scatha:pet"),
             Map.entry("scatha_choice_cut", "head:scatha:pet"), Map.entry("scatha_prime_cut", "head:scatha:pet"),
             Map.entry("scatha_full_set", "chest"), Map.entry("scatha_beginners_luck", "rabbit_foot"),
             Map.entry("scatha_dry_aged", "beef"), Map.entry("scatha_dry_aged_45", "bone"),
@@ -63,7 +65,7 @@ public final class StampArt {
             Map.entry("vg_ice_cold", "blue_ice"), Map.entry("vg_negative_equity", "redstone"),
             Map.entry("vg_in_the_black", "head:vanguard:Flawless Onyx Gemstone"), Map.entry("vg_skeleton_crew", "head:vanguard:Suspicious Scrap"),
             Map.entry("vg_cold_storage", "barrel"), Map.entry("vg_will_o_wisp", "head:vanguard:Caged Wisp"),
-            Map.entry("vg_tough_skin", "head:vanguard:Frozen Scute"), Map.entry("vg_master_key", "tripwire_hook"),
+            Map.entry("vg_tough_skin", "head:vanguard:Frozen Scute"), Map.entry("vg_master_key", "pack:glacite/uncategorized/skeleton_key:tripwire_hook"),
 
             Map.entry("diana_heads", "golden_shovel"), Map.entry("diana_brain_food", "head:diana:Brain Food"),
             Map.entry("diana_chimera", "enchanted_book"), Map.entry("diana_stinger", "head:diana:Fateful Stinger"),
@@ -75,7 +77,7 @@ public final class StampArt {
             Map.entry("hellion_fire_watch", "blaze_rod"), Map.entry("hellion_double_down", "enchanted_book"),
             Map.entry("hellion_roll_dice", "head:slayer:Archfiend Dice"), Map.entry("hellion_high_roller", "head:slayer:High Class Archfiend Dice"),
             Map.entry("hellion_playing_fire", "head:slayer:Flame Dye"), Map.entry("hellion_ashes", "gunpowder"),
-            Map.entry("hellion_power_trip", "head:slayer:Scorched Power Crystal"), Map.entry("hellion_cold_feet", "powder_snow_bucket"),
+            Map.entry("hellion_power_trip", "head:slayer:Scorched Power Crystal"), Map.entry("hellion_cold_feet", "pack:slayer/blaze/pets_related/subzero_inverter:powder_snow_bucket"),
             Map.entry("hellion_blueprints", "map"), Map.entry("hellion_paragon", "head:slayer:Paragon Shard"),
             Map.entry("hellion_hellfire_club", "magma_cream"), Map.entry("hellion_seventh_circle", "nether_star"),
 
@@ -83,18 +85,18 @@ public final class StampArt {
             Map.entry("lava_meltdown", "head:lava:RADIOACTIVE_VIAL"), Map.entry("lava_end_times", "head:lava:BURNT_TEXTS"),
             Map.entry("lava_kuudra", "head:lava:DYE_CARMINE"), Map.entry("lava_jaw_dropping", "head:lava:Lord Jawbus"),
             Map.entry("lava_thermal_runaway", "lava_bucket"), Map.entry("lava_chained", "head:lava:CHAIN_END_TIMES"),
-            Map.entry("lava_pinch_me", "head:lava:SEVERED_PINCER"), Map.entry("lava_forged", "anvil"),
+            Map.entry("lava_pinch_me", "head:lava:SEVERED_PINCER"), Map.entry("lava_forged", "pack:fishing/misc/brimstone_handle:anvil"),
             Map.entry("lava_shell_shocked", "head:lava:SCUTTLER_SHELL"), Map.entry("lava_hot_catch", "fishing_rod"),
 
             Map.entry("fin_shark_week", "cod"), Map.entry("fin_big_fish", "head:fishing:Megalodon"),
-            Map.entry("fin_bigger_fish", "head:fishing:Megalodon"), Map.entry("fin_tooth_fairy", "ghast_tear"),
-            Map.entry("fin_off_the_hook", "fishing_rod"), Map.entry("fin_dentist", "bone_meal"),
+            Map.entry("fin_bigger_fish", "head:fishing:Megalodon"), Map.entry("fin_tooth_fairy", "pack:community_center/mayor/marina/great_white_shark_tooth:ghast_tear"),
+            Map.entry("fin_off_the_hook", "fishing_rod"), Map.entry("fin_dentist", "pack:community_center/mayor/marina/great_white_shark_tooth:bone_meal"),
             Map.entry("fin_school", "salmon"), Map.entry("fin_dry_dock", "oak_boat"),
             Map.entry("fin_feeding_frenzy", "kelp"), Map.entry("fin_both_ends", "nautilus_shell"),
 
-            Map.entry("wisp_sorrowful", "ghast_tear"), Map.entry("wisp_plasma", "ender_eye"),
+            Map.entry("wisp_sorrowful", "pack:uncategorized/sorrow:ghast_tear"), Map.entry("wisp_plasma", "pack:uncategorized/plasma:ender_eye"),
             Map.entry("wisp_spirit_level", "phantom_membrane"), Map.entry("wisp_drowning", "water_bucket"),
-            Map.entry("wisp_high_voltage", "end_rod"), Map.entry("wisp_bittersweet", "honey_bottle"),
+            Map.entry("wisp_high_voltage", "pack:uncategorized/plasma:end_rod"), Map.entry("wisp_bittersweet", "honey_bottle"),
             Map.entry("wisp_double_haunting", "soul_lantern"), Map.entry("wisp_poltergeist", "echo_shard"),
             Map.entry("wisp_matched_pair", "glass_bottle"), Map.entry("wisp_witching_hour", "jack_o_lantern"),
 
@@ -107,7 +109,29 @@ public final class StampArt {
             Map.entry("vg_brain_freeze", "snow_block"), Map.entry("diana_nobody_expects", "head:creatures:INQUISITOR"),
             Map.entry("hellion_number_beast", "wither_skeleton_skull"), Map.entry("hellion_snake_eyes", "fermented_spider_eye"),
             Map.entry("lava_hot_potato", "baked_potato"), Map.entry("fin_bigger_boat", "trident"),
-            Map.entry("wisp_aint_afraid", "carved_pumpkin"));
+            Map.entry("wisp_aint_afraid", "carved_pumpkin"),
+
+            // The Seraph's, the Revenant's and the Tarantula's chapters (2026-10-26).
+            Map.entry("ser_voidwalker", "pack:slayer/enderman/null_sphere:ender_pearl"), Map.entry("ser_judgement", "head:slayer:Judgement Core"),
+            Map.entry("ser_byzantium", "head:slayer:Byzantium Dye"), Map.entry("ser_upgrade", "head:slayer:Exceedingly Rare Ender Artifact Upgrade"),
+            Map.entry("ser_idol", "head:slayer:End Stone Idol"), Map.entry("ser_eye", "pack:uncategorized/summoning_eye:ender_eye"),
+            Map.entry("ser_warp", "head:slayer:Etherwarp Merger"), Map.entry("ser_rune", "head:slayer:Enchant Rune I"),
+            Map.entry("ser_paragon", "head:slayer:Paragon Shard"), Map.entry("ser_lost", "pack:slayer/enderman/null_ovoid:ender_pearl"),
+            Map.entry("ser_hoarder", "pack:slayer/enderman/crafts/null_atom:ender_pearl"), Map.entry("ser_staring_contest", "ender_eye"),
+
+            Map.entry("rev_grave_digger", "zombie_head"), Map.entry("rev_heart_attack", "head:slayer:Warden Heart"),
+            Map.entry("rev_matcha", "head:slayer:Matcha Dye"), Map.entry("rev_heads_roll", "head:slayer:Beheaded Horror"),
+            Map.entry("rev_hand", "head:slayer:Severed Hand"), Map.entry("rev_reaper", "pack:slayer/zombie/weapons/reaper_scythe:diamond_sword"),
+            Map.entry("rev_pulled_muscle", "head:slayer:Shredded Sinew"), Map.entry("rev_morgue", "pack:slayer/zombie/revenant_viscera:rotten_flesh"),
+            Map.entry("rev_use_by", "pack:slayer/zombie/revenant_flesh:rotten_flesh"), Map.entry("rev_full_autopsy", "head:slayer:Festering Maggot"),
+            Map.entry("rev_back_from_dead", "totem_of_undying"), Map.entry("rev_trick_or_treat", "pumpkin_pie"),
+
+            Map.entry("tar_pest_control", "pack:slayer/spider/tarantula_web:cobweb"), Map.entry("tar_eye", "head:slayer:Primordial Eye"),
+            Map.entry("tar_brick", "head:slayer:Brick Red Dye"), Map.entry("tar_swatter", "pack:slayer/spider/fly_swatter:paper"),
+            Map.entry("tar_snail", "head:slayer:Ensnared Snail"), Map.entry("tar_wasp", "head:slayer:Shriveled Wasp"),
+            Map.entry("tar_mosquito", "rotten_flesh"), Map.entry("tar_talisman", "head:slayer:Tarantula Talisman"),
+            Map.entry("tar_webbed", "pack:slayer/spider/tarantula_silk:string"), Map.entry("tar_rain", "spider_eye"),
+            Map.entry("tar_food_chain", "head:slayer:Vial of Venom"), Map.entry("tar_eight_legs", "head:slayer:Darkness Within Rune I"));
 
     /** How crooked this stamp sits, in radians - fixed per stamp. */
     public static float tilt(Stamp s) {

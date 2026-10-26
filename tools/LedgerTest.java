@@ -47,7 +47,9 @@ public class LedgerTest {
             "house_unlucky_13", "house_leap_of_faith", "house_christmas_ham", "house_two_timer", "house_health_inspector",
             "house_natural", "house_loose_change", "scatha_round_number", "scatha_is_that_it", "scatha_cereal_killer",
             "vg_brain_freeze", "diana_nobody_expects", "hellion_number_beast", "hellion_snake_eyes", "lava_hot_potato",
-            "fin_bigger_boat", "wisp_aint_afraid");
+            "fin_bigger_boat", "wisp_aint_afraid",
+            // The slayer chapters (2026-10-26).
+            "rev_back_from_dead", "rev_trick_or_treat", "tar_eight_legs");
 
     static final ZoneId UTC = ZoneOffset.UTC;
 
@@ -70,9 +72,7 @@ public class LedgerTest {
                 for (int i = 1; i < s.tiers().length; i++) check(s.id() + " tiers rise", s.tiers()[i] > s.tiers()[i - 1]);
             }
         }
-        for (Chapter c : Chapter.values()) {
-            if (c != Chapter.SERAPH) check("chapter " + c + " has stamps", !Ledger.chapter(c).isEmpty());
-        }
+        for (Chapter c : Chapter.values()) check("chapter " + c + " has stamps", !Ledger.chapter(c).isEmpty());
 
         // ---- every counted stamp is wired to a number: with everything at plenty, it reads more than 0
         Facts rich = rich();
@@ -107,9 +107,23 @@ public class LedgerTest {
         String chop = Files.readString(Path.of("src/main/java/com/sbcs/anim/ChopTimeline.java"));
         check("Diana creature INQUISITOR", chop.contains("INQUISITOR"));
         for (com.sbcs.ledger.Chapter c : com.sbcs.ledger.Chapter.values()) {
-            if (c == com.sbcs.ledger.Chapter.SERAPH) continue;
             check("10 or more stamps in " + c, Ledger.chapter(c).size() >= 10, Ledger.chapter(c).size() + "");
         }
+        // The slayer chapters fit on one page of the book (12 a page), and each has a secret.
+        for (Chapter c : List.of(Chapter.SERAPH, Chapter.REVENANT, Chapter.TARANTULA)) {
+            check(c + " fits one page", Ledger.chapter(c).size() <= 12, Ledger.chapter(c).size() + "");
+            check(c + " has a secret", Ledger.chapter(c).stream().anyMatch(Stamp::hidden));
+        }
+        String seraph = Files.readString(Path.of("src/main/java/com/sbcs/anim/SeraphTimeline.java"));
+        for (String n : SERAPH) check("Seraph names " + n, seraph.contains("\"" + n + "\""));
+        String slayer = Files.readString(Path.of("src/main/java/com/sbcs/anim/SlayerTimeline.java"));
+        for (String n : REVENANT) check("Revenant names " + n, slayer.contains("\"" + n + "\""));
+        for (String n : TARANTULA) check("Tarantula names " + n, slayer.contains("\"" + n + "\""));
+        check("the Revenant's key is zombie", slayer.contains("REVENANT(\"zombie\""));
+        check("the Tarantula's key is spider", slayer.contains("TARANTULA(\"spider\""));
+        check("the Seraph's key is seraph", Files.readString(Path.of("src/main/java/com/sbcs/gui/SeraphScreen.java"))
+                .contains("SOURCE = \"seraph\""));
+        icons();
         for (String n : List.of("Megalodon", "Great White Shark Tooth")) check("Fin names " + n, shark.contains("\"" + n + "\""));
         for (String n : List.of("Sorrow", "Plasma")) check("Wisp names " + n, ghost.contains("\"" + n + "\""));
         for (String n : List.of("Brain Food", "Chimera I", "Fateful Stinger", "Manti-core", "Crown of Greed",
@@ -332,6 +346,65 @@ public class LedgerTest {
         Ledger.drop(boo, "ghost", "Plasma", 0, s0 + 9 * 60_000, UTC);
         check("ain't afraid: five in 9 minutes", boo.flags.containsKey("wisp_aint_afraid"));
 
+        // ---- the slayer chapters' events
+        LedgerData rev = new LedgerData();
+        Ledger.drop(rev, "zombie", "Severed Hand", 50, at(10, 0), UTC);
+        Ledger.drop(rev, "spider", "Fly Swatter", 51, at(10, 2), UTC);
+        check("another slayer's drop is no back from the dead", !rev.flags.containsKey("rev_back_from_dead"));
+        Ledger.drop(rev, "zombie", "Scythe Blade", 60, at(10, 6), UTC);
+        check("six minutes is no back from the dead", !rev.flags.containsKey("rev_back_from_dead"));
+        Ledger.drop(rev, "zombie", "Warden Heart", 61, at(10, 10), UTC);
+        check("back from the dead: two in 4 minutes", rev.flags.get("rev_back_from_dead") == 61L);
+        check("16 October is no Halloween", !rev.flags.containsKey("rev_trick_or_treat"));
+        long halloween = LocalDateTime.of(2026, 10, 31, 20, 0).atZone(UTC).toInstant().toEpochMilli();
+        Ledger.drop(rev, "spider", "Fly Swatter", 70, halloween, UTC);
+        check("a Tarantula drop is no trick or treat", !rev.flags.containsKey("rev_trick_or_treat"));
+        Ledger.drop(rev, "zombie", "Beheaded Horror", 71, halloween + 60_000, UTC);
+        check("trick or treat: a Revenant drop on 31 October", rev.flags.get("rev_trick_or_treat") == 71L);
+
+        LedgerData legs = new LedgerData();
+        for (int i = 1; i <= 7; i++) Ledger.kill(legs, "spider", at(11, i), UTC);
+        Ledger.drop(legs, "spider", "Fly Swatter", 7, at(11, 7), UTC);
+        check("the 7th Tarantula is no eight legs", !legs.flags.containsKey("tar_eight_legs"));
+        Ledger.kill(legs, "spider", at(11, 8), UTC);
+        Ledger.drop(legs, "spider", "Ensnared Snail", 8, at(11, 8), UTC);
+        check("eight legs: a drop on the day's 8th Tarantula", legs.flags.get("tar_eight_legs") == 8L);
+        LedgerData legs2 = new LedgerData();
+        for (int i = 1; i <= 7; i++) Ledger.kill(legs2, "spider", at(11, 23, i), UTC);
+        Ledger.kill(legs2, "spider", at(12, 0, 30), UTC);                  // after midnight: the 1st of a new day
+        Ledger.drop(legs2, "spider", "Fly Swatter", 8, at(12, 0, 30), UTC);
+        check("eight legs counts the day's kills, not the lifetime's", !legs2.flags.containsKey("tar_eight_legs"));
+
+        // The full sets: one of each, not one of any.
+        Facts sets = new Facts();
+        Map<String, Integer> z = new HashMap<>();
+        for (String t : REVENANT) z.put(t, 1);
+        z.remove("Matcha Dye");
+        sets.drops.put("zombie", z);
+        Map<String, Integer> sp = new HashMap<>();
+        sp.put("Digested Mosquito", 3);
+        sp.put("Shriveled Wasp", 1);
+        sets.drops.put("spider", sp);
+        LedgerData setsD = new LedgerData();
+        check("full autopsy needs the Matcha too", Ledger.value(Ledger.byId("rev_full_autopsy"), sets, setsD) == 0);
+        check("food chain needs the snail", Ledger.value(Ledger.byId("tar_food_chain"), sets, setsD) == 0);
+        z.put("Matcha Dye", 1);
+        sp.put("Ensnared Snail", 2);
+        check("full autopsy: every Revenant ending", Ledger.value(Ledger.byId("rev_full_autopsy"), sets, setsD) == 1);
+        check("food chain: all three bugs", Ledger.value(Ledger.byId("tar_food_chain"), sets, setsD) == 1);
+        z.put("Paragon Shard", 4);
+        check("a Paragon off a Revenant is not the Seraph's", Ledger.value(Ledger.byId("ser_paragon"), sets, setsD) == 0);
+
+        // The Seraph's chapter is no longer skipped: its stamps are earned like any other.
+        Facts ser = new Facts();
+        ser.kills.put("seraph", 30L);
+        ser.drops.put("seraph", new HashMap<>(Map.of("Judgement Core", 1, "Summoning Eye", 2)));
+        LedgerData serD = new LedgerData();
+        List<Stamp> serFresh = Ledger.refresh(ser, serD, 9_000, false);
+        check("Seraph kills stamp", Ledger.grade(Ledger.byId("ser_voidwalker"), serD) == 1);
+        check("Seraph's secret stamp", serFresh.contains(Ledger.byId("ser_staring_contest")));
+        check("Seraph's Judgement Core", Ledger.grade(Ledger.byId("ser_judgement"), serD) == 1);
+
         // ---- fail-safes: a clock that went back, and a file that was edited by hand
         LedgerData clock = new LedgerData();
         Ledger.drop(clock, "blaze", "Archfiend Dice", 10, at(14, 0), UTC);
@@ -382,11 +455,60 @@ public class LedgerTest {
         return d.recent.size() == Ledger.RECENT && d.recent.get(d.recent.size() - 1).kill == Ledger.RECENT + 25;
     }
 
+    /**
+     * Every stamp has its own icon in StampArt.ITEMS (read as source text), and each one resolves: a head's name is in
+     * its bundled skins, a pack icon names a vanilla fallback, and every vanilla item is one GuiDraw knows - an
+     * unknown one draws as paper.
+     */
+    static void icons() throws Exception {
+        String art = Files.readString(Path.of("src/main/java/com/sbcs/gui/menu/StampArt.java"));
+        String gui = Files.readString(Path.of("src/main/java/com/sbcs/gui/GuiDraw.java"));
+        Map<String, String> items = new HashMap<>();
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("Map\\.entry\\(\"([a-z0-9_]+)\", \"([^\"]+)\"\\)").matcher(art);
+        while (m.find()) check("one icon for " + m.group(1), items.put(m.group(1), m.group(2)) == null);
+        Map<String, String> sets = Map.of("slayer", "slayer_heads", "lava", "lava_heads", "vanguard", "vanguard_heads",
+                "diana", "diana_heads", "creatures", "creature_heads", "fishing", "fishing_heads");
+        int packs = 0;
+        for (Stamp s : Ledger.STAMPS) {
+            String it = items.get(s.id());
+            check(s.id() + " has its own icon", it != null);
+            if (it == null) continue;
+            String vanilla = it;
+            if (it.startsWith("head:")) {
+                String[] p = it.split(":", 3);
+                if (p[1].equals("scatha")) continue;
+                String file = sets.get(p[1]);
+                check(s.id() + " head set " + p[1], file != null);
+                if (file == null) continue;
+                String json = Files.readString(Path.of("src/main/resources/assets/sbcs/" + file + ".json"));
+                check(s.id() + " head " + p[2] + " is bundled", json.contains("\"" + p[2] + "\""));
+                continue;
+            }
+            if (it.startsWith("pack:")) {
+                String[] p = it.split(":", 3);
+                check(s.id() + " pack icon has a path and a fallback", p.length == 3 && !p[1].isEmpty() && !p[2].isEmpty());
+                if (p.length < 3) continue;
+                check(s.id() + " pack path is under textures/item, no extension", !p[1].endsWith(".png") && !p[1].startsWith("textures/"));
+                vanilla = p[2];
+                packs++;
+            }
+            check(s.id() + " vanilla " + vanilla + " is in GuiDraw", gui.contains("case \"" + vanilla + "\" ->"));
+        }
+        check("pack icons in use", packs >= 15, "" + packs);
+    }
+
     /** Every number high and every drop had. */
     static final String[] HELLION = {"Duplex I", "Scorched Power Crystal", "Subzero Inverter", "Wilson's Engineering Plans",
             "Paragon Shard", "Archfiend Dice", "High Class Archfiend Dice", "Flame Dye"};
     static final String[] ERUPTION = {"Chain of the End Times", "Severed Pincer", "Flash I", "Brimstone Handle",
             "Radioactive Vial", "Scuttler Shell", "Burnt Texts", "Carmine Dye"};
+
+    static final String[] SERAPH = {"Judgement Core", "Byzantium Dye", "Exceedingly Rare Ender Artifact Upgrade",
+            "End Stone Idol", "Summoning Eye", "Etherwarp Merger", "Enchant Rune I", "Paragon Shard"};
+    static final String[] REVENANT = {"Beheaded Horror", "Snake Rune I", "Festering Maggot", "Scythe Blade", "Shredded Sinew",
+            "Severed Hand", "Warden Heart", "Matcha Dye"};
+    static final String[] TARANTULA = {"Primordial Eye", "Brick Red Dye", "Fly Swatter", "Ensnared Snail", "Shriveled Wasp",
+            "Digested Mosquito", "Tarantula Talisman"};
 
     static Facts rich() {
         Facts f = new Facts();
@@ -402,6 +524,9 @@ public class LedgerTest {
         put(f, "lava", ERUPTION);
         put(f, "shark", "Megalodon", "Great White Shark Tooth");
         put(f, "ghost", "Sorrow", "Plasma");
+        put(f, "seraph", SERAPH);
+        put(f, "zombie", REVENANT);
+        put(f, "spider", TARANTULA);
         f.drops.get("ghost").put("Sorrow", 99_999);
         return f;
     }
