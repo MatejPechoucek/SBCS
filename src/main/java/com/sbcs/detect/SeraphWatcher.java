@@ -65,6 +65,9 @@ public final class SeraphWatcher {
         this.listener = listener;
     }
 
+    /** The quest's boss (the client's, shared by every slayer watcher): another boss's drop lines are never the Seraph's. */
+    public SlayerQuest quest = new SlayerQuest();
+
     static final String NAME = "Voidgloom Seraph IV";
     static final double MAX_HP = 210e6;
     private static final double SCAN_RADIUS = 48, TELEPORT = 12, GONE_REACH = 24, ARM_RADIUS = 24;
@@ -96,6 +99,7 @@ public final class SeraphWatcher {
         if (text == null) return;
         String s = DianaWatcher.plain(text).trim();
         if (ChatLines.fromPlayer(s)) return;
+        quest.onChatLine(s, now); // idempotent: the client feeds it too, so a replay needs nothing else
         if (s.startsWith("SLAYER QUEST STARTED!")) {
             forget();
             return;
@@ -106,6 +110,10 @@ public final class SeraphWatcher {
             return;
         }
         Drop d = SeraphDrops.of(s);
+        if (d != null && quest.otherThan(SlayerQuest.Boss.VOIDGLOOM, now)) {
+            log.note("§8Seraph: drop line during a " + quest.boss(now) + " quest - not the Seraph's (\"" + s + "\")");
+            return;
+        }
         if (d != null) {
             boolean better = bestDrop == null || bestDrop == Drop.BUST || (d != Drop.BUST && d.ordinal() > bestDrop.ordinal());
             if (better || now - bestAt > DROP_WAIT_MS) {

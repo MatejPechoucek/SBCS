@@ -21,8 +21,8 @@ import java.util.Arrays;
  */
 public final class ModelRaster {
 
-    private final int[][] tex = new int[8][];
-    private final int[] texW = new int[8], texH = new int[8];
+    private final int[][] tex = new int[16][];
+    private final int[] texW = new int[16], texH = new int[16];
 
     /** Sets slot {@code slot}'s texture from an image (the game reads them through its resource manager). */
     public void texture(int slot, BufferedImage img) {

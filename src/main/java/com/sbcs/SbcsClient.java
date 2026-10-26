@@ -393,6 +393,17 @@ public class SbcsClient implements ClientModInitializer {
         }
     });
 
+    /**
+     * Which slayer boss the player's quest is for, shared by every slayer watcher: the sidebar (every 10 ticks) and
+     * every game line feed it, whichever animations are on - a Paragon Shard off a Revenant played Hellion (2026-10-25).
+     */
+    public static final com.sbcs.detect.SlayerQuest slayerQuest = new com.sbcs.detect.SlayerQuest();
+    static {
+        hellionWatcher.quest = slayerQuest;
+        seraphWatcher.quest = slayerQuest;
+    }
+    private static int sidebarTicks;
+
     /** Diana's kills (nametags) and drops (chat). */
     private static final com.sbcs.detect.DianaWatcher dianaWatcher = new com.sbcs.detect.DianaWatcher(
             decisions, new com.sbcs.detect.DianaWatcher.Listener() {
@@ -696,6 +707,9 @@ public class SbcsClient implements ClientModInitializer {
 
             if (live && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.tick(client.player, config.dianaHidePct));
             if (live && config.fishingAnnounce) Safety.run("shark", () -> sharkWatcher.tick(client.player));
+            if (live && ++sidebarTicks % 10 == 0) {
+                Safety.run("slayer", () -> slayerQuest.onSidebar(com.sbcs.detect.dungeon.Sidebar.lines(client), System.currentTimeMillis()));
+            }
             if (live && config.blazeAnimation) Safety.run("blaze", () -> hellionWatcher.tick(client.player, config.blazeHidePct));
             if (live && seraphOn()) Safety.run("seraph", () -> seraphWatcher.tick(client.player, config.seraphHidePct));
             if (live && config.lavaAnimation) Safety.run("lava", () -> {
@@ -1290,6 +1304,28 @@ public class SbcsClient implements ClientModInitializer {
      * "Only play drops worth at least" (the menu): a win whose known price is under it plays as a bust. A price not
      * fetched yet lets the win play - a missing price never costs anyone a reveal.
      */
+    /**
+     * A slayer drop's chat tier word ("VERY RARE DROP!", "CRAZY RARE DROP!", "PRAY TO RNGESUS DROP!") against the
+     * player's threshold for that slayer ("zombie", "spider", "blaze", "seraph"): true when it is below it and must
+     * play as a bust. An unknown word (an ordinary RARE DROP!, or none) counts as below any threshold above 0.
+     */
+    public static boolean belowTier(String source, String tierWord) {
+        if (config == null) return false;
+        int need = switch (source) {
+            case "zombie" -> config.zombieTier;
+            case "spider" -> config.spiderTier;
+            case "blaze" -> config.blazeTier;
+            case "seraph" -> config.seraphTier;
+            default -> 0;
+        };
+        if (need <= 0) return false;
+        String w = tierWord == null ? "" : tierWord.toUpperCase(java.util.Locale.ROOT);
+        int got = w.contains("RNGESUS") ? 2 : w.contains("CRAZY") ? 1 : 0;
+        if (got >= need) return false;
+        decisions.note("§8" + source + " drop is " + (tierWord == null ? "untiered" : tierWord) + ", under your tier setting - played as a bust");
+        return true;
+    }
+
     public static boolean underFloor(String priceId) {
         if (config == null || config.minWorth <= 0 || priceId == null) return false;
         long floor = PatternConfig.MIN_WORTH[Math.min(config.minWorth, PatternConfig.MIN_WORTH.length - 1)];
@@ -1807,6 +1843,7 @@ public class SbcsClient implements ClientModInitializer {
         String text = message.getString();
         if (game && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.onChatLine(text));
         if (game && config.lavaAnimation) Safety.run("lava", () -> lavaWatcher.onChatLine(text));
+        if (game) Safety.run("slayer", () -> slayerQuest.onGameLine(text, System.currentTimeMillis()));
         if (game && seraphOn()) Safety.run("seraph", () -> seraphWatcher.onChatLine(text));
         if (game && config.blazeAnimation) Safety.run("blaze", () -> hellionWatcher.onChatLine(text));
         if (game && config.fishingAnnounce && Safety.on("shark")) {

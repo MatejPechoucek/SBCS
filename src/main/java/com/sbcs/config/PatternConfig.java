@@ -203,6 +203,8 @@ public class PatternConfig {
 
     /** Busts, per source: 0 the whole cutscene, 1 short (straight to the bust's own ending), 2 none (wins only). */
     public int dianaBusts = 0, blazeBusts = 0, seraphBusts = 0, lavaBusts = 0, nucleusBusts = 0;
+    /** The lowest drop tier each slayer's animation plays for: 0 Very Rare and up, 1 Crazy Rare and up, 2 Pray to RNGesus only. */
+    public int zombieTier = 1, spiderTier = 1, blazeTier = 0, seraphTier = 0;
     /** Only play drops worth at least this ({@link #MIN_WORTH} index; 0 any): one under it plays as a bust. */
     public int minWorth = 0;
     public static final long[] MIN_WORTH = {0, 500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000};
@@ -461,6 +463,10 @@ public class PatternConfig {
         lavaHidePct = clamp(lavaHidePct, 0, 20);
         dianaBusts = clamp(dianaBusts, 0, 2);
         blazeBusts = clamp(blazeBusts, 0, 2);
+        zombieTier = clamp(zombieTier, 0, 2);
+        spiderTier = clamp(spiderTier, 0, 2);
+        blazeTier = clamp(blazeTier, 0, 2);
+        seraphTier = clamp(seraphTier, 0, 2);
         seraphBusts = clamp(seraphBusts, 0, 2);
         lavaBusts = clamp(lavaBusts, 0, 2);
         nucleusBusts = clamp(nucleusBusts, 0, 2);
