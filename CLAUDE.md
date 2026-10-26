@@ -1266,6 +1266,11 @@ ending about its item (gore is fine).
   Snake Rune, Scythe Blade, Shredded Sinew, Paragon, the catalysts and Smite.
 - Offline: `tools/SlayerPreview` (frames, `-Dat=` or every frame at `-Dfps`), `tools/SlayerSoundtrack` (the WAV).
   `ModelRaster` has 16 texture slots now.
+- **CPU (0.4.0)**: draw calls are tiny (worst ~450 a frame, FrameBudgetTest counts them now), but the raster was 20-28 ms
+  a frame in the dyes at a 960 x 540 GUI - big bosses, overlapping faces. `ModelRaster.budget` is per raster; SlayerScene
+  sets 300k (half the usual), and `begin` never takes the image below 1 px a GUI pixel where 600k would not. Worst is
+  now ~10-13 ms (Digested Mosquito ~20 ms around 5 s: two rasters at scale 1). A specialised plain-face span loop was
+  tried and gained nothing - the cost is overdraw, not branches.
 
 ## The Seraph's Glyph (the Enderman slayer, Voidgloom Seraph tier IV) - 0.2.63
 

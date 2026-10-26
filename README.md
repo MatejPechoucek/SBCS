@@ -38,6 +38,8 @@ sound files to download.
 | Fishing Festival | **Fin** | A quick pop-up when a Great White Shark gives you a Megalodon or a Shark Tooth, and an even quicker one when it doesn't. |
 | Dwarven Mines | **Wisp** | A quick pop-up when a Ghost drops Sorrow or Plasma. |
 | Voidgloom Seraph III and IV | **The Seraph's Glyph** | Your own Seraph dies. The glyph's beam lands, and every good drop has its own ending: the Judgement Core's eye opens, the Byzantium Dye brings the Ender Dragon. |
+| Crystal Nucleus | **The Vault** | You place the fifth crystal. The safe takes every crystal, the dial spins, and the door creaks, swings, blows off or melts depending on the best thing in the loot bundle. The bundle on the floor is covered until you've seen it. |
+| Dungeons (F1-F7, M1-M7) | **The Ossuary** | You open a reward chest, in the boss room or at Croesus. A prize wheel rolls before you see what is inside; spin it yourself or just watch. It only ever reads the menu - it never clicks for you. |
 
 Every slayer card has a **Plays for** setting: Very Rare drops and up, Crazy Rare and up, or RNGesus drops only.
 

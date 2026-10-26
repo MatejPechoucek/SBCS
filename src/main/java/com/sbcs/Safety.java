@@ -93,6 +93,7 @@ public final class Safety {
             case "ghost" -> "Wisp";
             case "nucleus" -> "The Vault";
             case "ledger" -> "The Ledger's pop-up";
+            case "dungeon" -> "The Ossuary";
             default -> "SBCS (" + key + ")";
         };
     }
