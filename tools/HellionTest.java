@@ -62,6 +62,30 @@ public final class HellionTest {
                         frames(d, seed, 0, HellionTimeline.REVEAL) == ref);
             }
         }
+        // The "Pillars explode in turn" stage: the same honesty, and both pillars gone before the reveal.
+        HellionScene.countdown = true;
+        for (long seed : new long[]{1, 42}) {
+            long ref = frames(Drop.BUST, seed, 0, HellionTimeline.REVEAL);
+            for (Drop d : Drop.values()) {
+                check("pillars exploding: before the reveal, " + d + " draws the same as a bust (seed " + seed + ")",
+                        frames(d, seed, 0, HellionTimeline.REVEAL) == ref);
+            }
+            float[] base = null;
+            for (Drop d : Drop.values()) {
+                java.util.List<com.sbcs.audio.HellionSound.Cue> before = new java.util.ArrayList<>();
+                for (com.sbcs.audio.HellionSound.Cue c : com.sbcs.audio.HellionSound.schedule(new HellionTimeline(d, seed), true)) {
+                    if (c.at < HellionTimeline.REVEAL) before.add(c);
+                }
+                float[] pcm = HellionSoundtrack.render(before, HellionTimeline.REVEAL / 1000f);
+                if (base == null) base = pcm;
+                else check("pillars exploding: before the reveal, " + d + " sounds the same (seed " + seed + ")", java.util.Arrays.equals(base, pcm));
+            }
+        }
+        HellionScene.countdown = false;
+        long[] blow = HellionTimeline.PILLAR_BLOW;
+        check("the pillars blow in turn, the second a little later, and both are gone before the reveal",
+                blow.length == 2 && blow[0] > HellionTimeline.APPEAR + 1000 && blow[1] > blow[0]
+                        && blow[1] + HellionScene.BLOW_MS <= HellionTimeline.REVEAL);
         // ...and the reveal itself is where they differ.
         check("a win draws differently from a bust after the reveal",
                 frames(Drop.DUPLEX, 7, HellionTimeline.REVEAL, HellionTimeline.REVEAL + 400)

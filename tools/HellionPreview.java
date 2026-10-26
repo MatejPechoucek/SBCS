@@ -29,6 +29,8 @@ public final class HellionPreview {
         // -DnoPillars=true: the menu's "No pillars, bigger blaze" stage; -Dwaiting=true: the click prompt up.
         HellionScene.noPillars = Boolean.getBoolean("noPillars");
         HellionScene.waitingForHit = Boolean.getBoolean("waiting");
+        // -Dcountdown=true: the "Pillars explode in turn" stage.
+        HellionScene.countdown = Boolean.getBoolean("countdown");
         int fps = Integer.getInteger("fps", 30);
         String van = System.getProperty("vanilla"), skins = System.getProperty("skins");
         Map<String, BufferedImage> tex = new HashMap<>();

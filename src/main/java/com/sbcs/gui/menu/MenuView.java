@@ -716,10 +716,11 @@ public final class MenuView {
                     v -> cfg.blazeHidePct = v, v -> v == 0 ? "Off" : v + "% HP"));
             rows.add(new NoticeRow("The HUD and chat fade out when your Demonlord gets this low, so nothing gives the drop away."));
             rows.add(new SectionRow("The fight"));
-            String[] stages = {"Fire pillars", "No pillars, bigger blaze"};
-            int st = Math.max(0, Math.min(1, cfg.blazeStage));
-            rows.add(new ValueRow("Stage", stages[st], st != 0, () -> { cfg.blazeStage = 1 - st; cfg.save(); },
-                    () -> { cfg.blazeStage = 1 - st; cfg.save(); }));
+            String[] stages = {"Fire pillars", "No pillars, bigger blaze", "Pillars explode in turn"};
+            int st = Math.max(0, Math.min(2, cfg.blazeStage));
+            rows.add(new ValueRow("Stage", stages[st], st != 0, () -> { cfg.blazeStage = (st + 1) % 3; cfg.save(); },
+                    () -> { cfg.blazeStage = (st + 2) % 3; cfg.save(); }));
+            if (st == 2) rows.add(new NoticeRow("Each pillar counts down and blows up, the second a little later, then the blaze."));
             rows.add(toggle("Land the hits yourself (left click)", cfg.blazeClick, () -> cfg.blazeClick = !cfg.blazeClick, cfg));
             if (cfg.blazeClick) rows.add(new NoticeRow("Each hit waits for your click; leave it and the fight carries on by itself. The drop is the same either way."));
             rows.add(new SectionRow("The endings"));

@@ -167,6 +167,7 @@ public class EruptionScreen extends Screen implements ChopScene.Canvas, Cutscene
         textures();
         EruptionScene.nthNote = nth;
         ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
+        com.sbcs.render.Punch.set(t >= EruptionTimeline.REVEAL, tl.drop().win(), tl.price());
         EruptionScene.showBanner = SbcsClient.config == null || SbcsClient.config.lavaBanner;
         EruptionScene.rasterScale = Math.max(1, Math.min(2, Minecraft.getInstance().getWindow().getGuiScale()));
         this.g = g;

@@ -47,6 +47,8 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
     /** The menu's "Land the hits yourself": each hit holds the scene until a left click, or {@link #AUTO_HIT_MS}. */
     private final boolean clickHits = com.sbcs.SbcsClient.config != null && com.sbcs.SbcsClient.config.blazeClick;
     private final boolean noPillars = com.sbcs.SbcsClient.config != null && com.sbcs.SbcsClient.config.blazeStage == 1;
+    /** The "Pillars explode" stage: each pillar counts down and blows up in turn, then the blaze. */
+    private final boolean countdown = com.sbcs.SbcsClient.config != null && com.sbcs.SbcsClient.config.blazeStage == 2;
     static final long AUTO_HIT_MS = 1500, EARLY_CLICK_MS = 300;
     private boolean attackWasDown;
     private long releasedHold = -1, clickedAt = -1;
@@ -75,7 +77,7 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
         this.test = test;
         this.seed = System.nanoTime() ^ clock.openedAt();
         this.tl = new HellionTimeline(this.drop, seed);
-        this.cues = HellionSound.schedule(tl);
+        this.cues = HellionSound.schedule(tl, countdown);
         requestPrice();
         if (!test && this.drop.win()) tier = com.sbcs.detect.HellionDrops.freshTier();
         count();
@@ -124,7 +126,7 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
         }
         drop = d;
         tl = new HellionTimeline(drop, seed);
-        cues = HellionSound.schedule(tl);
+        cues = HellionSound.schedule(tl, countdown);
         // The cues already played are the same in every schedule; carry on after them.
         cueAt = 0;
         while (cueAt < cues.size() && cues.get(cueAt).at <= lastT) cueAt++;
@@ -175,8 +177,10 @@ public class HellionScreen extends Screen implements ChopScene.Canvas, Cutscene 
         HellionScene.bannerWord = tier;
         HellionScene.nthNote = nth;
         ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
+        com.sbcs.render.Punch.set(t >= HellionTimeline.REVEAL, tl.drop().win(), tl.price());
         HellionScene.showBanner = SbcsClient.config == null || SbcsClient.config.blazeBanner;
         HellionScene.noPillars = noPillars;
+        HellionScene.countdown = countdown;
         HellionScene.waitingForHit = clickHits && clock.held();
         this.g = g;
         PILLARS.begin(width, height, HellionScene.unitFor(height));

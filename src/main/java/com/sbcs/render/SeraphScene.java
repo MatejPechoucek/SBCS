@@ -250,7 +250,7 @@ public final class SeraphScene {
         if (e == Ending.JACKPOT) {
             long since = t - SeraphTimeline.SHOCK;
             if (since >= 0 && since < 450) {
-                float amp = ChopScene.calm ? 0f : h * 0.014f * (1f - since / 450f);
+                float amp = ChopScene.calm ? 0f : h * 0.014f * Punch.shake() * (1f - since / 450f);
                 ChopScene.sx0 += amp * (float) Math.sin(since * 0.13);
                 ChopScene.sy0 += amp * (float) Math.cos(since * 0.17);
             }

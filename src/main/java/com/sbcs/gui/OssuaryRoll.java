@@ -186,6 +186,13 @@ public final class OssuaryRoll implements OssuaryScene.Canvas {
         OssuaryScene.dryNote = dry;
         OssuaryScene.showBanner = c == null || c.dungeonBanner;
         ChopScene.calm = (c != null && c.calmEffects) || com.sbcs.Safety.slow();
+        com.sbcs.render.Punch.setLevel(t >= tl.reveal(), switch (tl.band()) {
+            case BUST -> 0f;
+            case BLUE -> 0.2f;
+            case PURPLE -> 0.45f;
+            case GOLD -> 0.7f;
+            case JACKPOT -> 1f;
+        });
         this.g = g;
         // The menu underneath is covered whole until the very end: its items would give the roll away.
         float cover = 1f - OssuaryTimeline.ease((t - (tl.total() - OssuaryTimeline.FADE_MS)) / (float) OssuaryTimeline.FADE_MS);

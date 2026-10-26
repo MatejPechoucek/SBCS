@@ -42,9 +42,26 @@ public final class HellionSound {
     private static final double ROD_PASS_MS = 250.0;
 
     public static List<Cue> schedule(HellionTimeline tl) {
+        return schedule(tl, false);
+    }
+
+    /** @param countdown the "Pillars explode" stage: each pillar's countdown ticks, then it blows up. */
+    public static List<Cue> schedule(HellionTimeline tl, boolean countdown) {
         long seed = tl.seed();
         long R = HellionTimeline.REVEAL;
         List<Cue> out = new ArrayList<>();
+        if (countdown) {
+            long from = HellionTimeline.APPEAR + 400;
+            for (int p = 0; p < HellionTimeline.PILLAR_BLOW.length; p++) {
+                long blow = HellionTimeline.PILLAR_BLOW[p];
+                // A tick a second, then four in the last one, climbing.
+                for (long at = blow - 1000 * ((blow - from) / 1000); at < blow - 999; at += 1000) {
+                    if (at >= from) out.add(new Cue(at, false, Voices.hellionCountTick(0, p)));
+                }
+                for (int i = 1; i < 5; i++) out.add(new Cue(blow - 1000 + i * 200, false, Voices.hellionCountTick(i, p)));
+                out.add(new Cue(blow, false, Voices.hellionPillarBlast(p, seed + 1000 + p)));
+            }
+        }
 
         // ---- before the reveal: identical for every drop
         out.add(new Cue(0, false, Voices.hellionOpen(seed)));

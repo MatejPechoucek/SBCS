@@ -62,10 +62,15 @@ public final class HellionScene {
         float clang = HellionTimeline.clang(t);
 
         if (!noPillars) pillars(c, pillars, tl, t, w, h, att, clang, master);
-        else if (t < HellionTimeline.REVEAL + 160) {
+        long lastBlow = HellionTimeline.PILLAR_BLOW[HellionTimeline.PILLAR_BLOW.length - 1];
+        if (noPillars && t < HellionTimeline.REVEAL + 160) {
             // No pillars: the fight's nametag hangs over the blaze instead.
             ChopScene.project(0f, HEAD_Y + 9f, 0f);
-            tag(c, ChopScene.P[0], ChopScene.P[1], t, clang, master * ease((t - 300) / 300f), w, h);
+            tag(c, ChopScene.P[0], ChopScene.P[1], t, HellionTimeline.REVEAL, clang, master * ease((t - 300) / 300f), w, h);
+        } else if (countdown && !noPillars && t >= lastBlow && t < HellionTimeline.REVEAL + 160) {
+            // Both pillars gone: the blaze's own countdown is the last one.
+            ChopScene.project(0f, HEAD_Y + 9f, 0f);
+            tag(c, ChopScene.P[0], ChopScene.P[1], t, HellionTimeline.REVEAL, clang, master * ease((t - lastBlow - 250) / 300f), w, h);
         }
 
         // A glow of the shield's colour behind the blaze.
@@ -90,6 +95,11 @@ public final class HellionScene {
 
     /** The menu's stage: no fire pillars, and the blaze bigger in their place. Set by the screen. */
     public static boolean noPillars;
+    /**
+     * The menu's other stage: the pillars each count down and explode in turn, then the blaze
+     * ({@link HellionTimeline#PILLAR_BLOW}). Set by the screen.
+     */
+    public static boolean countdown;
     /** The scene stands waiting for the player's click to land the next hit. Set by the screen. */
     public static boolean waitingForHit;
 
@@ -125,6 +135,15 @@ public final class HellionScene {
         ChopScene.fz = 0f;
         ChopScene.sx0 = w / 2f;
         ChopScene.sy0 = h * (noPillars ? 0.43f : 0.47f);
+        if (countdown && !noPillars && !ChopScene.calm) {
+            for (long at : HellionTimeline.PILLAR_BLOW) {
+                long since = t - at;
+                if (since < 0 || since >= 520) continue;
+                float amp = h * 0.013f * Punch.shake() * (1f - since / 520f);
+                ChopScene.sx0 += amp * (float) Math.sin(since * 0.13);
+                ChopScene.sy0 += amp * (float) Math.cos(since * 0.17);
+            }
+        }
         if (tl.rolls()) {
             // As the die stops, the camera leans over it and closes in - after the reveal, so it tells
             // nothing. The High Class one leans in through its bullet time, and further.
@@ -156,7 +175,7 @@ public final class HellionScene {
                 // The jackpot hits: the screen shakes for a moment.
                 long since = t - tl.jackpot();
                 if (since >= 0 && since < 420) {
-                    float amp = ChopScene.calm ? 0f : h * 0.014f * (1f - since / 420f);
+                    float amp = ChopScene.calm ? 0f : h * 0.014f * Punch.shake() * (1f - since / 420f);
                     ChopScene.sx0 += amp * (float) Math.sin(since * 0.13);
                     ChopScene.sy0 += amp * (float) Math.cos(since * 0.17);
                 }
@@ -948,8 +967,21 @@ public final class HellionScene {
         long pt = tl.phys(t);
         float rise = ease(Math.min(1f, (t - 150) / 550f));
         if (rise <= 0f) return;
-        Random r = new Random(tl.seed() * 13 + 5);
+        float shatterAll = shatter, burnAll = burn, erAll = er;
         for (int side = -1; side <= 1; side += 2) {
+            // Each its own: one pillar gone must not move the other's embers.
+            Random r = new Random(tl.seed() * 13 + 5 + (side < 0 ? 0 : 7919));
+            shatter = shatterAll;
+            burn = burnAll;
+            er = erAll;
+            long blowAt = HellionTimeline.PILLAR_BLOW[side < 0 ? 0 : 1];
+            if (countdown) {
+                // Its countdown has run out: it blows apart, whatever the drop, and is gone.
+                if (t >= blowAt + BLOW_MS) continue;
+                shatter = t >= blowAt ? (t - blowAt) / (float) BLOW_MS : -1f;
+                burn = -1f;
+                er = 0f;
+            }
             // Along the camera's own sideways (its resting yaw, 26 degrees), so both stand level on
             // screen - square across the world x, the far one rose up the screen as the gap widened.
             float px = side * pillarX(w, h) * pillarPull * PILLAR_COS, pz = side * pillarX(w, h) * pillarPull * PILLAR_SIN;
@@ -965,9 +997,11 @@ public final class HellionScene {
                     if (shatter >= 0f) {
                         float k = shatter * 0.9f;
                         float vx = side * (6f + r.nextFloat() * 10f), vy = 10f + r.nextFloat() * 14f, vz = (r.nextFloat() - 0.5f) * 10f;
-                        x += vx * k * 3f;
-                        y += vy * k * 3f - 60f * k * k;
-                        z += vz * k * 3f;
+                        // A pillar whose countdown ran out is blown apart, not knocked over: thrown hard at once.
+                        float fling = countdown ? 7f * (float) Math.pow(k, 0.6) / Math.max(0.05f, k) : 3f;
+                        x += vx * k * fling;
+                        y += vy * k * fling - 60f * k * k;
+                        z += vz * k * fling;
                         ax = (r.nextFloat() - 0.5f) * 9f * k;
                         az = (r.nextFloat() - 0.5f) * 9f * k;
                         a = 1f - ease((shatter - 0.4f) / 0.5f);
@@ -994,6 +1028,7 @@ public final class HellionScene {
             float fireBase = burn >= 0f ? top - BLOCK * 8f * ease(burn) * 0.9f : top;
             float fireH = (burn >= 0f ? 1f - ease((t - snuffAt) / 110f) : 1f) * (shatter >= 0f ? 1f - ease(shatter / 0.25f) : 1f);
             if (burn >= 0f && t >= snuffAt && t < snuffAt + 900) snuffPuff(embers, px, fireBase, pz, t - snuffAt, side, h, alpha);
+            if (countdown && t >= blowAt) blast(c, embers, px, pz, base, top, t - blowAt, att, side, h, alpha);
             if (fireH > 0.02f) {
                 // Vanilla's own size; only a small lick upwards on each clang (no taller).
                 float grow = (1f + 0.1f * clang + 2.2f * er) * fireH, wide = 1f + 0.35f * er;
@@ -1037,19 +1072,81 @@ public final class HellionScene {
             }
 
             // The nametag, as the fight shows it: seconds left, then hits left.
-            if (t < HellionTimeline.REVEAL + 160 && rise > 0.9f) {
+            long until = countdown ? blowAt : HellionTimeline.REVEAL;
+            if (t < until + (countdown ? 0 : 160) && rise > 0.9f) {
                 ChopScene.project(px, top + BLOCK * 3.4f, pz);
-                tag(c, ChopScene.P[0], ChopScene.P[1], t, clang, alpha, w, h);
+                tag(c, ChopScene.P[0], ChopScene.P[1], t, until, clang, alpha, w, h);
             }
         }
     }
 
-    /** The fight's nametag, "6s 8 Hits", centred on (x, y) and kept on the screen. */
-    static void tag(ChopScene.Canvas c, float x, float y, long t, float clang, float alpha, int w, int h) {
+    /** How long a pillar takes to blow apart and be gone, in the "Pillars explode" stage. */
+    public static final long BLOW_MS = 1100;
+
+    /**
+     * A pillar blowing up: a flash of its fire, a ring of fire squares thrown out, burning chunks arcing off
+     * and smoke rolling up after. Drawn on the pixel layer, the same on every run.
+     */
+    static void blast(ChopScene.Canvas c, CrystalVeins.Fill layer, float px, float pz, float base, float top, long since,
+                      Attunement att, int side, int h, float alpha) {
+        if (since >= 1600) return;
+        float u = unitFor(h);
+        float midY = (base + top) / 2f;
+        ChopScene.project(px, midY, pz);
+        float ox = ChopScene.P[0], oy = ChopScene.P[1];
+        // The flash: hot white at the core, the fire's colour round it.
+        float f = (float) Math.exp(-since / 180.0);
+        ChopScene.glow(c, ox, oy, BLOCK * 16f * ChopScene.size * (0.6f + 0.6f * (1f - f)), fireTint(att), 0.9f * f * alpha);
+        ChopScene.glow(c, ox, oy, BLOCK * 7f * ChopScene.size, 0xFFF0C0, 0.8f * f * alpha);
+        ChopScene.light(px, midY, pz, 46f, 0xFF8A2A, 1.2f * f);
+        Random r = new Random(side * 977L + 41);
+        float sec = since / 1000f;
+        // The ring: squares flung straight out, slowing.
+        int n = Punch.count(34);
+        for (int i = 0; i < n; i++) {
+            double a = i * Math.PI * 2 / n + r.nextFloat() * 0.2f;
+            float dist = (1f - (float) Math.exp(-sec * 5.0)) * h * (0.16f + 0.06f * r.nextFloat());
+            float x = ox + (float) Math.cos(a) * dist, y = oy + (float) Math.sin(a) * dist * 0.75f;
+            float life = 1f - Math.min(1f, sec / 0.7f);
+            if (life <= 0f) continue;
+            int rgb = mix(0xFFF0A0, fireTint(att), 1f - life);
+            int s = 1 + (life > 0.5f ? 1 : 0);
+            layer.fill(Math.round(x / u) * u, Math.round(y / u) * u, u * s, u * s, (Math.round(alpha * life * 255) << 24) | rgb);
+        }
+        // Burning chunks: up and out to its own side, falling, trailing.
+        int m = Punch.count(16);
+        for (int i = 0; i < m; i++) {
+            float vx = (side * (0.4f + r.nextFloat()) + (r.nextFloat() - 0.5f) * 0.9f) * h * 0.55f;
+            float vy = -(0.45f + r.nextFloat() * 0.7f) * h * 0.9f;
+            float life = 1f - Math.min(1f, sec / (0.9f + 0.5f * r.nextFloat()));
+            if (life <= 0f) continue;
+            for (int k = 0; k < 3; k++) {
+                float tt = Math.max(0f, sec - k * 0.03f);
+                float x = ox + vx * tt, y = oy + vy * tt + h * 1.6f * tt * tt;
+                int rgb = k == 0 ? 0xFFD060 : k == 1 ? 0xFF7A1A : 0x8A2A10;
+                layer.fill(Math.round(x / u) * u, Math.round(y / u) * u, u * (k == 0 ? 2 : 1), u * (k == 0 ? 2 : 1),
+                        (Math.round(alpha * life * (1f - 0.3f * k) * 255) << 24) | rgb);
+            }
+        }
+        // Smoke, rolling up where it stood.
+        for (int i = 0; i < 18; i++) {
+            float ph = r.nextFloat() * 0.4f;
+            float q = Math.max(0f, Math.min(1f, (sec - 0.1f - ph) / 1.1f));
+            if (q <= 0f || q >= 1f) continue;
+            float x = ox + (r.nextFloat() - 0.5f) * BLOCK * ChopScene.size * (3f + 5f * q);
+            float y = oy - q * h * 0.22f - r.nextFloat() * BLOCK * ChopScene.size * 2f;
+            int s = 1 + (int) (q * 3f);
+            layer.fill(Math.round(x / u) * u, Math.round(y / u) * u, u * s, u * s,
+                    (Math.round(alpha * (1f - q) * 0.6f * 255) << 24) | (i % 3 == 0 ? 0x3A3638 : 0x6A6668));
+        }
+    }
+
+    /** The fight's nametag, "6s 8 Hits", counting down to {@code until}, centred on (x, y) and kept on the screen. */
+    static void tag(ChopScene.Canvas c, float x, float y, long t, long until, float clang, float alpha, int w, int h) {
         if (alpha <= 0.02f) return;
         // The last second in tenths, red, landing on 0.0 on the reveal frame - whole seconds rounded up
         // never reached 0 (the review, H3).
-        long ms = Math.max(0, HellionTimeline.REVEAL - t);
+        long ms = Math.max(0, until - t);
         boolean last = ms < 1000;
         int steps = Math.max(0, HellionTimeline.step(t) + 1);
         int hits = Math.max(0, 8 - steps / 2);

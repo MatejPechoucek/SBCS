@@ -227,8 +227,8 @@ public final class ChopScene {
         float[] f = tl.focus(t);
         fx = f[0]; fy = f[1]; fz = f[2];
         float[] shake = calm ? new float[]{0f, 0f} : tl.shake(t);
-        sx0 = w / 2f + shake[0];
-        sy0 = h * 0.5f + shake[1];
+        sx0 = w / 2f + shake[0] * Punch.shake();
+        sy0 = h * 0.5f + shake[1] * Punch.shake();
     }
 
     static void project(float x, float y, float z) {
@@ -1172,7 +1172,8 @@ public final class ChopScene {
     // ================================================================== helpers
 
     static void glow(Canvas c, float x, float y, float d, int rgb, float a) {
-        a *= sceneAlpha;
+        a *= sceneAlpha * Punch.glowAlpha();
+        d *= Punch.glowSize();
         if (calm) a *= 0.55f;
         if (a <= 0.01f || d < 1f) return;
         c.sprite(ChopArt.TEX_GLOW, x, y, d, d, 0f, alpha(Math.min(1f, a)) | (rgb & 0xFFFFFF));

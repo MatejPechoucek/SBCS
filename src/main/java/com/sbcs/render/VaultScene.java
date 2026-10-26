@@ -120,7 +120,7 @@ public final class VaultScene {
         ChopScene.fx = 0f;
         ChopScene.fy = 0f;
         ChopScene.fz = 0f;
-        float s = ChopScene.calm ? 0f : tl.shake(t) * h;
+        float s = ChopScene.calm ? 0f : tl.shake(t) * h * Punch.shake();
         ChopScene.sx0 = w / 2f + s * (float) Math.sin(t * 0.13);
         ChopScene.sy0 = h * 0.5f + s * (float) Math.cos(t * 0.17);
     }

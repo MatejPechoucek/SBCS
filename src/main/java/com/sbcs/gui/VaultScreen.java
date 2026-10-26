@@ -114,6 +114,7 @@ public class VaultScreen extends Screen implements ChopScene.Canvas, Cutscene {
         VaultScene.bustNote = dry;
         VaultScene.showBanner = SbcsClient.config == null || SbcsClient.config.nucleusBanner;
         ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
+        com.sbcs.render.Punch.set(t >= VaultTimeline.REVEAL, tl.prize().win(), tl.price());
         this.g = g;
         LAYER.begin(width, height, VaultScene.unitFor(height));
         boolean[] flushed = {false};

@@ -192,7 +192,7 @@ public final class OssuaryScene {
         ChopScene.size *= 1f - 0.16f * back;
         float gone = going(tl, t);
         ChopScene.size *= 1f - 0.97f * gone * gone;
-        float s = ChopScene.calm ? 0f : tl.shake(t) * h;
+        float s = ChopScene.calm ? 0f : tl.shake(t) * h * Punch.shake();
         ChopScene.sx0 = w / 2f + s * (float) Math.sin(t * 0.13);
         ChopScene.sy0 = h * (0.5f - 0.07f * back) + s * (float) Math.cos(t * 0.17);
     }
@@ -946,7 +946,7 @@ public final class OssuaryScene {
         // Gold and up: a fountain of coins and sparks out of the slot.
         if (p >= 3 && !tl.frozen(t)) {
             long et = tl.phys(t) - r;
-            int n = ChopScene.calm ? 24 : 60;
+            int n = ChopScene.calm ? 24 : Punch.count(60);
             Random cr = new Random(tl.seed() * 3 + 1);
             for (int k = 0; k < n; k++) {
                 float delay = cr.nextFloat() * 1400f, life = 900f + cr.nextFloat() * 700f;
@@ -1199,7 +1199,7 @@ public final class OssuaryScene {
         Random rng = new Random(tl.seed() * 13 + 5);
         int floor = Math.max(1, tl.floor().number());
         int col = tint(tl.outcomeRgb());
-        int n = ChopScene.calm ? 30 : 64;
+        int n = ChopScene.calm ? 30 : Punch.count(64);
         for (int k = 0; k < n; k++) {
             float x0 = rng.nextFloat() * w, delay = rng.nextFloat() * 1600f, life = 2200f + rng.nextFloat() * 1600f;
             float f = (et - delay) / life;

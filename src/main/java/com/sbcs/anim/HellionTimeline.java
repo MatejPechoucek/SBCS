@@ -84,6 +84,11 @@ public final class HellionTimeline {
     public static final long HANG = STEPS[STEPS.length - 1] + Math.round(420f * Math.pow(0.91f, STEPS.length - 1));
     /** The answer. Nothing before this may depend on the drop. */
     public static final long REVEAL = 4800;
+    /**
+     * The "Pillars explode" stage (2026-10-24, Matej): the left pillar's countdown runs out here, the right
+     * one's a little later, and then the blaze's at the reveal. The same on every run.
+     */
+    public static final long[] PILLAR_BLOW = {2300, 3600};
     /** A bust is over by this - short after the reveal, so the player is back to the next boss. */
     public static final long BUST_END = REVEAL + 900;
     /** The drop out of the core, up to where it stands. */
