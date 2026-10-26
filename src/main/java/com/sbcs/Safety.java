@@ -85,6 +85,9 @@ public final class Safety {
             case "diana" -> "The Chopping Block";
             case "blaze" -> "Hellion";
             case "seraph" -> "The Seraph's Glyph";
+            case "zombie" -> "Exhumed";
+            case "spider" -> "The Brood";
+            case "slayer" -> "The slayer quest tracker";
             case "lava" -> "Eruption";
             case "shark" -> "Fin";
             case "ghost" -> "Wisp";

@@ -502,6 +502,12 @@ public final class SbcsAudio {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.blazeVolume);
     }
 
+    /** The Revenant's or the Tarantula's cues ("zombie" / "spider"), on that slayer's own volume. */
+    public static void playSlayer(String source, Voice[] voices) {
+        int pct = SbcsClient.config == null ? 100 : "spider".equals(source) ? SbcsClient.config.spiderVolume : SbcsClient.config.zombieVolume;
+        playSlayer(voices, pct);
+    }
+
     /** The Seraph's cues, on its own volume. */
     public static void playSeraph(Voice[] voices) {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.seraphVolume);

@@ -60,6 +60,12 @@ public final class HellionWatcher {
         this.listener = listener;
     }
 
+    /**
+     * The quest's boss (the client's, shared by every slayer watcher). A drop line during another boss's quest is never
+     * the Demonlord's: a Paragon Shard off a Revenant Horror played Hellion (Matej, 2026-10-25).
+     */
+    public SlayerQuest quest = new SlayerQuest();
+
     static final String NAME = "Inferno Demonlord IV";
     private static final double SCAN_RADIUS = 48, CLAIM_REACH = 16,
             // A demon phase comes back where it left, a few blocks off; neighbouring players' bosses stood at 19-26
@@ -119,6 +125,7 @@ public final class HellionWatcher {
         if (text == null) return;
         String s = DianaWatcher.plain(text).trim();
         if (ChatLines.fromPlayer(s)) return;
+        quest.onChatLine(s, now); // idempotent: the client feeds it too, so a replay needs nothing else
 
         if (s.startsWith("SLAYER BOSS!") && s.contains(NAME) && s.contains("spawned")) {
             spawnLineAt = now;
@@ -144,6 +151,10 @@ public final class HellionWatcher {
         }
 
         Drop d = HellionDrops.of(s);
+        if (d != null && quest.otherThan(SlayerQuest.Boss.INFERNO, now)) {
+            log.note("§8Blaze: drop line during a " + quest.boss(now) + " quest - not the Demonlord's (\"" + s + "\")");
+            return;
+        }
         if (d != null) {
             boolean better = bestDrop == null || bestDrop == Drop.BUST || (d != Drop.BUST && d.ordinal() > bestDrop.ordinal());
             if (better || now - bestAt > DROP_WAIT_MS) {
@@ -159,6 +170,15 @@ public final class HellionWatcher {
             return;
         }
 
+        if (s.startsWith("SLAYER QUEST COMPLETE!") && quest.otherThan(SlayerQuest.Boss.INFERNO, now)) {
+            if (pendingSince >= 0) {
+                pendingSince = -1;
+                listener.resolve(Drop.BUST, s);
+            }
+            forget();
+            questStartedAt = -1;
+            return;
+        }
         if (s.startsWith("SLAYER QUEST COMPLETE!")) {
             if (pendingSince >= 0) {
                 pendingSince = -1;
@@ -169,11 +189,16 @@ public final class HellionWatcher {
                 Drop known = bestDrop != null && now - bestAt <= DROP_WAIT_MS ? bestDrop : Drop.BUST;
                 log.note("§aBlaze: quest complete - your Demonlord died out of sight; " + (known.win() ? known.title : "bust"));
                 listener.killKnown(known, bestLine);
-            } else if (!killedThisQuest && bestDrop != null && bestDrop.win() && now - bestAt <= DROP_WAIT_MS) {
+            } else if (!killedThisQuest && bestDrop != null && bestDrop.win() && now - bestAt <= DROP_WAIT_MS
+                    && (quest.boss(now) == SlayerQuest.Boss.INFERNO || (quest.boss(now) == null && bestDrop != Drop.PARAGON))) {
+                // A Demonlord quest, or no quest seen and a drop no other boss gives (the Paragon Shard drops from
+                // every slayer, so it needs the quest - the Revenant's Paragon that played the blaze, 2026-10-25).
                 // Never claimed (it spawned too far off, or without a line), but the drop line is our own - a slayer
                 // drop in brackets only ever names the player's own loot. The win still plays.
                 log.note("§aBlaze: quest complete with " + bestDrop.title + " - your Demonlord was never claimed; playing it");
                 listener.killKnown(bestDrop, bestLine);
+            } else if (!killedThisQuest && bestDrop != null && bestDrop.win() && now - bestAt <= DROP_WAIT_MS) {
+                log.note("§8Blaze: quest complete with " + bestDrop.title + ", but nothing says it was a Demonlord quest - not played");
             }
             forget();
             questStartedAt = -1;

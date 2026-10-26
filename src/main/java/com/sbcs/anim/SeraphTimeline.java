@@ -30,7 +30,7 @@ public final class SeraphTimeline {
     }
 
     /** How a win ends. */
-    public enum Ending { BUST, PLAIN, CHALICE, ESPRESSO, SKIN, DICE, JACKPOT, EYE, DRAGON }
+    public enum Ending { BUST, PLAIN, CHALICE, ESPRESSO, SKIN, DICE, JACKPOT, EYE, DRAGON, ALTAR, WARP, RUNE, SHARD, IDOL }
 
     /**
      * What dropped. Odds and prices from the Hypixel SkyBlock wiki (hypixelskyblock.minecraft.wiki) and
@@ -43,16 +43,16 @@ public final class SeraphTimeline {
      */
     public enum Drop {
         BUST("", 0, Glass.BLACK, Ending.BUST, null, null, null, false, 0),
-        ETHERWARP_MERGER("Etherwarp Merger", 0xAA00AA, Glass.WHITE, Ending.PLAIN, "ETHERWARP_MERGER", "ETHERWARP_MERGER", "Etherwarp Merger", true, 236),
-        SUMMONING_EYE("Summoning Eye", 0xAA00AA, Glass.LIGHT_BLUE, Ending.PLAIN, "SUMMONING_EYE", "SUMMONING_EYE", "ender_eye", false, 177),
-        PARAGON("Paragon Shard", 0xFF55FF, Glass.LIGHT_BLUE, Ending.PLAIN, "SHARD_PARAGON", "SHARD_PARAGON", "Paragon Shard", true, 400),
-        ENCHANT_RUNE("Enchant Rune I", 0xAAAAAA, Glass.LIGHT_BLUE, Ending.PLAIN, "RUNE_ENCHANT", "ENCHANT_RUNE", "Enchant Rune I", true, 2157),
+        ETHERWARP_MERGER("Etherwarp Merger", 0xAA00AA, Glass.WHITE, Ending.WARP, "ETHERWARP_MERGER", "ETHERWARP_MERGER", "Etherwarp Merger", true, 236),
+        SUMMONING_EYE("Summoning Eye", 0xAA00AA, Glass.LIGHT_BLUE, Ending.ALTAR, "SUMMONING_EYE", "SUMMONING_EYE", "ender_eye", false, 177),
+        PARAGON("Paragon Shard", 0xFF55FF, Glass.LIGHT_BLUE, Ending.SHARD, "SHARD_PARAGON", "SHARD_PARAGON", "Paragon Shard", true, 400),
+        ENCHANT_RUNE("Enchant Rune I", 0xAAAAAA, Glass.LIGHT_BLUE, Ending.RUNE, "RUNE_ENCHANT", "ENCHANT_RUNE", "Enchant Rune I", true, 2157),
         BLOOD_CHALICE("Handy Blood Chalice", 0xFFFFFF, Glass.WHITE, Ending.CHALICE, "HANDY_BLOOD_CHALICE", "HANDY_BLOOD_CHALICE", "Handy Blood Chalice", true, 567),
         ESPRESSO("Pocket Espresso Machine", 0xFFFFFF, Glass.WHITE, Ending.ESPRESSO, "POCKET_ESPRESSO_MACHINE", "POCKET_ESPRESSO_MACHINE", "Pocket Espresso Machine", true, 258),
         SINFUL_DICE("Sinful Dice", 0xAA00AA, Glass.WHITE, Ending.DICE, "SINFUL_DICE", "SINFUL_DICE", "Sinful Dice", true, 218),
         VOID_SKIN("Void Conqueror Enderman Skin", 0xAA00AA, Glass.WHITE, Ending.SKIN, "PET_SKIN_ENDERMAN_SLAYER", "PET_SKIN_ENDERMAN_SLAYER", "Void Conqueror Enderman Skin", true, 604),
         ARTIFACT_UPGRADE("Exceedingly Rare Ender Artifact Upgrade", 0xFFAA00, Glass.MAGENTA, Ending.JACKPOT, "EXCEEDINGLY_RARE_ENDER_ARTIFACT_UPGRADER", "EXCEEDINGLY_RARE_ENDER_ARTIFACT_UPGRADER", "Exceedingly Rare Ender Artifact Upgrade", true, 3542),
-        END_STONE_IDOL("End Stone Idol", 0xFFAA00, Glass.MAGENTA, Ending.JACKPOT, "ENDSTONE_IDOL", "ENDSTONE_IDOL", "End Stone Idol", true, 7085),
+        END_STONE_IDOL("End Stone Idol", 0xFFAA00, Glass.MAGENTA, Ending.IDOL, "ENDSTONE_IDOL", "ENDSTONE_IDOL", "End Stone Idol", true, 7085),
         JUDGEMENT_CORE("Judgement Core", 0xFFAA00, Glass.PURPLE, Ending.EYE, "JUDGEMENT_CORE", "JUDGEMENT_CORE", "Judgement Core", true, 1771),
         BYZANTIUM_DYE("Byzantium Dye", 0xAA00AA, Glass.PURPLE, Ending.DRAGON, "DYE_BYZANTIUM", "DYE_BYZANTIUM", "Byzantium Dye", true, 500_000);
 
@@ -132,6 +132,26 @@ public final class SeraphTimeline {
             D_POOL_END = D_POOL + 2600, D_BURST = D_BREATH_END + 900, D_RISE = D_BURST + 100;
     /** Byzantium, the dye's own purple. */
     public static final int BYZANTIUM = 0x702963;
+    // The Summoning Eye: "The Summoning" (2026-10-26). Eight End Portal frames rise round the glyph's spot as the
+    // altar in the Dragon's Nest; seven eyes click in, the dropped eye sets into the eighth, the portal opens for a
+    // breath with the dragon's roar far off, and the beam takes the eye back out.
+    public static final long A_FRAMES = REVEAL + 900, A_EYES = REVEAL + 1700, A_EYE_STEP = 190, A_SEAT = A_EYES + 7 * A_EYE_STEP + 300,
+            A_SEATED = A_SEAT + 450, A_OPEN = A_SEATED + 100, A_CLOSE = A_OPEN + 1500, A_LIFT = A_CLOSE - 200;
+    public static final int A_FRAMES_N = 8;
+    // The Etherwarp Merger: "Etherwarp" - the drop warps round the arena the way the ability does, a target block lit
+    // where it will land, then it is there.
+    public static final long W_FROM = REVEAL + 1300, W_STEP = 620, W_AIM = 330;
+    public static final int W_JUMPS = 4;
+    // The Enchant Rune: "The Runecraft" - an enchanting table rises where the glyph stood, the table's own glyphs
+    // stream into it off the fallen Seraph and the crystals, and the rune is written out of them.
+    public static final long R_TABLE = REVEAL + 700, R_TABLE_UP = R_TABLE + 500, R_STREAM = REVEAL + 1100, R_STREAM_END = REVEAL + 3300,
+            R_FORM = REVEAL + 3400;
+    // The Paragon Shard: "Paragon" - both End Crystals crack and burst, and every shard of them spirals in along
+    // their beams and is pressed into one.
+    public static final long S_CRACK = REVEAL + 500, S_BURST = REVEAL + 1300, S_FUSE = REVEAL + 2700;
+    // The End Stone Idol: "Set in Stone" - the Seraph does not fall. It turns to end stone from the feet up, stands
+    // as a statue, cracks, and bursts; the idol is what was inside it.
+    public static final long I_STONE = REVEAL + 300, I_STONED = REVEAL + 1900, I_CRACK = REVEAL + 2300, I_SHATTER = REVEAL + 3300;
     // The skin.
     public static final long HEAD_OFF = DEATH + 250, HEAD_LANDS = DEATH + 900, SKIN_DONE = DEATH + 2100;
     // The dice: thrown from where the beacon stood.
@@ -170,6 +190,11 @@ public final class SeraphTimeline {
             case JACKPOT -> SHOCK + 600;
             case EYE -> E_RISE + 700;
             case DRAGON -> D_RISE + 1000;
+            case ALTAR -> A_LIFT + 800;
+            case WARP -> W_FROM + W_JUMPS * W_STEP + 250;
+            case RUNE -> R_FORM + 900;
+            case SHARD -> S_FUSE + 600;
+            case IDOL -> I_SHATTER + 900;
         };
     }
 
@@ -182,6 +207,9 @@ public final class SeraphTimeline {
             case JACKPOT -> arrive() + 5500;
             case EYE -> arrive() + 4500;
             case DRAGON -> arrive() + 7500;
+            case ALTAR, RUNE -> arrive() + 3400;
+            case WARP, SHARD -> arrive() + 3200;
+            case IDOL -> arrive() + 5000;
         };
     }
 
@@ -281,6 +309,11 @@ public final class SeraphTimeline {
         // No glyph, no beam: the Eye's bursts off the core, the Dragon's in the paint.
         if (drop.ending == Ending.EYE) return up * (1f - ease((t - E_BURST) / 250f));
         if (drop.ending == Ending.DRAGON) return up * (1f - ease((t - D_BURST) / 250f));
+        // Out of the way of what comes next: the statue behind it, the altar round it, the table in its place.
+        if (drop.ending == Ending.IDOL) return up * (1f - ease((t - I_STONE) / 400f));
+        if (drop.ending == Ending.ALTAR) return up * (1f - ease((t - A_FRAMES - 200) / 500f)) + up * 0.9f * altarBeam(t);
+        if (drop.ending == Ending.RUNE) return up * (1f - ease((t - R_TABLE) / 400f));
+        if (drop.ending == Ending.WARP) return up * (1f - ease((t - W_FROM) / 300f));
         return up;
     }
 
@@ -306,7 +339,7 @@ public final class SeraphTimeline {
     /** The Seraph's death fall, 0..1 (vanilla: sqrt of the death clock, 90 degrees over a second); -1 if not dying. */
     public float death(long t) {
         if (!drop.win() || t < DEATH) return -1f;
-        if (drop.ending == Ending.JACKPOT || drop.ending == Ending.EYE || drop.ending == Ending.DRAGON) return -1f;
+        if (drop.ending == Ending.JACKPOT || drop.ending == Ending.EYE || drop.ending == Ending.DRAGON || drop.ending == Ending.IDOL) return -1f;
         float f = (float) Math.sqrt(Math.max(0f, (t - DEATH) / 1000f * 1.6f));
         return Math.min(1f, f);
     }
@@ -320,14 +353,15 @@ public final class SeraphTimeline {
             case JACKPOT -> t < VANISH;
             case EYE -> t < E_PULLED;
             case DRAGON -> t < D_LAND;
+            case IDOL -> t < I_SHATTER;
             default -> t < POOF;
         };
     }
 
     /** The crystals blowing up: 0..1, -1 before (on the jackpot they go with the shock, on the judgement never). */
     public float crystalsBlow(long t) {
-        if (!drop.win() || drop.ending == Ending.EYE || drop.ending == Ending.DRAGON) return -1f;
-        long at = drop.ending == Ending.JACKPOT ? SHOCK : CRYSTALS_BLOW;
+        if (!drop.win() || drop.ending == Ending.EYE || drop.ending == Ending.DRAGON || drop.ending == Ending.SHARD) return -1f;
+        long at = drop.ending == Ending.JACKPOT ? SHOCK : drop.ending == Ending.IDOL ? I_SHATTER : CRYSTALS_BLOW;
         if (t < at) return -1f;
         return Math.min(1f, (t - at) / 600f);
     }
@@ -371,7 +405,12 @@ public final class SeraphTimeline {
 
     /** "PRAY TO RNGESUS DROP!" on the jackpots and the judgement. */
     public boolean banner() {
-        return drop.ending == Ending.JACKPOT || drop.ending == Ending.EYE || drop.ending == Ending.DRAGON;
+        return drop.ending == Ending.JACKPOT || drop.ending == Ending.EYE || drop.ending == Ending.DRAGON || drop.ending == Ending.IDOL;
+    }
+
+    /** Whether this ending's own spectacle is one of the big three (the score, the big arrive). */
+    public boolean big() {
+        return banner();
     }
 
     public float bannerStamp(long t) {
@@ -491,6 +530,113 @@ public final class SeraphTimeline {
     public float rear(long t) {
         if (drop.ending != Ending.DRAGON || t < arrive() - 200) return 0f;
         return ease((t - arrive() + 200) / 700f);
+    }
+
+    // ---- the Summoning (the Summoning Eye)
+
+    /** Frame {@code k}'s rise out of the ground, 0..1 - staggered round the ring. */
+    public float altarFrame(long t, int k) {
+        if (drop.ending != Ending.ALTAR) return 0f;
+        // Up out of the ground in turn, and back down once the eye is out, to leave the showcase clear.
+        return backOut(Math.min(1f, Math.max(0f, (t - A_FRAMES - k * 70L) / 420f))) * (1f - ease((t - A_LIFT - 300 - k * 40L) / 500f));
+    }
+
+    /** Whether frame {@code k} has its eye: seven click in, the eighth is the drop's. */
+    public boolean altarEye(long t, int k) {
+        if (drop.ending != Ending.ALTAR) return false;
+        if (k < A_FRAMES_N - 1) return t >= A_EYES + k * A_EYE_STEP;
+        return t >= A_SEATED && t < A_LIFT;
+    }
+
+    /** The portal open in the middle of the ring, 0..1 and back. */
+    public float altarPortal(long t) {
+        if (drop.ending != Ending.ALTAR || t < A_OPEN) return 0f;
+        return ease((t - A_OPEN) / 250f) * (1f - ease((t - A_CLOSE + 300) / 300f));
+    }
+
+    /** The beam coming back for the eye as it lifts out of its frame. */
+    public float altarBeam(long t) {
+        if (drop.ending != Ending.ALTAR || t < A_LIFT - 250) return 0f;
+        return ease((t - A_LIFT + 250) / 300f);
+    }
+
+    // ---- Etherwarp (the Etherwarp Merger)
+
+    /** Which warp {@code t} is in: -1 before the first aim, then 0..W_JUMPS-1 (the last lands at the showcase). */
+    public int warp(long t) {
+        if (drop.ending != Ending.WARP || t < W_FROM) return -1;
+        return (int) Math.min(W_JUMPS - 1, (t - W_FROM) / W_STEP);
+    }
+
+    /** The target block lit for warp {@code k}, 0..1 (its aim, then gone as it lands). */
+    public float warpAim(long t, int k) {
+        long at = W_FROM + k * W_STEP;
+        if (drop.ending != Ending.WARP || t < at || t >= at + W_AIM + 60) return 0f;
+        return ease((t - at) / 120f);
+    }
+
+    /** When warp {@code k} lands. */
+    public static long warpAt(int k) {
+        return W_FROM + k * W_STEP + W_AIM;
+    }
+
+    // ---- the Runecraft (the Enchant Rune)
+
+    /** The table rising out of the ground, 0..1. */
+    public float runeTable(long t) {
+        if (drop.ending != Ending.RUNE || t < R_TABLE) return 0f;
+        return backOut(Math.min(1f, (t - R_TABLE) / (float) (R_TABLE_UP - R_TABLE)));
+    }
+
+    /** How thick the stream of glyphs is, 0..1 (it thickens, then stops when the rune forms). */
+    public float runeStream(long t) {
+        if (drop.ending != Ending.RUNE || t < R_STREAM || t >= R_FORM + 200) return 0f;
+        return ease((t - R_STREAM) / (float) (R_STREAM_END - R_STREAM));
+    }
+
+    /** The rune written out of the glyphs above the table, 0..1. */
+    public float runeForm(long t) {
+        if (drop.ending != Ending.RUNE || t < R_FORM) return 0f;
+        return ease((t - R_FORM) / 400f);
+    }
+
+    // ---- Paragon (the Paragon Shard)
+
+    /** The crystals cracking before they burst, 0..1. */
+    public float shardCrack(long t) {
+        if (drop.ending != Ending.SHARD || t < S_CRACK) return 0f;
+        return Math.min(1f, (t - S_CRACK) / (float) (S_BURST - S_CRACK));
+    }
+
+    /** The shards' spiral in from the burst to the fuse, 0..1; -1 before the burst. */
+    public float shardPull(long t) {
+        if (drop.ending != Ending.SHARD || t < S_BURST) return -1f;
+        return Math.min(1f, (t - S_BURST) / (float) (S_FUSE - S_BURST));
+    }
+
+    /** Whether the End Crystals are gone (burst into shards). */
+    public boolean crystalsGone(long t) {
+        return drop.ending == Ending.SHARD && t >= S_BURST;
+    }
+
+    // ---- Set in Stone (the End Stone Idol)
+
+    /** How far up the Seraph the stone has crept, 0..1 of its height (a little past, so the head is taken). */
+    public float stone(long t) {
+        if (drop.ending != Ending.IDOL || t < I_STONE) return 0f;
+        return 1.15f * ease((t - I_STONE) / (float) (I_STONED - I_STONE));
+    }
+
+    /** The statue cracking, 0..1 until it bursts. */
+    public float statueCrack(long t) {
+        if (drop.ending != Ending.IDOL || t < I_CRACK) return 0f;
+        return Math.min(1f, (t - I_CRACK) / (float) (I_SHATTER - I_CRACK));
+    }
+
+    /** The idol rising out of the rubble, 0..1. */
+    public float idolRise(long t) {
+        if (drop.ending != Ending.IDOL || t < I_SHATTER) return 0f;
+        return backOut(Math.min(1f, (t - I_SHATTER) / (float) (arrive() - I_SHATTER)));
     }
 
     // ---- everything

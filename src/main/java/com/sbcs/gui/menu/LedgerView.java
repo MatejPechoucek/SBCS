@@ -243,7 +243,7 @@ final class LedgerView {
     }
 
     private static int pages(Chapter c) {
-        if (c == Chapter.SERAPH && Maintenance.SERAPH) return 1;
+        if (c == Chapter.SERAPH && Maintenance.SERAPH_LEDGER) return 1;
         return Math.max(1, (Ledger.chapter(c).size() + PER_PAGE - 1) / PER_PAGE);
     }
 
@@ -464,7 +464,7 @@ final class LedgerView {
             d.fill(x0, y, x1, y + TAB_H, cur ? c.colour : mix(c.colour, 0xFF2A2018, hover ? 0.15f : 0.35f));
             d.fill(x1 - 1, y, x1, y + TAB_H, 0x40000000);
             d.fill(x0, y, x1, y + 1, 0x50FFFFFF);
-            if (c == Chapter.SERAPH && Maintenance.SERAPH) {
+            if (c == Chapter.SERAPH && Maintenance.SERAPH_LEDGER) {
                 for (int k = 0; k < TAB_H; k += 4) d.fill(x0 + 2, y + k, x1 - 2, y + k + 2, 0x90F2C21B);
             }
             d.push();
@@ -498,7 +498,7 @@ final class LedgerView {
         d.fill(x + 14, COVER + 11, cx - hw / 2 - 5, COVER + 12, mix(chapter.ink, PAPER, 0.5f));
         d.fill(cx + hw / 2 + 5, COVER + 11, x + PAGE_W - 8, COVER + 12, mix(chapter.ink, PAPER, 0.5f));
 
-        if (chapter == Chapter.SERAPH && Maintenance.SERAPH) {
+        if (chapter == Chapter.SERAPH && Maintenance.SERAPH_LEDGER) {
             StampArt.hazardTape(d, cx, H / 2f - 10, PAGE_W / 2 - 4, -0.12f, "UNDER MAINTENANCE");
             StampArt.hazardTape(d, cx, H / 2f + 22, PAGE_W / 2 - 4, 0.09f, "UNDER MAINTENANCE");
             return;
@@ -627,7 +627,7 @@ final class LedgerView {
 
         int y = COVER + 53;
         List<Stamp> stamps = Ledger.chapter(chapter);
-        if (chapter == Chapter.SERAPH && Maintenance.SERAPH) {
+        if (chapter == Chapter.SERAPH && Maintenance.SERAPH_LEDGER) {
             y = wrap(d, "Being sharpened. Its stamps come back with it.", x, y, right - x, PENCIL);
             note(d, x, right);
             return;

@@ -60,6 +60,10 @@ public final class SeraphDetectTest {
         w.self = self;
         Map<Integer, SeraphWatcher.Tag> present = new LinkedHashMap<>();
         long last = -1;
+        // Quests that show a "SLAYER BOSS! The Voidgloom Seraph" line (Matej's file, 2026-10-25: tier III and IV, no
+        // "Spawned by" tag caught): each one ends in a kill or a failure, and every kill must open.
+        int spawnLines = 0, failedAfterSpawn = 0;
+        boolean inSpawned = false;
         try (BufferedReader in = new BufferedReader(new FileReader(file, java.nio.charset.StandardCharsets.UTF_8))) {
             String line;
             while ((line = in.readLine()) != null) {
@@ -70,7 +74,17 @@ public final class SeraphDetectTest {
                 if (last >= 0) for (long t = last + 50; t < now; t += 50) w.afterTick(t);
                 last = now;
                 if (kind.equals("slayer_line")) {
-                    w.onChatLine(o.get("line").getAsString(), now);
+                    String text = o.get("line").getAsString();
+                    if (text.startsWith("SLAYER BOSS! The Voidgloom Seraph")) {
+                        spawnLines++;
+                        inSpawned = true;
+                    } else if (text.contains("SLAYER QUEST FAILED!") && inSpawned) {
+                        failedAfterSpawn++;
+                        inSpawned = false;
+                    } else if (text.contains("SLAYER QUEST COMPLETE!")) {
+                        inSpawned = false;
+                    }
+                    w.onChatLine(text, now);
                 } else if (kind.equals("slayer_mob")) {
                     int id = o.get("entity").getAsInt();
                     String name = o.get("name").getAsString();
@@ -91,8 +105,13 @@ public final class SeraphDetectTest {
         // The recorder's own kills in that file: the 19:05 one read 0 and dropped a Null Atom (a bust); the 19:06 one
         // went at 0; the 14:55 one (Endersnake Rune) was before its nametag was ever in range of the records.
         long kills = events.stream().filter(e -> e.equals("kill") || e.startsWith("known")).count();
-        check("every kill of the recorder's own opened (" + events + ")", kills >= 2);
-        check("no other player's boss opened anything", kills <= 3);
+        if (spawnLines > 0) {
+            check("every spawn-lined quest that ended in a kill opened, and nothing else (" + kills + " of "
+                    + (spawnLines - failedAfterSpawn) + ")", kills == spawnLines - failedAfterSpawn);
+        } else {
+            check("every kill of the recorder's own opened (" + events + ")", kills >= 2);
+            check("no other player's boss opened anything", kills <= 3);
+        }
         check("every opened kill was resolved", events.stream().filter(e -> e.equals("kill")).count()
                 == events.stream().filter(e -> e.startsWith("resolve")).count());
         check("none of them was a win (the file has none)", events.stream().noneMatch(e -> e.contains(" ") && !e.endsWith("BUST")));

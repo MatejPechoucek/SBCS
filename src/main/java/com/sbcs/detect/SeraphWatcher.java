@@ -36,7 +36,15 @@ import java.util.Set;
  *       straight from 10.7M to gone) is taken from the nametag going at 5% or less, close, or from QUEST COMPLETE.</li>
  * </ul>
  *
- * Tier IV only. Every decision is narrated.
+ * Tiers III and IV (0.3.x, Matej's own records of 2026-10-25: he fights tier III, {@code [Lv534]  Voidgloom Seraph III
+ * 0/50M❤} - current / max - with "Spawned by: qMighty" under it and the drop line ~0.3 s after the 0). A tier III can
+ * drop the Summoning Eye and the Byzantium Dye; everything else the animation plays is tier IV's. The maximum comes
+ * off the nametag when it shows one, else 50M / 210M by tier.
+ *
+ * <p>In those records not one of his seventeen bosses had a "Spawned by" tag the recorder caught, so the quest's own
+ * line {@code SLAYER BOSS! The Voidgloom Seraph III spawned!} also claims one, as Hellion's does: the first nametag of
+ * that tier seen within {@link #CLAIM_REACH} blocks, from 2 s before the line to 5 s after it (in the records it came
+ * 50 ms after, 3 blocks away). Every decision is narrated.
  */
 public final class SeraphWatcher {
 
@@ -65,8 +73,35 @@ public final class SeraphWatcher {
         this.listener = listener;
     }
 
-    static final String NAME = "Voidgloom Seraph IV";
-    static final double MAX_HP = 210e6;
+    /** The quest's boss (the client's, shared by every slayer watcher): another boss's drop lines are never the Seraph's. */
+    public SlayerQuest quest = new SlayerQuest();
+
+    static final String NAME = "Voidgloom Seraph ";
+    private static final java.util.regex.Pattern TIER = java.util.regex.Pattern.compile("Voidgloom Seraph (III|IV)(?![IV])");
+    private static final java.util.regex.Pattern MAX = java.util.regex.Pattern.compile("/\\s*([0-9]+(?:\\.[0-9]+)?)([kKmMbB]?)");
+
+    /** 3 or 4 for a Seraph nametag the animation plays for, else 0 (tiers I and II drop nothing it plays). */
+    static int tierOf(String name) {
+        java.util.regex.Matcher m = TIER.matcher(name);
+        return !m.find() ? 0 : m.group(1).equals("IV") ? 4 : 3;
+    }
+
+    /** The maximum health a nametag shows after its "/", or -1. */
+    static double maxOf(String name) {
+        java.util.regex.Matcher m = MAX.matcher(name);
+        if (!m.find()) return -1;
+        double v = Double.parseDouble(m.group(1));
+        switch (m.group(2).toLowerCase(Locale.ROOT)) {
+            case "k" -> v *= 1e3;
+            case "m" -> v *= 1e6;
+            case "b" -> v *= 1e9;
+            default -> { }
+        }
+        return v;
+    }
+
+    /** The tier of the player's last Seraph (4 until one has been seen), for the odds the screen shows. */
+    public volatile int tier = 4;
     private static final double SCAN_RADIUS = 48, TELEPORT = 12, GONE_REACH = 24, ARM_RADIUS = 24;
     private static final long DROP_WAIT_MS = 3_000, ARM_MS = 2_500, MIN_SEEN_MS = 300;
 
@@ -74,11 +109,16 @@ public final class SeraphWatcher {
         int id;
         long firstSeen;
         boolean owned, dead;
-        double hp = -1, distSq;
+        double hp = -1, distSq, max;
+        int tier;
         String owner;
     }
 
     private final Map<Integer, Boss> bosses = new HashMap<>();
+    private static final double CLAIM_REACH = 16;
+    private static final long CLAIM_BEFORE_MS = 2_000, CLAIM_AFTER_MS = 5_000;
+    private long spawnLineAt = -1;
+    private int spawnLineTier;
     private long pendingSince = -1;
     private boolean killedThisQuest, oursThisQuest;
     private Drop bestDrop;
@@ -96,6 +136,7 @@ public final class SeraphWatcher {
         if (text == null) return;
         String s = DianaWatcher.plain(text).trim();
         if (ChatLines.fromPlayer(s)) return;
+        quest.onChatLine(s, now); // idempotent: the client feeds it too, so a replay needs nothing else
         if (s.startsWith("SLAYER QUEST STARTED!")) {
             forget();
             return;
@@ -105,7 +146,20 @@ public final class SeraphWatcher {
             forget();
             return;
         }
+        if (s.startsWith("SLAYER BOSS!") && s.contains("spawned")) {
+            int t = tierOf(s);
+            if (t != 0) {
+                spawnLineAt = now;
+                spawnLineTier = t;
+                claimBySpawnLine(now);
+            }
+            return;
+        }
         Drop d = SeraphDrops.of(s);
+        if (d != null && quest.otherThan(SlayerQuest.Boss.VOIDGLOOM, now)) {
+            log.note("§8Seraph: drop line during a " + quest.boss(now) + " quest - not the Seraph's (\"" + s + "\")");
+            return;
+        }
         if (d != null) {
             boolean better = bestDrop == null || bestDrop == Drop.BUST || (d != Drop.BUST && d.ordinal() > bestDrop.ordinal());
             if (better || now - bestAt > DROP_WAIT_MS) {
@@ -136,12 +190,12 @@ public final class SeraphWatcher {
 
     // ------------------------------------------------------------------ the world
 
-    /** @param hidePct the pre-kill hide, as a percentage of a tier IV Seraph's 210M (its nametag shows no maximum; 0 off) */
+    /** @param hidePct the pre-kill hide, as a percentage of the boss's maximum (0 off) */
     public void tick(LocalPlayer player, double hidePct) {
         long now = System.currentTimeMillis();
         if (player != null) self = player.getGameProfile().name();
         scan(player, now);
-        arm(210_000_000.0 * hidePct / 100.0, now);
+        arm(hidePct / 100.0, now);
         afterTick(now);
     }
 
@@ -153,7 +207,7 @@ public final class SeraphWatcher {
         }
     }
 
-    /** One nametag this tick: a tier IV Seraph's, or a "Spawned by:" one. */
+    /** One nametag this tick: a tier III or IV Seraph's, or a "Spawned by:" one. */
     public record Tag(int id, String name, double distSq) {
     }
 
@@ -173,7 +227,7 @@ public final class SeraphWatcher {
             Component custom = stand.getCustomName();
             if (custom == null) continue;
             String name = custom.getString();
-            if (!name.contains(NAME) && !name.startsWith("Spawned by:")) continue;
+            if (tierOf(name) == 0 && !name.startsWith("Spawned by:")) continue;
             tags.add(new Tag(stand.getId(), name, stand.distanceToSqr(player)));
         }
         observe(tags, teleported, now);
@@ -189,15 +243,20 @@ public final class SeraphWatcher {
         Set<Integer> seen = new HashSet<>();
         for (Tag tag : tags) {
             String name = tag.name();
-            if (!name.contains(NAME)) continue;
+            int tierHere = tierOf(name);
+            if (tierHere == 0) continue;
             seen.add(tag.id());
             Boss b = bosses.get(tag.id());
             if (b == null) {
                 b = new Boss();
                 b.id = tag.id();
                 b.firstSeen = now;
+                b.tier = tierHere;
+                b.max = tierHere == 4 ? 210e6 : 50e6;
                 bosses.put(b.id, b);
             }
+            double shownMax = maxOf(name);
+            if (shownMax > 0) b.max = shownMax;
             b.distSq = tag.distSq();
             // Its owner's tag is right after it (two ids on; one either side is taken too, to be safe).
             if (b.owner == null) {
@@ -211,12 +270,14 @@ public final class SeraphWatcher {
                 if (b.owner != null && !self.isEmpty() && b.owner.toLowerCase(Locale.ROOT).equals(self.toLowerCase(Locale.ROOT)) && !b.dead) {
                     b.owned = true;
                     oursThisQuest = true;
-                    log.note("§7Seraph: your Voidgloom Seraph IV - spawned by you, " + Math.round(Math.sqrt(b.distSq)) + " blocks away");
+                    tier = b.tier;
+                    log.note("§7Seraph: your Voidgloom Seraph " + (b.tier == 4 ? "IV" : "III") + " - spawned by you, " + Math.round(Math.sqrt(b.distSq)) + " blocks away");
                     listener.spawned();
                 }
             }
             Double hp = DianaWatcher.hpOf(name);
             if (hp != null) b.hp = hp;
+            if (!b.owned && spawnLineAt >= 0) claimBySpawnLine(now);
             if (b.owned && !b.dead && hp != null && hp <= 0) {
                 b.dead = true;
                 killed("its nametag reads 0", now);
@@ -227,13 +288,37 @@ public final class SeraphWatcher {
             if (seen.contains(b.id)) continue;
             it.remove();
             if (!b.owned || b.dead || teleported) continue;
-            if (now - b.firstSeen >= MIN_SEEN_MS && b.distSq <= GONE_REACH * GONE_REACH && b.hp >= 0 && b.hp <= MAX_HP * 0.05) {
+            if (now - b.firstSeen >= MIN_SEEN_MS && b.distSq <= GONE_REACH * GONE_REACH && b.hp >= 0 && b.hp <= b.max * 0.05) {
                 b.dead = true;
                 killed("its nametag went at " + fmt(b.hp), now);
             } else {
                 log.note("§8Seraph: your Seraph's nametag went at " + (b.hp < 0 ? "?" : fmt(b.hp)) + " - not a kill");
             }
         }
+    }
+
+    /** The quest's "SLAYER BOSS!" line: the closest unclaimed nametag of its tier that appeared around it is ours. */
+    private void claimBySpawnLine(long now) {
+        if (spawnLineAt < 0) return;
+        if (now - spawnLineAt > CLAIM_AFTER_MS) {
+            log.note("§8Seraph: no tier " + (spawnLineTier == 4 ? "IV" : "III") + " nametag near you within " + CLAIM_AFTER_MS / 1000 + " s of the spawn line");
+            spawnLineAt = -1;
+            return;
+        }
+        Boss best = null;
+        for (Boss b : bosses.values()) {
+            if (b.owned || b.dead || b.tier != spawnLineTier || b.distSq > CLAIM_REACH * CLAIM_REACH) continue;
+            if (b.firstSeen < spawnLineAt - CLAIM_BEFORE_MS || b.firstSeen > spawnLineAt + CLAIM_AFTER_MS) continue;
+            if (b.owner != null && !b.owner.equalsIgnoreCase(self)) continue;
+            if (best == null || b.distSq < best.distSq) best = b;
+        }
+        if (best == null) return;
+        spawnLineAt = -1;
+        best.owned = true;
+        oursThisQuest = true;
+        tier = best.tier;
+        log.note("§7Seraph: your Voidgloom Seraph " + (best.tier == 4 ? "IV" : "III") + " - the spawn line's, " + Math.round(Math.sqrt(best.distSq)) + " blocks away");
+        listener.spawned();
     }
 
     private void killed(String how, long now) {
@@ -251,6 +336,7 @@ public final class SeraphWatcher {
     }
 
     private void forget() {
+        spawnLineAt = -1;
         oursThisQuest = false;
         killedThisQuest = false;
         for (Boss b : bosses.values()) b.owned = false;
@@ -265,11 +351,11 @@ public final class SeraphWatcher {
         return System.currentTimeMillis() < armedUntil;
     }
 
-    private void arm(double belowHp, long now) {
-        if (belowHp <= 0) return;
+    private void arm(double belowFrac, long now) {
+        if (belowFrac <= 0) return;
         for (Boss b : bosses.values()) {
             if (!b.owned || b.dead || b.distSq > ARM_RADIUS * ARM_RADIUS) continue;
-            if (b.hp < 0 || b.hp > belowHp) continue;
+            if (b.hp < 0 || b.hp > b.max * belowFrac) continue;
             if (now >= armedUntil) log.note("§7Seraph: your Seraph is at " + fmt(b.hp) + " - hiding the HUD");
             armedUntil = now + ARM_MS;
         }

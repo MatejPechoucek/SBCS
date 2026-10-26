@@ -3,7 +3,7 @@
 	"id": "sbcs",
 	"version": "${version}",
 	"name": "SkyBlock Cutscenes",
-	"description": "Cutscenes for Hypixel SkyBlock's rare drops: the Scatha, Vanguard corpses, Diana's Mythological Ritual, the Inferno Demonlord, lava fishing, the Fishing Festival's Great White Shark and the Dwarven Mines' Ghosts. The drop is hidden until the reveal; you keep control while it plays. /sbcs opens the settings.",
+	"description": "Cutscenes for Hypixel SkyBlock's rare drops: the Scatha, Vanguard corpses, Diana's Mythological Ritual, the Revenant, Tarantula, Inferno Demonlord and Voidgloom Seraph slayers, lava fishing, the Fishing Festival's Great White Shark and the Dwarven Mines' Ghosts. The drop is hidden until the reveal; you keep control while it plays. /sbcs opens the settings.",
 	"authors": [
 		"qMighty"
 	],
