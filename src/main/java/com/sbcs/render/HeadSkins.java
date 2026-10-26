@@ -46,6 +46,8 @@ public final class HeadSkins {
     public static final HeadSkins SLAYER = new HeadSkins("/assets/sbcs/slayer_heads.json", "slayer_head_");
     /** Lava fishing: the rare creatures' bestiary heads (by display name) and the head drops (by NEU ID). */
     public static final HeadSkins LAVA = new HeadSkins("/assets/sbcs/lava_heads.json", "lava_head_");
+    /** The water mythics (Titanoboa, Wiki Tiki - NEU bestiary) and their head drops (NEU items). */
+    public static final HeadSkins WATER = new HeadSkins("/assets/sbcs/water_heads.json", "water_head_");
     /** The Crystal Nucleus bundle's head drops (the Jade Dye, the Quick Claw), by NEU id. */
     public static final HeadSkins NUCLEUS = new HeadSkins("/assets/sbcs/nucleus_heads.json", "nucleus_head_");
     /**
@@ -101,6 +103,7 @@ public final class HeadSkins {
             case "fishing" -> FISHING;
             case "slayer" -> SLAYER;
             case "lava" -> LAVA;
+            case "water" -> WATER;
             case "nucleus" -> NUCLEUS;
             case "dungeon" -> DUNGEON;
             case "superpairs" -> PAIRS;

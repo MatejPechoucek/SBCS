@@ -528,6 +528,11 @@ public final class SbcsAudio {
         for (Voice v : voices) play(v);
     }
 
+    /** The Coil's and the Totem's cues (the water mythics), on their own volume. */
+    public static void playWater(Voice[] voices) {
+        playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.waterVolume);
+    }
+
     /** The Vault's cues (the Crystal Nucleus), on its own volume. */
     public static void playNucleus(Voice[] voices) {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.nucleusVolume);

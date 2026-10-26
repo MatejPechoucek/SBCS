@@ -90,7 +90,11 @@ public final class DropRecorder {
                     + "|jawbus|thunder|ragnarok|scuttler|plhlegblast|carmine|radioactive vial|burnt texts"
                     + "|brimstone handle|chain of the end times|severed pincer|flash i\\b|bobbin|squid boots"
                     + "|magma lord|crab stick|has spawned|has arrived|emerges|end times|waddles up|appeared"
-                    + "|double hook|CHARM!|LOOT SHARE|DROP!|WOW!|RNGESUS|sea creature");
+                    + "|double hook|CHARM!|LOOT SHARE|DROP!|WOW!|RNGESUS|sea creature"
+                    // Water mythics (2026-10-26, for the Titanoboa's and the Wiki Tiki's cutscenes): the creatures, their
+                    // catch lines (the wiki's), the Laser Totems, their drops and the dye they share.
+                    + "|titanoboa|wiki tiki|laser totem|surfaces|stretches as far|disturbed|pay the price|hotspot"
+                    + "|snake eyes|troubled bubble|tiki mask|aquamarine|lily pad|clay ball|clay block|jungle wood");
 
     /** The Ghosts' drops (2026-10-12, for "Wisp"): GhostDrops was written before a real Sorrow or Plasma line was seen. */
     private static final Pattern GHOST = Pattern.compile("(?i)sorrow|plasma|volta|ghostly boots|materialized|the mist|ghost");
