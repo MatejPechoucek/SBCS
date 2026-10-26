@@ -58,8 +58,14 @@ public final class EruptionPreview {
             case PLHLEGBLAST -> van + "/squid.png";
             case RAGNAROK -> skins + "/Ragnarok_skin.png";
             case SCUTTLER -> skins + "/Fiery_Scuttler_skin.png";
+            case TAURUS -> van + "/zombified_piglin.png";
         };
         EruptionScene.RASTER.texture(EruptionScene.SLOT_CREATURE, argb(ImageIO.read(new File(creatureTex))));
+        if (creature == Creature.TAURUS) {
+            EruptionScene.RASTER.texture(EruptionScene.SLOT_HORSE, argb(ImageIO.read(new File(van, "pig_temperate.png"))));
+            EruptionScene.RASTER.texture(EruptionScene.SLOT_SADDLE, argb(ImageIO.read(new File(van, "pig_saddle.png"))));
+            EruptionScene.RASTER.texture(EruptionScene.SLOT_HELMET, argb(ImageIO.read(new File(skins, "TAURUS_HELMET_skin.png"))));
+        }
         EruptionScene.rasterScale = 2f;
         BufferedImage bg = System.getProperty("bg") == null ? null : ImageIO.read(new File(System.getProperty("bg")));
         int W = ChopPreview.W, H = ChopPreview.H, S = ChopPreview.S;
@@ -68,7 +74,10 @@ public final class EruptionPreview {
             EruptionTimeline tl = new EruptionTimeline(creature, d, seed);
             tl.price(prices(d, creature));
             if (d.win()) {
-                BufferedImage img = d.head ? argb(ImageIO.read(new File(skins, d.art + "_skin.png"))) : argb(ImageIO.read(new File(van, d.art + ".png")));
+                File pack = d.packIcon == null || System.getProperty("pack") == null ? null : new File(System.getProperty("pack"), d.packIcon);
+                BufferedImage img = d.head ? argb(ImageIO.read(new File(skins, d.art + "_skin.png")))
+                        : pack != null && pack.exists() ? argb(ImageIO.read(pack)) : argb(ImageIO.read(new File(van, d.art + ".png")));
+                if (EruptionTimeline.artTint(d) >= 0) img = LavaArt.tint(img, EruptionTimeline.artTint(d));
                 EruptionScene.dropPixels = LavaArt.pixels(img);
                 EruptionScene.dropW = img.getWidth();
                 EruptionScene.dropH = img.getHeight();
@@ -108,6 +117,10 @@ public final class EruptionPreview {
     static long prices(Drop d, Creature c) {
         return switch (d) {
             case BUST -> c == Creature.JAWBUS ? 4_471_331L : (c == Creature.SCUTTLER ? 442_727L : 0L);
+            // Not looked up (no market access offline): stand-ins for the counter.
+            case BOBBIN -> 1_150_000L;
+            case SQUID_BOOTS -> 600_000L;
+            case TAURUS_HELMET -> 900_000L;
             case CHAIN -> 1_302_383L;
             case PINCER -> 2_278_632L;
             case FLASH -> 4_821_835L;

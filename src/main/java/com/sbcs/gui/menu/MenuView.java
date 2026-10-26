@@ -619,14 +619,15 @@ public final class MenuView {
     }
 
     private void lavaRows(List<Row> rows, PatternConfig cfg) {
-        if (!group(rows, "lava", "Lava Fishing - Eruption", "Jawbus, Thunder, Ragnarok, Scuttler, the Carmine Dye", "magma_cream", LAVA, cfg.lavaAnimation,
+        if (!group(rows, "lava", "Lava Fishing - Eruption", "Jawbus, Thunder, Ragnarok, Scuttler, Taurus, the Carmine Dye", "magma_cream", LAVA, cfg.lavaAnimation,
                 () -> { cfg.lavaAnimation = !cfg.lavaAnimation; cfg.save(); })) return;
         rows.add(new SectionRow("What plays it"));
-        rows.add(new NoticeRow("Every kill of your own creature, the moment it dies - the heat it lands on is the drop. Plhlegblast only plays for the Carmine Dye."));
+        rows.add(new NoticeRow("Every kill of your own creature, the moment it dies - the heat it lands on is the drop. Plhlegblast and Taurus only play when one of their good drops comes."));
         rows.add(toggle("Lord Jawbus", cfg.lavaJawbus, () -> cfg.lavaJawbus = !cfg.lavaJawbus, cfg));
         rows.add(toggle("Thunder", cfg.lavaThunder, () -> cfg.lavaThunder = !cfg.lavaThunder, cfg));
         rows.add(toggle("Ragnarok", cfg.lavaRagnarok, () -> cfg.lavaRagnarok = !cfg.lavaRagnarok, cfg));
         rows.add(toggle("Fiery Scuttler", cfg.lavaScuttler, () -> cfg.lavaScuttler = !cfg.lavaScuttler, cfg));
+        rows.add(toggle("Taurus (its Helmet and the dye)", cfg.lavaTaurus, () -> cfg.lavaTaurus = !cfg.lavaTaurus, cfg));
         rows.add(toggle("Loot-shared kills", cfg.lavaLootShare, () -> cfg.lavaLootShare = !cfg.lavaLootShare, cfg));
         rows.add(new SectionRow("Hiding the drop"));
         rows.add(new SliderRow("lava_hide", "Hide the HUD below", cfg.lavaHidePct, 0, 20, 1,
@@ -634,6 +635,7 @@ public final class MenuView {
         rows.add(new NoticeRow("The HUD and chat fade out when your creature gets this low, so nothing gives the drop away."));
         rows.add(new SectionRow("The endings"));
         rows.add(toggle("RARE DROP! banner", cfg.lavaBanner, () -> cfg.lavaBanner = !cfg.lavaBanner, cfg));
+        rows.add(toggle("Jawbus's entrance", cfg.lavaJawbusIntro, () -> cfg.lavaJawbusIntro = !cfg.lavaJawbusIntro, cfg));
         rows.add(toggle("Show the price", cfg.lavaPrice, () -> cfg.lavaPrice = !cfg.lavaPrice, cfg));
         rows.add(new SliderRow("lava_volume", "Volume", cfg.lavaVolume, 0, 150, 5, v -> cfg.lavaVolume = v, v -> v + "%"));
         speedRow(rows, "lava_speed", cfg.lavaSpeed, v -> cfg.lavaSpeed = v);

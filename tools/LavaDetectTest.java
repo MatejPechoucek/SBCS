@@ -158,6 +158,70 @@ public final class LavaDetectTest {
         w.observe(List.of(), false, u + 240_090);
         check("our Ragnarok gone just after its Burnt Texts opens, known (" + opened + ")", opened.equals(List.of("known RAGNAROK BURNT_TEXTS")));
 
+        // ---- 0.4.0: Taurus, Bobbin' Scriptures, Squid Boots (no real lines seen yet - Hypixel's format assumed)
+        check("Taurus's catch line (plural \"emerge\")", LavaDrops.ofCatch("Taurus and his steed emerge.") == Creature.TAURUS);
+        check("Taurus's nametag", LavaDrops.ofNametag("[Lv250]  Taurus 1.2M/1.5M❤") == Creature.TAURUS);
+        check("the Horn of Taurus does not name Taurus", LavaDrops.ofCatch("You have spawned a Horn of Taurus") == null);
+        check("the Taurus Helmet", LavaDrops.of("RARE DROP! Taurus Helmet (+281  Magic Find)") == Drop.TAURUS_HELMET);
+        check("Squid Boots", LavaDrops.of("RARE DROP! Squid Boots (+120  Magic Find)") == Drop.SQUID_BOOTS);
+        check("Bobbin' Scriptures", LavaDrops.of("RARE DROP! Bobbin' Scriptures (+300  Magic Find)") == Drop.BOBBIN);
+        check("a Horn of Taurus is a bust", LavaDrops.of("RARE DROP! Horn of Taurus") == Drop.BUST);
+        check("the Taurus Helmet only comes from Taurus", Drop.TAURUS_HELMET.from(Creature.TAURUS) && !Drop.TAURUS_HELMET.from(Creature.JAWBUS));
+        check("Bobbin' Scriptures comes from the three mythics, not Thunder",
+                Drop.BOBBIN.from(Creature.JAWBUS) && Drop.BOBBIN.from(Creature.RAGNAROK) && Drop.BOBBIN.from(Creature.PLHLEGBLAST) && !Drop.BOBBIN.from(Creature.THUNDER));
+        long v = u + 1_000_000;
+        // Our Taurus dies: nothing opens (it only plays for its wins), and it does not arm the hide.
+        opened.clear();
+        String tau = "[Lv250]  Taurus 1.5M/1.5M❤", tauLow = "[Lv250]  Taurus 20k/1.5M❤", tauDead = "[Lv250]  Taurus 0/1.5M❤";
+        w.onChatLine("Taurus and his steed emerge.", v);
+        w.observe(List.of(new LavaWatcher.Tag(70, tau, 16)), false, v + 200);
+        w.observe(List.of(new LavaWatcher.Tag(70, tauLow, 16)), false, v + 20_000);
+        w.arm(5, v + 20_000);
+        check("our Taurus does not arm the hide", !w.armedAt(v + 20_050));
+        w.observe(List.of(new LavaWatcher.Tag(70, tauDead, 16)), false, v + 21_000);
+        w.afterTick(v + 26_000);
+        check("our Taurus's kill opens nothing by itself (" + opened + ")", opened.isEmpty());
+        // Its helmet, the line just after the death: known.
+        opened.clear();
+        w.onChatLine("Taurus and his steed emerge.", v + 40_000);
+        w.observe(List.of(new LavaWatcher.Tag(71, tau, 16)), false, v + 40_200);
+        w.observe(List.of(new LavaWatcher.Tag(71, tauDead, 16)), false, v + 50_000);
+        w.onChatLine("RARE DROP! Taurus Helmet (+281  Magic Find)", v + 50_900);
+        check("the Taurus Helmet after our Taurus died opens, known (" + opened + ")", opened.equals(List.of("known TAURUS TAURUS_HELMET")));
+        // The helmet with no death seen at all (the nametag out of range): only Taurus drops it.
+        opened.clear();
+        w.onChatLine("RARE DROP! Taurus Helmet (+281  Magic Find)", v + 120_000);
+        check("a Taurus Helmet with no death seen still opens (" + opened + ")", opened.equals(List.of("known TAURUS TAURUS_HELMET")));
+        // The Carmine Dye from our Taurus is Taurus's, 1 in 2.5M.
+        opened.clear();
+        w.onChatLine("Taurus and his steed emerge.", v + 200_000);
+        w.observe(List.of(new LavaWatcher.Tag(72, tau, 16)), false, v + 200_200);
+        w.observe(List.of(new LavaWatcher.Tag(72, tauDead, 16)), false, v + 210_000);
+        w.onChatLine("RARE DROP! Carmine Dye", v + 211_000);
+        check("the Carmine Dye after our Taurus died is Taurus's (" + opened + ")", opened.equals(List.of("known TAURUS CARMINE")));
+        check("from Taurus the dye is 1 in 2,500,000", Drop.CARMINE.oneIn(Creature.TAURUS) == 2_500_000 && Drop.CARMINE.oneIn(Creature.THUNDER) == 50_000);
+        // Squid Boots: the line before Plhlegblast's nametag reads 0 (the drop line can beat it).
+        opened.clear();
+        String plh = "[Lv300]  Plhlegblast 500M/500M❤", plhDead = "[Lv300]  Plhlegblast 0/500M❤";
+        w.onChatLine("WOAH! A Plhlegblast appeared.", v + 300_000);
+        w.observe(List.of(new LavaWatcher.Tag(73, plh, 16)), false, v + 300_200);
+        w.onChatLine("RARE DROP! Squid Boots (+120  Magic Find)", v + 330_000);
+        check("Squid Boots with no Plhlegblast dead yet waits (" + opened + ")", opened.isEmpty());
+        w.observe(List.of(new LavaWatcher.Tag(73, plhDead, 16)), false, v + 330_050);
+        check("then Plhlegblast's death opens it, known (" + opened + ")", opened.equals(List.of("known PLHLEGBLAST SQUID_BOOTS")));
+        // Squid Boots out of nowhere (no Plhlegblast at all) open nothing.
+        opened.clear();
+        w.onChatLine("RARE DROP! Squid Boots (+120  Magic Find)", v + 400_000);
+        w.afterTick(v + 405_000);
+        check("Squid Boots with no Plhlegblast open nothing (" + opened + ")", opened.isEmpty());
+        // Bobbin' Scriptures resolves our pending Jawbus.
+        opened.clear();
+        w.onChatLine("You have angered a legendary creature... Lord Jawbus has arrived.", v + 500_000);
+        w.observe(List.of(new LavaWatcher.Tag(74, jaw, 25)), false, v + 500_500);
+        w.observe(List.of(new LavaWatcher.Tag(74, jawDead, 25)), false, v + 520_000);
+        w.onChatLine("RARE DROP! Bobbin' Scriptures (+300  Magic Find)", v + 520_800);
+        check("Bobbin' Scriptures resolves our Jawbus's kill (" + opened + ")", opened.equals(List.of("kill JAWBUS", "resolve BOBBIN")));
+
         System.out.println(passed + " passed, " + failed + " failed");
         if (failed > 0) System.exit(1);
     }

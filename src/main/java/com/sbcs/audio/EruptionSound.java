@@ -41,6 +41,12 @@ public final class EruptionSound {
 
         // ---- before the reveal: the same for every drop
         out.add(new Cue(0, false, Voices.eruptionRumble(R / 1000f, seed)));
+        // Jawbus's entrance: the lava heaving, his roar as he breaks the surface (the same on every Jawbus).
+        if (EruptionTimeline.jawbusIntro && tl.creature() == com.sbcs.anim.EruptionTimeline.Creature.JAWBUS) {
+            out.add(new Cue(0, false, Voices.eruptionTentacle(1.2f, seed + 20)));
+            out.add(new Cue(0, false, Voices.eruptionGolem(0.45f, seed + 21)));
+            out.add(new Cue(220, false, Voices.eruptionRoar(1.1f, seed + 22)));
+        }
         out.add(new Cue(EruptionTimeline.SINK_FROM, false, Voices.eruptionSink(seed + 1)));
         out.add(new Cue(EruptionTimeline.CRUST_FROM, false,
                 Voices.eruptionCrust((EruptionTimeline.CRUST_TO - EruptionTimeline.CRUST_FROM) / 1000f, seed + 2)));
@@ -138,6 +144,23 @@ public final class EruptionSound {
                 out.add(new Cue(EruptionTimeline.V_FREE + 150, false, Voices.eruptionSwell(1.8f, seed + 752)));
                 out.add(new Cue(EruptionTimeline.V_DESCEND, false, Voices.eruptionGeiger((arrive + 1200 - EruptionTimeline.V_DESCEND) / 1000f, seed + 753)));
                 out.add(new Cue(EruptionTimeline.V_DESCEND, false, Voices.eruptionRise((arrive - EruptionTimeline.V_DESCEND) / 1000f)));
+            }
+            case BOBBIN -> {
+                // The magmafish breaking out of the lava and diving back in, twice.
+                for (int i = 0; i < EruptionTimeline.B_LEAPS.length; i++) {
+                    out.add(new Cue(EruptionTimeline.B_LEAPS[i], false, Voices.eruptionLeap(false, seed + 760 + i)));
+                    out.add(new Cue(EruptionTimeline.B_LEAPS[i] + EruptionTimeline.B_LEAP_MS, false, Voices.eruptionLeap(true, seed + 765 + i)));
+                }
+            }
+            case INK -> {
+                for (int i = 0; i < EruptionTimeline.I_SQUIRTS.length; i++) {
+                    out.add(new Cue(EruptionTimeline.I_SQUIRTS[i], false, Voices.eruptionInk(i, seed + 770 + i)));
+                }
+            }
+            case CHARGE -> {
+                for (int i = 0; i < EruptionTimeline.C_CHARGES.length; i++) {
+                    out.add(new Cue(EruptionTimeline.C_CHARGES[i], false, Voices.eruptionCharge(i, seed + 780 + i)));
+                }
             }
             case SHELL -> out.add(new Cue(EruptionTimeline.S_PEEK, false, Voices.eruptionScuttle(
                     (EruptionTimeline.S_RUN - EruptionTimeline.S_PEEK) / 1000f, (EruptionTimeline.S_GONE - EruptionTimeline.S_RUN) / 1000f, seed + 740)));

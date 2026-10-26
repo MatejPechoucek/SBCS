@@ -2653,6 +2653,42 @@ public final class Voices {
         };
     }
 
+    /** Bobbin' Scriptures: the magmafish breaking out of the lava (a bright slop) or diving back in (a plop and a hiss). */
+    public static Voice[] eruptionLeap(boolean in, long seed) {
+        if (!in) {
+            return new Voice[]{
+                    noise(1400f, 1.1f, 0.18f, 0.14f, 0.002f, 0.4f, seed),
+                    tone(330f, 620f, 0.08f, 0.12f, 0.002f, new float[]{1f, 0.3f}, 0.4f),
+            };
+        }
+        return new Voice[]{
+                tone(520f, 210f, 0.09f, 0.16f, 0.002f, new float[]{1f, 0.35f, 0.1f}, 0.4f),
+                noise(700f, 0.9f, 0.22f, 0.12f, 0.002f, 0.5f, seed),
+                after(0.06f, noise(5200f, 1.4f, 0.35f, 0.04f, 0.05f, 0.5f, seed + 1)),
+        };
+    }
+
+    /** Squid Boots: a squirt of ink out of the vent - a wet squelch, a little higher each time. */
+    public static Voice[] eruptionInk(int i, long seed) {
+        float k = 1f + 0.12f * i;
+        return new Voice[]{
+                tone(260f * k, 110f * k, 0.18f, 0.20f, 0.003f, new float[]{1f, 0.5f, 0.2f}, 0.5f),
+                noise(600f * k, 0.8f, 0.28f, 0.16f, 0.004f, 0.5f, seed),
+                after(0.05f, noise(2400f, 1.2f, 0.4f, 0.05f, 0.1f, 0.5f, seed + 1)),
+        };
+    }
+
+    /** The Taurus Helmet's charge: a snort, then a hoof slamming into the crust, harder the second time. */
+    public static Voice[] eruptionCharge(int i, long seed) {
+        float amp = 1f + 0.25f * i;
+        return new Voice[]{
+                noise(1900f, 1.4f, 0.09f, 0.10f * amp, 0.003f, 0.4f, seed),
+                after(0.11f, noise(1700f, 1.4f, 0.12f, 0.12f * amp, 0.003f, 0.4f, seed + 1)),
+                after(0.15f, tone(92f, 48f, 0.35f, 0.34f * amp, 0.002f, new float[]{1f, 0.5f, 0.25f}, 0.5f)),
+                after(0.15f, noise(380f, 0.7f, 0.3f, 0.18f * amp, 0.002f, 0.5f, seed + 2)),
+        };
+    }
+
     // ================================================================== the Mythological Dye: "The Whole Hunt"
 
     /** G, the Dye's root (its score is G dorian). */

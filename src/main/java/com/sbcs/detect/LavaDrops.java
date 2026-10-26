@@ -14,7 +14,8 @@ import java.util.Locale;
  * or {@code LOOT SHARE You received loot for assisting X!}. The catch lines are Hypixel's own (Feesh's constants)
  * or, with Feesh installed, its local rewrite {@code A Thunder has spawned!} - both are read.
  *
- * The Carmine Dye's own line has not been seen by anyone we can ask; any drop or WOW! line naming it is taken.
+ * The Carmine Dye's own line has not been seen by anyone we can ask; any drop or WOW! line naming it is taken. Nor have
+ * the 0.4.0 small wins' (Bobbin' Scriptures, Squid Boots, the Taurus Helmet) - they are read by name, like the rest.
  */
 public final class LavaDrops {
     private LavaDrops() {}
@@ -46,6 +47,9 @@ public final class LavaDrops {
         if (l.contains("flash i)") || l.contains("flash 1)")) return Drop.FLASH;
         if (l.contains("severed pincer")) return Drop.PINCER;
         if (l.contains("chain of the end times")) return Drop.CHAIN;
+        if (l.contains("taurus helmet")) return Drop.TAURUS_HELMET;
+        if (l.contains("squid boots")) return Drop.SQUID_BOOTS;
+        if (l.contains("bobbin' scriptures") || l.contains("bobbin scriptures")) return Drop.BOBBIN;
         return Drop.BUST;
     }
 
@@ -62,13 +66,16 @@ public final class LavaDrops {
         if (s.contains("Fiery Scuttler")) return Creature.SCUTTLER;
         if (s.contains("Plhlegblast")) return Creature.PLHLEGBLAST;
         if (s.contains("Thunder")) return Creature.THUNDER;
+        // Not "Horn of Taurus" or the Taurus Helmet: those are its drops, not it.
+        if (s.contains("Taurus") && !s.contains("Horn of Taurus") && !s.contains("Taurus Helmet")) return Creature.TAURUS;
         return null;
     }
 
     /**
      * The creature a catch line announces, or null. Hypixel's own lines, and Feesh's rewrite of them ("A Thunder
-     * has spawned!", "DOUBLE ... has spawned!") - any game line naming one of ours with "spawned", "emerges",
+     * has spawned!", "DOUBLE ... has spawned!") - any game line naming one of ours with "spawned", "emerge(s)",
      * "arrived", "is here", "waddles up" or "appeared", that is not a drop, a charm, a loot share or a death.
+     * Taurus's is "Taurus and his steed emerge." - plural, which "emerges" missed.
      */
     public static Creature ofCatch(String line) {
         if (line == null) return null;
@@ -76,7 +83,7 @@ public final class LavaDrops {
         if (s.contains("DROP!") || s.startsWith("CHARM!") || s.startsWith("LOOT SHARE") || s.contains("killed by")
                 || s.contains("Shard") || s.startsWith("WOW!")) return null;
         String l = s.toLowerCase(Locale.ROOT);
-        if (!(l.contains("spawned") || l.contains("emerges") || l.contains("has arrived") || l.contains("is here")
+        if (!(l.contains("spawned") || l.contains("emerge") || l.contains("has arrived") || l.contains("is here")
                 || l.contains("waddles up") || l.contains("appeared"))) return null;
         return named(s);
     }

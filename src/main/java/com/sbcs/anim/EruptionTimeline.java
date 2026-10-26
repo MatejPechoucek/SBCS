@@ -32,38 +32,54 @@ public final class EruptionTimeline {
     /** The Carmine Dye's own colour, #960018 (the wiki). */
     public static final int CARMINE = 0x960018;
 
-    public enum Model { GOLEM, ELDER_GUARDIAN, SQUID, HEAD }
+    public enum Model { GOLEM, ELDER_GUARDIAN, SQUID, HEAD, PIG_RIDER }
 
-    /** The rare lava creatures. {@code skin} is the NEU bestiary head (lava_heads.json), {@code model} what is drawn. */
+    /**
+     * The rare lava creatures. {@code skin} is the NEU bestiary head (lava_heads.json), {@code model} what is drawn.
+     * {@code onKill}: whether its kill opens Eruption, outcome pending. Plhlegblast and Taurus do not - Taurus is 1 in
+     * 30 catches and Plhlegblast's table is nearly all ink - they play only when one of their wins drops, with the
+     * outcome known.
+     */
     public enum Creature {
-        JAWBUS("Lord Jawbus", Model.GOLEM, 100e6, 0xFF55FF),
-        THUNDER("Thunder", Model.ELDER_GUARDIAN, 35e6, 0xFFAA00),
-        RAGNAROK("Ragnarok", Model.HEAD, 125e6, 0xFF55FF),
-        SCUTTLER("Fiery Scuttler", Model.HEAD, 10e6, 0xFFAA00),
-        PLHLEGBLAST("Plhlegblast", Model.SQUID, 500e6, 0xFF55FF);
+        JAWBUS("Lord Jawbus", Model.GOLEM, 100e6, 0xFF55FF, true),
+        THUNDER("Thunder", Model.ELDER_GUARDIAN, 35e6, 0xFFAA00, true),
+        RAGNAROK("Ragnarok", Model.HEAD, 125e6, 0xFF55FF, true),
+        SCUTTLER("Fiery Scuttler", Model.HEAD, 10e6, 0xFFAA00, true),
+        PLHLEGBLAST("Plhlegblast", Model.SQUID, 500e6, 0xFF55FF, false),
+        /** "Taurus and his steed emerge." - an Epic, a zombified piglin in a bull's head riding a pig (NEU: pig_rider). */
+        TAURUS("Taurus", Model.PIG_RIDER, 1.5e6, 0xAA00AA, false);
 
         public final String title;
         public final Model model;
         public final double maxHp;
-        /** Its rarity colour: Mythic pink, Legendary gold. */
+        /** Its rarity colour: Mythic pink, Legendary gold, Epic purple. */
         public final int colour;
+        public final boolean onKill;
 
-        Creature(String title, Model model, double maxHp, int colour) {
+        Creature(String title, Model model, double maxHp, int colour, boolean onKill) {
             this.title = title;
             this.model = model;
             this.maxHp = maxHp;
             this.colour = colour;
+            this.onKill = onKill;
         }
     }
 
-    public enum Ending { BUST, PLAIN, PINCER, FLASH, FORGE, VIAL, SHELL, END_TIMES, KUUDRA }
+    public enum Ending { BUST, BOBBIN, INK, CHARGE, PLAIN, PINCER, FLASH, FORGE, VIAL, SHELL, END_TIMES, KUUDRA }
 
     /**
      * What the animation plays: the drops worth it (prices 2026-10-05), each with its heat, its ending, its
      * creature (null: any), its price ID and how it is drawn (a NEU head skin, else a vanilla item icon).
      */
     public enum Drop {
-        BUST("", Heat.BLACK, Ending.BUST, null, null, null, false, 0, 0xAAAAAA),
+        BUST("", Heat.BLACK, Ending.BUST, null, null, null, false, 0, 0xAAAAAA, null),
+        // The small wins (0.4.0): each the cheapest roll on its creature's table that is still worth a reveal. A Silver
+        // Magmafish leaps over Bobbin' Scriptures; Plhlegblast squirts its ink before the Squid Boots; the Taurus Helmet
+        // charges. Red, with the Chain: nothing here outranks a Severed Pincer.
+        BOBBIN("Bobbin' Scriptures", Heat.RED, Ending.BOBBIN, Creature.JAWBUS, "BOBBIN_SCRIPTURES", "paper", false, 100, 0x5555FF,
+                "textures/item/island_relevant/crimson_isle/bobbin_time/bobbin_scriptures.png", Creature.RAGNAROK, Creature.PLHLEGBLAST),
+        SQUID_BOOTS("Squid Boots", Heat.RED, Ending.INK, Creature.PLHLEGBLAST, "SQUID_BOOTS", "leather_boots", false, 100, 0x55FF55, null),
+        TAURUS_HELMET("Taurus Helmet", Heat.RED, Ending.CHARGE, Creature.TAURUS, "TAURUS_HELMET", "TAURUS_HELMET", true, 50, 0x5555FF, null),
         CHAIN("Chain of the End Times", Heat.RED, Ending.PLAIN, Creature.RAGNAROK, "CHAIN_END_TIMES", "CHAIN_END_TIMES", true, 100, 0x5555FF),
         PINCER("Severed Pincer", Heat.RED, Ending.PINCER, Creature.SCUTTLER, "SEVERED_PINCER", "SEVERED_PINCER", true, 500, 0x5555FF),
         FLASH("Flash I", Heat.ORANGE, Ending.FLASH, Creature.THUNDER, "ENCHANTMENT_ULTIMATE_FLASH_1", "enchanted_book", false, 67, 0xFF55FF),
@@ -86,8 +102,17 @@ public final class EruptionTimeline {
         public final int oneIn;
         /** Its name's colour: the item's rarity. */
         public final int colour;
+        /** Its icon in Hypixel's own pack (hypixel_skyblock namespace), drawn instead of {@link #art} when the pack is loaded; or null. */
+        public final String packIcon;
+        /** Other creatures that drop it too (Bobbin' Scriptures is on every mythic's table). */
+        public final Creature[] also;
 
         Drop(String title, Heat heat, Ending ending, Creature from, String id, String art, boolean head, int oneIn, int colour) {
+            this(title, heat, ending, from, id, art, head, oneIn, colour, null);
+        }
+
+        Drop(String title, Heat heat, Ending ending, Creature from, String id, String art, boolean head, int oneIn, int colour,
+             String packIcon, Creature... also) {
             this.title = title;
             this.heat = heat;
             this.ending = ending;
@@ -97,6 +122,8 @@ public final class EruptionTimeline {
             this.head = head;
             this.oneIn = oneIn;
             this.colour = colour;
+            this.packIcon = packIcon;
+            this.also = also;
         }
 
         public boolean win() {
@@ -105,7 +132,14 @@ public final class EruptionTimeline {
 
         /** Whether {@code c} can drop it. */
         public boolean from(Creature c) {
-            return this == BUST || from == null || from == c;
+            if (this == BUST || from == null || from == c) return true;
+            for (Creature a : also) if (a == c) return true;
+            return false;
+        }
+
+        /** About one in this many kills of {@code c}: the Carmine Dye is 1 in 50,000 but 1 in 2,500,000 from Taurus (the wiki). */
+        public int oneIn(Creature c) {
+            return this == CARMINE && c == Creature.TAURUS ? 2_500_000 : oneIn;
         }
     }
 
@@ -130,6 +164,14 @@ public final class EruptionTimeline {
         };
     }
 
+    /**
+     * The colour a drop's icon is dyed, or -1: Squid Boots are leather boots in NEU's {@code color:0} - black - lifted to
+     * an inky violet so they still read against the crust.
+     */
+    public static int artTint(Drop d) {
+        return d == Drop.SQUID_BOOTS ? 0x3E3858 : -1;
+    }
+
     public static String guaranteedId(Creature c) {
         return switch (c) {
             case JAWBUS -> "MAGMA_LORD_FRAGMENT";
@@ -152,6 +194,11 @@ public final class EruptionTimeline {
     /** The hold: the cone shudders, the heat flickers through every level. */
     public static final long HANG = 4300;
     public static final long REVEAL = 4800;
+    /**
+     * The menu's "Jawbus's entrance" (0.4.0): every Jawbus heaves up out of the lava with a roar before he sinks. The
+     * same on every Jawbus, so it tells nothing; the scene and the sound both read it.
+     */
+    public static boolean jawbusIntro = true;
     /** The fade at the very end of every run. */
     public static final long FADE = 400;
 
@@ -219,6 +266,16 @@ public final class EruptionTimeline {
             K_RESUME = R + 2400, K_SWELL = R + 2400, K_SWELL_TO = R + 3600, K_TENTACLES = R + 3200,
             K_TENTACLES_TO = R + 4800, K_EYE = R + 5000, K_EYE_TO = R + 5800, K_RISE = R + 6000, K_RISE_TO = R + 7400;
 
+    // Bobbin' Scriptures: a Silver Magmafish leaps out of the lava over it, twice.
+    public static final long[] B_LEAPS = {R + 650, R + 1250};
+    public static final long B_LEAP_MS = 520;
+    // Squid Boots: Plhlegblast's ink squirts up out of the vent three times and spreads over the lava, then the boots.
+    public static final long[] I_SQUIRTS = {R + 250, R + 560, R + 820};
+    public static final long I_INK = R + 250, I_INK_TO = R + 1100;
+    // The Taurus Helmet: it surges out and charges at the camera twice, hooves shaking the ground.
+    public static final long[] C_CHARGES = {R + 1350, R + 1800};
+    public static final long C_CHARGE_MS = 300;
+
     /** A bust's last beat: the crater block slumps into the vent with a puff of steam (the review, E9). */
     public static final long SLUMP = R + 520;
 
@@ -232,7 +289,9 @@ public final class EruptionTimeline {
     public long arrive() {
         return switch (drop.ending) {
             case BUST -> R + 700;
-            case PLAIN -> R + 1900;
+            case PLAIN, BOBBIN -> R + 1900;
+            case INK -> R + 2300;
+            case CHARGE -> R + 2500;
             case PINCER -> R + 2300;
             case FLASH -> R + 2300;
             case FORGE -> R + 3000;
@@ -247,7 +306,7 @@ public final class EruptionTimeline {
         return switch (drop.ending) {
             // A second shorter than it was: it sat for 2.5 s after the vent went dark (the review, E9).
             case BUST -> guaranteed(creature) != null ? R + 1800 : R + 1100;
-            case PLAIN, PINCER -> arrive() + 3200;
+            case PLAIN, PINCER, BOBBIN, INK, CHARGE -> arrive() + 3200;
             case FLASH -> arrive() + 3500;
             case FORGE -> arrive() + 3800;
             case VIAL, SHELL -> arrive() + 5000;
@@ -260,7 +319,9 @@ public final class EruptionTimeline {
     public long riseFrom() {
         return switch (drop.ending) {
             case BUST -> Long.MAX_VALUE;
-            case PLAIN, FLASH -> R + 500;
+            case PLAIN, FLASH, BOBBIN -> R + 500;
+            case INK -> R + 1150;
+            case CHARGE -> R + 300;
             case PINCER -> R + 1400;
             case FORGE -> R + 400;
             case VIAL -> V_FREE;
@@ -273,7 +334,9 @@ public final class EruptionTimeline {
     public long riseTo() {
         return switch (drop.ending) {
             case BUST -> Long.MAX_VALUE;
-            case PLAIN, FLASH -> R + 1300;
+            case PLAIN, FLASH, BOBBIN -> R + 1300;
+            case INK -> R + 1950;
+            case CHARGE -> R + 1100;
             case PINCER -> R + 1900;
             case FORGE -> R + 1400;
             case VIAL -> V_FREE + 500;
@@ -287,7 +350,9 @@ public final class EruptionTimeline {
     public long quenchFrom() {
         return switch (drop.ending) {
             case BUST -> Long.MAX_VALUE;
-            case PLAIN -> R + 1300;
+            case PLAIN, BOBBIN -> R + 1300;
+            case INK -> R + 1900;
+            case CHARGE -> R + 2050;
             case PINCER -> R + 1900;
             case FLASH -> R + 1400;
             case FORGE -> R + 2500;
@@ -452,6 +517,29 @@ public final class EruptionTimeline {
         float b = 0f;
         for (long a : at) if (t >= a) b = Math.max(b, (float) Math.exp(-(t - a) / 90.0));
         return b;
+    }
+
+    /** The fish's leap {@code i}: 0 as it breaks the surface .. 1 as it dives back in; -1 outside it. */
+    public float leap(long t, int i) {
+        if (drop.ending != Ending.BOBBIN || i < 0 || i >= B_LEAPS.length) return -1f;
+        float k = (t - B_LEAPS[i]) / (float) B_LEAP_MS;
+        return k < 0f || k > 1f ? -1f : k;
+    }
+
+    /** Plhlegblast's ink over the lava, 0..1 (its reach, from the vent out). */
+    public float ink(long t) {
+        if (drop.ending != Ending.INK) return 0f;
+        return ease((t - I_INK) / (float) (I_INK_TO - I_INK)) * (1f - 0.6f * ease((t - arrive() - 600) / 1800f));
+    }
+
+    /** A charge's lunge, 0..1..0 over {@link #C_CHARGE_MS}; 0 between them. */
+    public float charge(long t) {
+        if (drop.ending != Ending.CHARGE) return 0f;
+        for (long at : C_CHARGES) {
+            float k = (t - at) / (float) C_CHARGE_MS;
+            if (k >= 0f && k < 1f) return (float) Math.sin(Math.PI * Math.pow(k, 0.6));
+        }
+        return 0f;
     }
 
     /** The radioactive green taking the lava, 0..1. */
