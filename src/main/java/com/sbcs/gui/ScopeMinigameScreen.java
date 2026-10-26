@@ -3,7 +3,9 @@ package com.sbcs.gui;
 import com.sbcs.SbcsClient;
 import com.sbcs.detect.DropDetector.DropResult;
 import com.sbcs.detect.DropDetector.Outcome;
+import com.sbcs.anim.PetTierTimeline;
 import com.sbcs.anim.SwingCurve;
+import com.sbcs.audio.PetTierSound;
 import com.sbcs.audio.SbcsAudio;
 import com.sbcs.render.MeshRenderer;
 import com.sbcs.render.TextureBank;
@@ -69,13 +71,8 @@ public class ScopeMinigameScreen extends Screen {
     private static final long FALL_MS       = 95;
     private static final long IMPACT_MS     = 300;
     /** Pet payoff: head lifts, spins, shrinks away. Short and punchy - the totem takes over right after. */
+    /** The pet reveal's length at the base speed - only the speed setting's reference now; PetTierTimeline times it. */
     private static final long PET_REVEAL_MS = 1500;
-    /**
-     * How long the pet's head holds in the middle with its card (name, rarity, price, count) before it shrinks away.
-     * Not part of BASE_TOTAL_MS, so the speed setting means what it did. The Scatha pet had no words at all (the review, T1).
-     */
-    private static final long PET_HOLD_MS = 2600;
-    private long petBaseMs;
     /** The pet's card, fixed when its drop is known: Coflnet id with its rarity, which pet of yours, after how many kills. */
     private String petPriceId;
     private int petNth, petKills;
@@ -102,12 +99,8 @@ public class ScopeMinigameScreen extends Screen {
     /** Guard rails on the scale factor, so a hand-edited config can't stall or skip the cutscene. */
     private static final float MIN_SPEED_SCALE = 0.35f, MAX_SPEED_SCALE = 3.5f;
 
-    /** How tall the flying head gets at the top of its arc, as a fraction of screen height. */
-    private static final float HEAD_REVEAL_FRAC = 0.34f;
-    /** Same, for a gemstone pile or a Dwarven O's block - a little smaller, since neither is the prize. */
+    /** How big a gemstone pile or a Dwarven O's block gets at the top of its arc, as a fraction of screen height. */
     private static final float ITEM_REVEAL_FRAC = 0.28f;
-    /** Full turns the head makes on its way out. */
-    private static final float HEAD_TURNS = 3f;
 
     private static final int PARTS = 6;        // five body parts plus the head
 
@@ -115,7 +108,6 @@ public class ScopeMinigameScreen extends Screen {
     private static Identifier id(String path) { return Identifier.fromNamespaceAndPath(NS, path); }
 
 
-    private static final Identifier SEG_HEAD = id("textures/gui/sbcs/seg_head.png");
     private static final Identifier CUT_FLASH = id("textures/gui/sbcs/cut_flash.png");
 
     private static final Identifier BLOCK_BRAN = id("textures/gui/sbcs/block_bran.png");
@@ -160,7 +152,7 @@ public class ScopeMinigameScreen extends Screen {
 
     // Every phase length, already scaled by the menu's speed setting.
     private final long introMs, readyMs, raiseMs, fallMs, impactMs;
-    private final long petRevealMs, dropRevealMs, flashMs, fadeOutMs, sparkMs, cleaverExitMs;
+    private final long dropRevealMs, flashMs, fadeOutMs, sparkMs, cleaverExitMs;
 
     private Phase phase = Phase.INTRO;
     private long phaseStart = System.currentTimeMillis();
@@ -205,8 +197,6 @@ public class ScopeMinigameScreen extends Screen {
         this.raiseMs = scaled(RAISE_MS, scale);
         this.fallMs = scaled(FALL_MS, scale);
         this.impactMs = scaled(IMPACT_MS, scale);
-        this.petRevealMs = scaled(PET_REVEAL_MS, scale) + PET_HOLD_MS;
-        this.petBaseMs = scaled(PET_REVEAL_MS, scale);
         this.dropRevealMs = scaled(DROP_REVEAL_MS, scale);
         this.flashMs = scaled(FLASH_MS, scale);
         this.fadeOutMs = scaled(FADE_OUT_MS, scale);
@@ -253,6 +243,22 @@ public class ScopeMinigameScreen extends Screen {
             com.sbcs.config.SbcsStats st = com.sbcs.config.SbcsStats.get();
             petNth = st.petsRare + st.petsEpic + st.petsLegendary + 1;
             petKills = st.dryStreak + 1;
+            // Each rarity its own reveal (PetTierTimeline) - and none of it says which until the cycle lands.
+            PetTierTimeline.Tier tier = PetTierTimeline.Tier.of(r);
+            petTl = new PetTierTimeline(tier, seedMs);
+            int nthOfTier = 1 + switch (tier) {
+                case LEGENDARY -> st.petsLegendary;
+                case EPIC -> st.petsEpic;
+                case RARE -> st.petsRare;
+            };
+            petTl.note(test ? "Test run - not counted"
+                    : tier == PetTierTimeline.Tier.LEGENDARY
+                    ? "Your " + ChopScreen.ordinal(nthOfTier) + " Legendary Scatha, after " + String.format("%,d", petKills)
+                            + (petKills == 1 ? " kill" : " kills")
+                    : "Your " + ChopScreen.ordinal(petNth) + " Scatha pet, after " + String.format("%,d", petKills)
+                            + (petKills == 1 ? " kill" : " kills"));
+            petCues = PetTierSound.schedule(petTl);
+            petCueAt = 0;
         }
 
         // Does it get away?
@@ -277,6 +283,13 @@ public class ScopeMinigameScreen extends Screen {
         // looking like a scripted beat once you have seen a few.
         this.dodgeUp = rng.nextBoolean();
     }
+
+    /** The pet's reveal, per rarity; null unless the pet dropped. */
+    private PetTierTimeline petTl;
+    private java.util.List<com.sbcs.audio.HellionSound.Cue> petCues;
+    private int petCueAt;
+    /** The pet reveal's own pixel effects, one image (PixelLayer). */
+    private static final com.sbcs.render.PixelLayer PET_LAYER = new com.sbcs.render.PixelLayer("scatha_pet");
 
     /** Used only if the config could not be read. */
     private static final int DEFAULT_ESCAPE_CHANCE = 45;
@@ -470,7 +483,9 @@ public class ScopeMinigameScreen extends Screen {
                         // Deliberately here and not a moment earlier: the chime says how
                         // good the drop was, so playing it before the reveal would hand
                         // the answer over exactly the way a chat line would.
-                        SbcsAudio.onReveal(reachesHead && result != null ? result.rarity : null);
+                        // A pet's sounds are its reveal's own cue list (PetTierSound): the same chime for every
+                        // rarity here, its own voice only once the cycle lands.
+                        if (!reachesHead || petTl == null) SbcsAudio.onReveal(null);
                         countDrop();
                         enter(Phase.REVEAL, now);
                         revealStart = now;
@@ -496,7 +511,35 @@ public class ScopeMinigameScreen extends Screen {
         }
     }
 
-    private long revealLengthMs() { return reachesHead ? petRevealMs : dropRevealMs; }
+    private long revealLengthMs() { return reachesHead && petTl != null ? petTl.total() : dropRevealMs; }
+
+    /** How late a pet reveal's cue may still play. */
+    private static final long STALE_CUE_MS = 1_000;
+
+    /** The pet reveal's sounds and the price's coins, whatever is due by {@code t} ms after the head came free. */
+    private void petSounds(long t) {
+        if (petCues == null) return;
+        while (petCueAt < petCues.size() && t >= petCues.get(petCueAt).at) {
+            com.sbcs.audio.HellionSound.Cue cue = petCues.get(petCueAt++);
+            if (cue.cut) SbcsAudio.silence();
+            if (t - cue.at > STALE_CUE_MS) continue;
+            SbcsAudio.playScatha(cue.voices);
+        }
+        if (petTl.price() <= 0 && (SbcsClient.config == null || SbcsClient.config.livePrices)) {
+            Long price = petPriceId == null ? null : com.sbcs.market.LivePrice.cached(petPriceId);
+            if (price != null && price > 0) petTl.price(price, "lowest BIN, " + petTl.tier().title.toLowerCase(java.util.Locale.ROOT));
+        }
+        if (petTl.price() > 0 && t >= petTl.countStart()) {
+            // Counted up, with the coins' ticks and their landing, as every other win's price is.
+            float k = Math.min(1f, (t - petTl.countStart()) / (float) PetTierTimeline.COUNT_MS);
+            int due = Math.min(12, (int) (k * 13));
+            while (petCoins <= due && petCoins < 13) SbcsAudio.onThawCoin(petCoins++);
+            if (k >= 1f && !petCoinsLanded) {
+                petCoinsLanded = true;
+                SbcsAudio.onThawCoinLand();
+            }
+        }
+    }
 
     /** The screen's edges: crystals in the Crystal Hollows' colours. */
     private final com.sbcs.render.CrystalVeins veins = new com.sbcs.render.CrystalVeins(openedAt);
@@ -523,7 +566,9 @@ public class ScopeMinigameScreen extends Screen {
             end = reachesHead ? com.sbcs.render.CrystalVeins.End.FLARE : com.sbcs.render.CrystalVeins.End.SHATTER;
             endT = Math.min(1f, (now - revealStart) / (reachesHead ? 1600f : 1000f));
         }
-        int flare = rarityRgb(reachesHead && result != null ? result.rarity : null);
+        // A pet's veins flare in its reveal's cycle - blue, violet, gold - and only land on its own colour with it.
+        int flare = reachesHead && petTl != null
+                ? petTl.colour(revealStart > 0 ? now - revealStart : 0) : rarityRgb(null);
         VEIN_LAYER.begin(sw, sh, com.sbcs.render.CrystalVeins.unitFor(sh));
         veins.draw(VEIN_LAYER, sw, sh, growth, end, endT, flare, sw / 2f, sh * 0.46f, alpha);
         VEIN_LAYER.end(g);
@@ -1528,13 +1573,11 @@ public class ScopeMinigameScreen extends Screen {
     // ------------------------------------------------- reveal
     private void drawReveal(GuiGraphicsExtractor g, int sw, int sh, long now,
                             float partSize, float spacing, float chainLeft, float baseY) {
-        float rp = Math.min(1f, (now - revealStart) / (float) revealLengthMs());
-        long held = 0;
-        if (reachesHead && petBaseMs > 0) {
-            long e = now - revealStart, hold = revealLengthMs() - petBaseMs, at = (long) (petBaseMs * 0.78f);
-            held = Math.max(0, Math.min(hold, e - at));
-            rp = Math.min(1f, (e - held) / (float) petBaseMs);
+        if (reachesHead && petTl != null) {
+            drawPetReveal(g, sw, sh, now, partSize);
+            return;
         }
+        float rp = Math.min(1f, (now - revealStart) / (float) revealLengthMs());
         float cx = sw / 2f, cy = sh * 0.46f;
 
         // Every outcome gets the same move: the drop lifts off the block, arcs into
@@ -1568,14 +1611,9 @@ public class ScopeMinigameScreen extends Screen {
             originX = from[0];
             originY = from[1];
         }
-        if (reachesHead) {
-            tex = SEG_HEAD;          // unused for the pet: the head is a real mesh below
-            endFrac = HEAD_REVEAL_FRAC;
-        } else {
-            // whatever fell out of the last cut, so it comes from where the blade landed
-            tex = result != null && result.outcome == Outcome.BLOCKED ? BLOCK_BRAN : GEMSTONES;
-            endFrac = ITEM_REVEAL_FRAC;
-        }
+        // whatever fell out of the last cut, so it comes from where the blade landed
+        tex = result != null && result.outcome == Outcome.BLOCKED ? BLOCK_BRAN : GEMSTONES;
+        endFrac = ITEM_REVEAL_FRAC;
 
         // Held back while the item is still riding the worm, so the pop is its own beat
         // rather than the start of the flight to the middle of the screen.
@@ -1609,104 +1647,135 @@ public class ScopeMinigameScreen extends Screen {
         float is = lerp(partSize, sh * endFrac, travel) * (1f - shrink);
         if (is < 1f) return;   // shrunk away; nothing left to draw
 
-        if (reachesHead) {
-            // The pet head is the real model, turning on its own axis.
-            //
-            // It used to be the flat seg_head.png "spinning" by having its width pinched
-            // to nothing and opened out again - the only rotation a 2D blit can fake, and
-            // it always read as a card flipping rather than a head turning. There is a
-            // head mesh and a projection now, so it simply turns: same arc, same timing,
-            // same number of turns, just actual geometry.
-            float spin = (float) Math.pow(rp, 1.5) * HEAD_TURNS * 360f + 10f * (float) Math.sin(held / 420.0);
-            petRays(g, ix, iy, is, travel, shrink, now - revealStart);
-            meshes.begin();
-            // Sized so the mesh ends up the same height on screen the sprite did, and
-            // pitched a little further over than the scene camera so the turn reads.
-            meshes.camera(ModelProjection.Camera.of(spin, REVEAL_PITCH,
-                    is / Math.max(1f, PlayerHeadMesh.HEAD + 2 * PlayerHeadMesh.HAT_INFLATE)));
-            meshes.add(CutsceneScene.headMesh(), ScathaModels.textureName(ScathaSkins.Part.HEAD),
-                    0f, 0f, 0f, 0f, 0xFFFFFFFF, true, false, true);
-            meshes.flush(g, ix, iy, 0xFF000000, Math.max(1.5f, sw / 640f));
-            petCard(g, sw, sh, cx, cy, is, travel, shrink, held);
-            return;
-        }
-
         drawTex(g, tex, ix - is / 2f, iy - is / 2f, is, is);
-    }
-
-    /**
-     * The pet's card while its head holds in the middle: Hypixel's "PET DROP!" above, then the name in its rarity's
-     * colour, the price at its rarity (Coflnet's lowest BIN), which pet of yours and after how many kills.
-     */
-    private void petCard(GuiGraphicsExtractor g, int sw, int sh, float cx, float cy, float headSize, float travel, float shrink, long held) {
-        if (travel < 0.98f) return;
-        float a = Math.min(1f, held / 220f) * (1f - Math.min(1f, shrink * 3f));
-        if (a <= 0.03f) return;
-        float ts = Math.max(1f, Math.min(2f, sh / 240f));
-        int alpha = Math.round(255 * a) << 24;
-        String r = result == null || result.rarity == null ? "unknown" : result.rarity;
-        int rgb = rarityRgb(r) & 0xFFFFFF;
-        float top = cy - headSize / 2f - 12f * ts, below = cy + headSize / 2f + 10f * ts;
-        cardText(g, "PET DROP!", cx, top, 1.5f * ts, alpha | 0xFFAA00);
-        String rarity = r.equals("unknown") ? "" : Character.toUpperCase(r.charAt(0)) + r.substring(1) + " ";
-        // The name stamped out a letter at a time, centred on the whole of it so it does not slide.
-        String name = rarity + "Scatha";
-        int n = (int) Math.min(name.length(), held / 45);
-        if (n > 0) {
-            float shift = (font.width(name.substring(0, n)) - font.width(name)) / 2f * 1.6f * ts;
-            cardText(g, name.substring(0, n), cx + shift, below, 1.6f * ts, alpha | rgb);
-        }
-        float y = below + 15f * ts;
-        Long price = petPriceId == null ? null : com.sbcs.market.LivePrice.cached(petPriceId);
-        if (price != null && price > 0 && (SbcsClient.config == null || SbcsClient.config.livePrices)) {
-            // Counted up, with the coins' ticks and their landing, as every other win's price is.
-            float k = Math.max(0f, Math.min(1f, (held - 500) / 900f));
-            long shown = Math.round(price * (1f - (1f - k) * (1f - k) * (1f - k)));
-            int due = k <= 0f ? -1 : Math.min(12, (int) (k * 13));
-            while (petCoins <= due && petCoins < 13) SbcsAudio.onThawCoin(petCoins++);
-            if (k >= 1f && !petCoinsLanded) {
-                petCoinsLanded = true;
-                SbcsAudio.onThawCoinLand();
-            }
-            cardText(g, String.format("%,d coins", shown), cx, y, 1.2f * ts, alpha | 0xFFD84A);
-            y += 9f * ts;
-            cardText(g, "lowest BIN, " + r, cx, y, 0.75f * ts, alpha | 0x9A9A9A);
-            y += 11f * ts;
-        }
-        if (test) {
-            cardText(g, "Test run - not counted", cx, y, 0.9f * ts, alpha | 0xBBBBBB);
-        } else {
-            cardText(g, "Your " + ChopScreen.ordinal(petNth) + " Scatha pet, after " + String.format("%,d", petKills)
-                    + (petKills == 1 ? " kill" : " kills"), cx, y, 0.9f * ts, alpha | 0xDDDDDD);
-        }
     }
 
     private int petCoins;
     private boolean petCoinsLanded;
 
-    /** Pixel rays in the pet's rarity colour, turning behind its head while it holds (the review, T4). */
-    private void petRays(GuiGraphicsExtractor g, float x, float y, float headSize, float travel, float shrink, long e) {
-        Identifier rays = com.sbcs.render.TextureBank.id(com.sbcs.render.art.ChopArt.TEX_RAYS);
-        if (rays == null || travel < 0.6f) return;
-        float a = Math.min(1f, (travel - 0.6f) / 0.4f) * (1f - Math.min(1f, shrink * 2f));
-        if (a <= 0.02f) return;
-        String r = result == null || result.rarity == null ? "unknown" : result.rarity;
-        int rgb = rarityRgb(r) & 0xFFFFFF;
-        int tw = com.sbcs.render.TextureBank.width(com.sbcs.render.art.ChopArt.TEX_RAYS);
-        int th = com.sbcs.render.TextureBank.height(com.sbcs.render.art.ChopArt.TEX_RAYS);
-        for (int layer = 0; layer < 2; layer++) {
-            float size = headSize * (layer == 0 ? 3.2f : 2.1f);
-            float turn = (layer == 0 ? 1f : -1.6f) * e / 60f;
-            int col = layer == 0 ? rgb : 0xFFFFFF;
-            float la = a * (layer == 0 ? 0.55f : 0.3f);
+    /**
+     * The pet's reveal (render/PetTierScene): the head flies to the middle, the cycle lands on its rarity and that
+     * rarity's own ending and card play. Drawn through {@link RevealCanvas} so it is the same code the offline preview
+     * and PetTierTest run.
+     */
+    private void drawPetReveal(GuiGraphicsExtractor g, int sw, int sh, long now, float partSize) {
+        long e = Math.max(0, now - revealStart);
+        petSounds(e);
+        // Dim the cavern back so the head carries the frame.
+        float dim = easeOutCubic(Math.min(1f, e / 700f));
+        fillFull(g, sw, sh, (int) (170 * dim) << 24);
+        float[] from = partOnScreen(PARTS - 1, sw, sh, now, 0f);
+        com.sbcs.render.ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
+        PET_LAYER.begin(sw, sh, com.sbcs.render.CrystalVeins.unitFor(sh));
+        boolean[] flushed = {false};
+        Runnable flush = () -> {
+            if (flushed[0]) return;
+            flushed[0] = true;
+            PET_LAYER.end(g);
+        };
+        RevealCanvas canvas = new RevealCanvas(g);
+        com.sbcs.render.PetTierScene.draw(canvas, PET_LAYER, flush, petTl, e, sw, sh, from[0], from[1], partSize);
+        flush.run();
+    }
+
+    /** ChopScene's canvas over the GUI, for the pet reveal - as HellionScreen draws it. */
+    private final class RevealCanvas implements com.sbcs.render.ChopScene.Canvas {
+        private final GuiGraphicsExtractor g;
+        private final org.joml.Matrix3x2f matrix = new org.joml.Matrix3x2f();
+
+        RevealCanvas(GuiGraphicsExtractor g) {
+            this.g = g;
+        }
+
+        @Override
+        public void quad(String tex, float ox, float oy, float ux, float uy, float vx, float vy, int u0, int v0, int uw, int vh, int argb) {
+            Identifier id = TextureBank.id(tex);
+            if (id == null || uw <= 0 || vh <= 0) return;
+            matrix.set(ux / uw, uy / uw, vx / vh, vy / vh, ox, oy);
+            Matrix3x2fStack pose = g.pose();
+            pose.pushMatrix();
+            pose.mul(matrix);
+            g.blit(RenderPipelines.GUI_TEXTURED, id, 0, 0, u0, v0, uw, vh, TextureBank.width(tex), TextureBank.height(tex), argb);
+            pose.popMatrix();
+        }
+
+        @Override
+        public void sprite(String tex, float cx, float cy, float w, float h, float rot, int argb) {
+            if ((argb >>> 24) < 2 || w < 0.5f || h < 0.5f) return;
+            Identifier id = TextureBank.id(tex);
+            if (id == null) return;
+            int tw = TextureBank.width(tex), th = TextureBank.height(tex);
+            Matrix3x2fStack pose = g.pose();
+            pose.pushMatrix();
+            pose.translate(cx, cy);
+            if (rot != 0f) pose.rotate((float) Math.toRadians(rot));
+            pose.scale(w / tw, h / th);
+            pose.translate(-tw / 2f, -th / 2f);
+            g.blit(RenderPipelines.GUI_TEXTURED, id, 0, 0, 0, 0, tw, th, tw, th, argb);
+            pose.popMatrix();
+        }
+
+        @Override
+        public void line(float x0, float y0, float x1, float y1, float width, int argb) {
+            float dx = x1 - x0, dy = y1 - y0;
+            float len = (float) Math.sqrt(dx * dx + dy * dy);
+            if (len < 0.05f || (argb >>> 24) < 3) return;
+            Matrix3x2fStack pose = g.pose();
+            pose.pushMatrix();
+            pose.translate(x0, y0);
+            pose.rotate((float) Math.atan2(dy, dx));
+            pose.translate(-width / 2f, -width / 2f);
+            pose.scale(len + width, width);
+            g.fill(0, 0, 1, 1, argb);
+            pose.popMatrix();
+        }
+
+        @Override
+        public void fill(float x, float y, float w, float h, int argb) {
+            if ((argb >>> 24) < 3) return;
             Matrix3x2fStack pose = g.pose();
             pose.pushMatrix();
             pose.translate(x, y);
-            pose.rotate((float) Math.toRadians(turn));
-            pose.scale(size / tw, size / th);
-            pose.translate(-tw / 2f, -th / 2f);
-            g.blit(RenderPipelines.GUI_TEXTURED, rays, 0, 0, 0, 0, tw, th, tw, th, Math.round(255 * la) << 24 | col);
+            pose.scale(w, h);
+            g.fill(0, 0, 1, 1, argb);
             pose.popMatrix();
+        }
+
+        @Override public void item(float cx, float cy, float size, float alpha, float yaw) { }
+
+        @Override public String creatureSkin(com.sbcs.anim.ChopTimeline.Creature creature) { return null; }
+
+        /** The worm's head: the standard skin layout the box renderer needs, captured or the placeholder. */
+        @Override public String dropSkin() { return ScathaSkins.textureName(ScathaSkins.Part.HEAD); }
+
+        @Override
+        public String bestiarySkin(String key) {
+            return com.sbcs.render.PetTierScene.BODY_SKIN.equals(key) ? ScathaSkins.textureName(ScathaSkins.Part.BODY) : null;
+        }
+
+        @Override
+        public void name(float cx, float cy, float scale, int argb, int letters) {
+            String full = petTl.tier().title + " Scatha";
+            int n = Math.min(letters, full.length());
+            if (n <= 0) return;
+            plate(cx, cy, scale, font.width(full), argb);
+            String part = full.substring(0, n);
+            float shift = (font.width(part) - font.width(full)) / 2f * scale;
+            cardText(g, part, cx + shift, cy, scale, argb);
+        }
+
+        @Override
+        public void text(String text, float cx, float cy, float scale, int argb) {
+            plate(cx, cy, scale, font.width(text), argb);
+            cardText(g, text, cx, cy, scale, argb);
+        }
+
+        /** A dark plate behind a line, the whole line's width, as every cutscene's text has (the review, A3). */
+        private void plate(float cx, float cy, float scale, int textW, int argb) {
+            int a = Math.round((argb >>> 24) * 0.42f);
+            if (a < 4) return;
+            float w = (textW + 8) * scale, h = 12f * scale;
+            fill(Math.round(cx - w / 2f), Math.round(cy - h / 2f), Math.round(w), Math.round(h), a << 24 | 0x0B0709);
         }
     }
 
@@ -1728,8 +1797,6 @@ public class ScopeMinigameScreen extends Screen {
         pose.popMatrix();
     }
 
-    /** The reveal looks down on the head a little less steeply than the scene does. */
-    private static final float REVEAL_PITCH = -12f;
     /** Firework and pet-head popup. Deliberately fired while this screen is still up. */
     private void firePetPayoff() {
         if (payoffFired) return;
