@@ -168,7 +168,7 @@ public final class DianaWatcher {
     }
 
     /** Some lines reach us with their colour codes still in the text. */
-    static String plain(String s) {
+    public static String plain(String s) {
         return s.replaceAll("§.", "").strip();
     }
 

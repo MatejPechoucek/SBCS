@@ -364,7 +364,7 @@ public class SbcsClient implements ClientModInitializer {
 
         @Override
         public void resolve(com.sbcs.anim.HellionTimeline.Drop drop, String line) {
-            if (drop.win() && underFloor(drop.id)) drop = com.sbcs.anim.HellionTimeline.Drop.BUST;
+            if (drop.win() && (underFloor(drop.id) || belowTier("blaze", com.sbcs.detect.HellionDrops.freshTier()))) drop = com.sbcs.anim.HellionTimeline.Drop.BUST;
             boolean screen = currentHellion != null && currentHellion.isActive() && currentHellion.pending() && !currentHellion.isTest();
             if (screen && currentHellion.resolve(drop)) {
                 decisions.note("§aBlaze: the kill's drop is " + (drop.win() ? drop.title : "nothing the animation plays - bust"));
@@ -377,7 +377,7 @@ public class SbcsClient implements ClientModInitializer {
 
         @Override
         public void killKnown(com.sbcs.anim.HellionTimeline.Drop drop, String line) {
-            com.sbcs.anim.HellionTimeline.Drop dr = drop.win() && underFloor(drop.id) ? com.sbcs.anim.HellionTimeline.Drop.BUST : drop;
+            com.sbcs.anim.HellionTimeline.Drop dr = drop.win() && (underFloor(drop.id) || belowTier("blaze", com.sbcs.detect.HellionDrops.freshTier())) ? com.sbcs.anim.HellionTimeline.Drop.BUST : drop;
             if (!dr.win() && bustStyle("blaze") == 2) {
                 countUnplayed("blaze", null, "Blaze: the bust (busts are off)");
                 return;
@@ -398,9 +398,38 @@ public class SbcsClient implements ClientModInitializer {
      * every game line feed it, whichever animations are on - a Paragon Shard off a Revenant played Hellion (2026-10-25).
      */
     public static final com.sbcs.detect.SlayerQuest slayerQuest = new com.sbcs.detect.SlayerQuest();
+
+    /** The Revenant's and the Tarantula's good drops: the drop line opens the cutscene, its outcome known. */
+    private static final com.sbcs.detect.SlayerDropWatcher slayerDrops = new com.sbcs.detect.SlayerDropWatcher(decisions,
+            new com.sbcs.detect.SlayerDropWatcher.Listener() {
+            @Override
+            public void dryKill(com.sbcs.anim.SlayerTimeline.Source source) {
+                SbcsStats.get().onSource(source.key, null);
+            }
+
+            @Override
+            public void drop(com.sbcs.anim.SlayerTimeline.Drop drop, String tier, String line) {
+                String key = drop.source.key;
+                String what = drop.source.boss + ": " + drop.title;
+                boolean on = drop.source == com.sbcs.anim.SlayerTimeline.Source.REVENANT ? config.zombieAnimation : config.spiderAnimation;
+                String word = tier != null ? tier : com.sbcs.anim.SlayerTimeline.Tier.RNGESUS.word;
+                if (!on || belowTier(key, word) || underFloor(drop.priceId)) {
+                    countUnplayed(key, drop.title, what + (on ? "" : " (turned off in the menu)"));
+                    return;
+                }
+                Runnable open = () -> openSlayer(drop, false, tier);
+                if (isAnimationPlaying()) {
+                    if (!makeRoom(true, what)) waitForTurn(open, true, what);
+                    else open.run();
+                    return;
+                }
+                open.run();
+            }
+            });
     static {
         hellionWatcher.quest = slayerQuest;
         seraphWatcher.quest = slayerQuest;
+        slayerDrops.quest = slayerQuest;
     }
     private static int sidebarTicks;
 
@@ -935,10 +964,24 @@ public class SbcsClient implements ClientModInitializer {
                     return 1;
                 }));
             }
+            LiteralArgumentBuilder<FabricClientCommandSource> zombieNode = ClientCommands.literal("zombie");
+            LiteralArgumentBuilder<FabricClientCommandSource> spiderNode = ClientCommands.literal("spider");
+            for (com.sbcs.anim.SlayerTimeline.Drop d : com.sbcs.anim.SlayerTimeline.Drop.values()) {
+                String word = d.name().toLowerCase(java.util.Locale.ROOT);
+                (d.source == com.sbcs.anim.SlayerTimeline.Source.REVENANT ? zombieNode : spiderNode)
+                        .then(ClientCommands.literal(word).executes(ctx -> {
+                            Minecraft.getInstance().execute(() -> openSlayer(d, true, null));
+                            return 1;
+                        }));
+            }
             LiteralArgumentBuilder<FabricClientCommandSource> slayerNode = ClientCommands.literal("slayer")
                     .executes(ctx -> options(ctx, "test slayer",
+                            "zombie", "Exhumed - the Revenant Horror",
+                            "spider", "The Brood - the Tarantula Broodfather",
                             "blaze", "Hellion - the Inferno Demonlord",
                             "enderman", "The Seraph's Glyph - the Voidgloom Seraph"))
+                    .then(zombieNode)
+                    .then(spiderNode)
                     .then(blazeNode)
                     .then(endermanNode);
 
@@ -1412,6 +1455,7 @@ public class SbcsClient implements ClientModInitializer {
         switch (group) {
             case "diana" -> openChop(com.sbcs.anim.ChopTimeline.Verdict.valueOf(name), null, true);
             case "blaze" -> openHellion(com.sbcs.anim.HellionTimeline.Drop.valueOf(name), true);
+            case "zombie", "spider" -> openSlayer(com.sbcs.anim.SlayerTimeline.Drop.valueOf(name), true, null);
             case "nucleus" -> openVault(com.sbcs.anim.VaultTimeline.Prize.test(name), true);
             case "dungeon" -> {
                 // "F7:jackpot" - a floor and an outcome, rolled on that floor's best chest (Bedrock from Floor V).
@@ -1469,6 +1513,7 @@ public class SbcsClient implements ClientModInitializer {
     private static com.sbcs.gui.Cutscene currentCutscene() {
         if (chopActive()) return currentChop;
         if (hellionActive()) return currentHellion;
+        if (slayerActive()) return currentSlayer;
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
         if (vaultActive()) return currentVault;
@@ -1542,6 +1587,7 @@ public class SbcsClient implements ClientModInitializer {
     private static void clearFinished() {
         if (currentChop != null && !currentChop.isActive()) currentChop = null;
         if (currentHellion != null && !currentHellion.isActive()) currentHellion = null;
+        if (currentSlayer != null && !currentSlayer.isActive()) currentSlayer = null;
         if (currentSeraph != null && !currentSeraph.isActive()) currentSeraph = null;
         if (currentEruption != null && !currentEruption.isActive()) currentEruption = null;
         if (currentVault != null && !currentVault.isActive()) {
@@ -1605,7 +1651,7 @@ public class SbcsClient implements ClientModInitializer {
 
     private static boolean isAnimationPlaying() {
         return animationManager.isPlaying() || (currentScope != null && currentScope.isActive()) || thawActive()
-                || chopActive() || hellionActive() || seraphActive() || eruptionActive() || vaultActive();
+                || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive();
     }
 
     /** "Eruption", lava fishing's animation, while it plays. */
@@ -1620,6 +1666,21 @@ public class SbcsClient implements ClientModInitializer {
         if (!mayOpen("lava", test)) return;
         com.sbcs.gui.EruptionScreen screen = new com.sbcs.gui.EruptionScreen(creature, drop, test);
         currentEruption = screen;
+        com.sbcs.render.CutsceneHud.show(screen);
+    }
+
+    /** "Exhumed" or "The Brood", the Revenant's or the Tarantula's drop animation, while it plays. */
+    private static com.sbcs.gui.SlayerScreen currentSlayer;
+
+    private static boolean slayerActive() {
+        return currentSlayer != null && currentSlayer.isActive();
+    }
+
+    /** Opens the Revenant's or the Tarantula's cutscene for a known drop; {@code tier} the line's word (null in tests). */
+    public static void openSlayer(com.sbcs.anim.SlayerTimeline.Drop drop, boolean test, String tier) {
+        if (!mayOpen(drop.source.key, test)) return;
+        com.sbcs.gui.SlayerScreen screen = new com.sbcs.gui.SlayerScreen(drop, test, tier);
+        currentSlayer = screen;
         com.sbcs.render.CutsceneHud.show(screen);
     }
 
@@ -1681,6 +1742,7 @@ public class SbcsClient implements ClientModInitializer {
         if (currentScope != null && currentScope.isActive()) return currentScope;
         if (chopActive()) return currentChop;
         if (hellionActive()) return currentHellion;
+        if (slayerActive()) return currentSlayer;
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
         if (vaultActive()) return currentVault;
@@ -1697,7 +1759,7 @@ public class SbcsClient implements ClientModInitializer {
      * still running.
      */
     public static boolean cutsceneOwnsScreen() {
-        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || seraphActive() || eruptionActive() || vaultActive();
+        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive();
     }
 
     /**
@@ -1845,6 +1907,10 @@ public class SbcsClient implements ClientModInitializer {
         if (game && config.lavaAnimation) Safety.run("lava", () -> lavaWatcher.onChatLine(text));
         if (game) Safety.run("slayer", () -> slayerQuest.onGameLine(text, System.currentTimeMillis()));
         if (game && seraphOn()) Safety.run("seraph", () -> seraphWatcher.onChatLine(text));
+        if (game) Safety.run("slayer", () -> {
+            if (slayerDrops.self == null && Minecraft.getInstance().player != null) slayerDrops.self = Minecraft.getInstance().player.getGameProfile().name();
+            slayerDrops.onChatLine(com.sbcs.detect.DianaWatcher.plain(text), System.currentTimeMillis());
+        });
         if (game && config.blazeAnimation) Safety.run("blaze", () -> hellionWatcher.onChatLine(text));
         if (game && config.fishingAnnounce && Safety.on("shark")) {
             Safety.run("shark", () -> sharkWatcher.onChatLine(text));
@@ -2419,6 +2485,7 @@ public class SbcsClient implements ClientModInitializer {
     private static String safetyKey(net.minecraft.client.gui.screens.Screen s) {
         if (s instanceof com.sbcs.gui.ChopScreen) return "diana";
         if (s instanceof com.sbcs.gui.HellionScreen) return "blaze";
+        if (s instanceof com.sbcs.gui.SlayerScreen sl) return sl.drop().source.key;
         if (s instanceof com.sbcs.gui.SeraphScreen) return "seraph";
         if (s instanceof com.sbcs.gui.EruptionScreen) return "lava";
         if (s instanceof com.sbcs.gui.VaultScreen) return "nucleus";
@@ -2486,6 +2553,7 @@ public class SbcsClient implements ClientModInitializer {
         com.sbcs.render.CutsceneHud.clear();
         currentChop = null;
         currentHellion = null;
+        currentSlayer = null;
         currentSeraph = null;
         currentEruption = null;
         currentVault = null;
@@ -2526,6 +2594,7 @@ public class SbcsClient implements ClientModInitializer {
         PatternConfig c = config;
         if (c == null) return false;
         if (c.blazeAnimation && (hellionActive() || hellionWatcher.armed())) return true;
+        if (slayerActive()) return true;
         return seraphOn() && (seraphActive() || seraphWatcher.armed());
     }
 

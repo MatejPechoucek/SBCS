@@ -224,6 +224,13 @@ public class PatternConfig {
     /** How fast Wisp plays, in percent (50-200): the whole of it, picture and cues together. */
     public int ghostSpeed = 100;
 
+    /** "Exhumed" (the Revenant Horror) and "The Brood" (the Tarantula Broodfather): a cutscene on a good slayer drop. */
+    public boolean zombieAnimation = true, spiderAnimation = true;
+    public boolean zombieBanner = true, spiderBanner = true;
+    public boolean zombiePrice = true, spiderPrice = true;
+    public int zombieVolume = 100, spiderVolume = 100;
+    public int zombieSpeed = 100, spiderSpeed = 100;
+
     /** "Hellion": the cutscene on every kill of the player's own tier IV Inferno Demonlord. */
     public boolean blazeAnimation = true;
     /** The HUD and chat fade once your Demonlord is at or below this many million HP (0 off). Max 150M. */
@@ -445,6 +452,10 @@ public class PatternConfig {
         dianaSize = clamp(dianaSize, 60, 140);
         blazeVolume = clamp(blazeVolume, 0, 150);
         blazeSpeed = clamp(blazeSpeed, 50, 200);
+        zombieVolume = clamp(zombieVolume, 0, 150);
+        spiderVolume = clamp(spiderVolume, 0, 150);
+        zombieSpeed = clamp(zombieSpeed, 50, 200);
+        spiderSpeed = clamp(spiderSpeed, 50, 200);
         blazeStage = clamp(blazeStage, 0, 2);
         seraphVolume = clamp(seraphVolume, 0, 150);
         seraphSpeed = clamp(seraphSpeed, 50, 200);

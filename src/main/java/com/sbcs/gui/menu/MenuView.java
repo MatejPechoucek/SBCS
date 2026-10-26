@@ -85,7 +85,7 @@ public final class MenuView {
 
     /** Each animation's own colour: its card, its bar, its switches and sliders. */
     static final int SCATHA = 0xFFB27BE6, VANGUARD = 0xFF72C6F2, DIANA = 0xFFE4573F, FIN = 0xFF3FB0D0,
-            WISP = 0xFFA9E4EE, LAVA = 0xFFFF8C2E, SLAYERS = 0xFFD04848, BLAZE = 0xFFFFA238, SERAPH = 0xFFA36BF5,
+            WISP = 0xFFA9E4EE, LAVA = 0xFFFF8C2E, SLAYERS = 0xFFD04848, BLAZE = 0xFFFFA238, ZOMBIE = 0xFF6FBF4A, SPIDER = 0xFFC8423A, SERAPH = 0xFFA36BF5,
             NUCLEUS = 0xFF55D8FF, OSSUARY = 0xFFD9C9A3;
 
     // ------------------------------------------------------------------ state (kept while the game runs)
@@ -704,10 +704,34 @@ public final class MenuView {
 
     /** The slayers: one card, each boss its own card inside it. */
     private void slayerRows(List<Row> rows, PatternConfig cfg) {
-        if (!group(rows, "slayers", "Slayers", com.sbcs.Maintenance.SERAPH ? "Hellion (the Seraph's Glyph is on its way)" : "Hellion and the Seraph's Glyph", "diamond_sword", SLAYERS, null, null)) return;
+        if (!group(rows, "slayers", "Slayers", com.sbcs.Maintenance.SERAPH ? "Revenant, Tarantula and Hellion (the Seraph's Glyph is on its way)" : "Revenant, Tarantula, Hellion and the Seraph's Glyph", "diamond_sword", SLAYERS, null, null)) return;
         curIndent = 0;
         int outer = curIndent;
         curIndent = outer + 9;
+        if (group(rows, "zombie", "Revenant Horror - Exhumed", "Your good Revenant drops", "rotten_flesh", ZOMBIE, cfg.zombieAnimation,
+                () -> { cfg.zombieAnimation = !cfg.zombieAnimation; cfg.save(); })) {
+            rows.add(new NoticeRow("Plays when one of your Revenant Horrors drops something good - the drop line starts it, every drop its own ending."));
+            tierRow(rows, cfg.zombieTier, v -> cfg.zombieTier = v, cfg);
+            rows.add(new SectionRow("The endings"));
+            rows.add(toggle("Drop banner", cfg.zombieBanner, () -> cfg.zombieBanner = !cfg.zombieBanner, cfg));
+            rows.add(toggle("Show the price", cfg.zombiePrice, () -> cfg.zombiePrice = !cfg.zombiePrice, cfg));
+            rows.add(new SliderRow("zombie_volume", "Volume", cfg.zombieVolume, 0, 150, 5, v -> cfg.zombieVolume = v, v -> v + "%"));
+            speedRow(rows, "zombie_speed", cfg.zombieSpeed, v -> cfg.zombieSpeed = v);
+            tryRows(rows, "zombie", slayerDrops(com.sbcs.anim.SlayerTimeline.Source.REVENANT),
+                    n -> com.sbcs.anim.SlayerTimeline.Drop.valueOf(n).title);
+        }
+        if (group(rows, "spider", "Tarantula Broodfather - The Brood", "Your good Tarantula drops", "spider_eye", SPIDER, cfg.spiderAnimation,
+                () -> { cfg.spiderAnimation = !cfg.spiderAnimation; cfg.save(); })) {
+            rows.add(new NoticeRow("Plays when one of your Tarantula Broodfathers drops something good - the drop line starts it, every drop its own ending."));
+            tierRow(rows, cfg.spiderTier, v -> cfg.spiderTier = v, cfg);
+            rows.add(new SectionRow("The endings"));
+            rows.add(toggle("Drop banner", cfg.spiderBanner, () -> cfg.spiderBanner = !cfg.spiderBanner, cfg));
+            rows.add(toggle("Show the price", cfg.spiderPrice, () -> cfg.spiderPrice = !cfg.spiderPrice, cfg));
+            rows.add(new SliderRow("spider_volume", "Volume", cfg.spiderVolume, 0, 150, 5, v -> cfg.spiderVolume = v, v -> v + "%"));
+            speedRow(rows, "spider_speed", cfg.spiderSpeed, v -> cfg.spiderSpeed = v);
+            tryRows(rows, "spider", slayerDrops(com.sbcs.anim.SlayerTimeline.Source.TARANTULA),
+                    n -> com.sbcs.anim.SlayerTimeline.Drop.valueOf(n).title);
+        }
         if (group(rows, "blaze", "Inferno Demonlord - Hellion", "Every kill of your own tier IV Demonlord", "blaze_rod", BLAZE, cfg.blazeAnimation,
                 () -> { cfg.blazeAnimation = !cfg.blazeAnimation; cfg.save(); })) {
             rows.add(new NoticeRow("Plays on every kill of your own tier IV Demonlord, the moment it dies; the drop decides the ending."));
@@ -724,6 +748,7 @@ public final class MenuView {
             rows.add(toggle("Land the hits yourself (left click)", cfg.blazeClick, () -> cfg.blazeClick = !cfg.blazeClick, cfg));
             if (cfg.blazeClick) rows.add(new NoticeRow("Each hit waits for your click; leave it and the fight carries on by itself. The drop is the same either way."));
             rows.add(new SectionRow("The endings"));
+            tierRow(rows, cfg.blazeTier, v -> cfg.blazeTier = v, cfg);
             rows.add(toggle("Drop banner (RARE DROP! and up)", cfg.blazeBanner, () -> cfg.blazeBanner = !cfg.blazeBanner, cfg));
             rows.add(toggle("Show the price", cfg.blazePrice, () -> cfg.blazePrice = !cfg.blazePrice, cfg));
             rows.add(new SliderRow("blaze_volume", "Volume", cfg.blazeVolume, 0, 150, 5, v -> cfg.blazeVolume = v, v -> v + "%"));
@@ -746,6 +771,7 @@ public final class MenuView {
                     v -> cfg.seraphHidePct = v, v -> v == 0 ? "Off" : v + "% HP"));
             rows.add(new NoticeRow("The HUD and chat fade out when your Seraph gets this low, so nothing gives the drop away."));
             rows.add(new SectionRow("The endings"));
+            tierRow(rows, cfg.seraphTier, v -> cfg.seraphTier = v, cfg);
             rows.add(toggle("Drop banner (RARE DROP! and up)", cfg.seraphBanner, () -> cfg.seraphBanner = !cfg.seraphBanner, cfg));
             rows.add(toggle("Show the price", cfg.seraphPrice, () -> cfg.seraphPrice = !cfg.seraphPrice, cfg));
             rows.add(new SliderRow("seraph_volume", "Volume", cfg.seraphVolume, 0, 150, 5, v -> cfg.seraphVolume = v, v -> v + "%"));
@@ -755,6 +781,20 @@ public final class MenuView {
                     n -> com.sbcs.anim.SeraphTimeline.Drop.valueOf(n).title);
         }
         curIndent = outer;
+    }
+
+    /** "Plays for": the lowest drop tier a slayer's ending plays for; anything under it is a bust (or nothing). */
+    private void tierRow(List<Row> rows, int value, IntConsumer set, PatternConfig cfg) {
+        String[] tiers = {"Very Rare and up", "Crazy Rare and up", "RNGesus drops only"};
+        int v = Math.max(0, Math.min(2, value));
+        rows.add(new ValueRow("Plays for", tiers[v], v != 0, () -> { set.accept((v + 1) % 3); cfg.save(); },
+                () -> { set.accept((v + 2) % 3); cfg.save(); }));
+    }
+
+    private static List<String> slayerDrops(com.sbcs.anim.SlayerTimeline.Source source) {
+        List<String> out = new ArrayList<>();
+        for (com.sbcs.anim.SlayerTimeline.Drop d : com.sbcs.anim.SlayerTimeline.Drop.values()) if (d.source == source) out.add(d.name());
+        return out;
     }
 
     /** "Speed": the whole animation, picture and sound cues together, faster or slower. Never the outcome. */
@@ -855,6 +895,8 @@ public final class MenuView {
         soundSlider(rows, "snd_lava", "Lava fishing - Eruption", LAVA, cfg.lavaVolume, v -> cfg.lavaVolume = v);
         soundSlider(rows, "snd_nucleus", "Crystal Nucleus - The Vault", NUCLEUS, cfg.nucleusVolume, v -> cfg.nucleusVolume = v);
         soundSlider(rows, "snd_dungeon", "Dungeons - The Ossuary", OSSUARY, cfg.dungeonVolume, v -> cfg.dungeonVolume = v);
+        soundSlider(rows, "snd_zombie", "Revenant Horror - Exhumed", ZOMBIE, cfg.zombieVolume, v -> cfg.zombieVolume = v);
+        soundSlider(rows, "snd_spider", "Tarantula Broodfather - The Brood", SPIDER, cfg.spiderVolume, v -> cfg.spiderVolume = v);
         soundSlider(rows, "snd_blaze", "Inferno Demonlord - Hellion", BLAZE, cfg.blazeVolume, v -> cfg.blazeVolume = v);
         if (!com.sbcs.Maintenance.SERAPH) {
             soundSlider(rows, "snd_seraph", "Voidgloom Seraph", SERAPH, cfg.seraphVolume, v -> cfg.seraphVolume = v);
@@ -994,6 +1036,10 @@ public final class MenuView {
             if (total == 0) rows.add(new NoticeRow("Nothing yet. Only real kills are counted; Try it never is."));
             rows.add(resetButton("stats-diana", "Reset Diana stats", st::resetDiana));
         }
+        sourceGroup(rows, st, "zombie", "Exhumed - Revenant Horror", "rotten_flesh", ZOMBIE, "kill", "Bosses killed",
+                slayerTitles(com.sbcs.anim.SlayerTimeline.Source.REVENANT));
+        sourceGroup(rows, st, "spider", "The Brood - Tarantula Broodfather", "spider_eye", SPIDER, "kill", "Bosses killed",
+                slayerTitles(com.sbcs.anim.SlayerTimeline.Source.TARANTULA));
         sourceGroup(rows, st, "blaze", "Hellion - Inferno Demonlord IV", "blaze_rod", BLAZE, "kill", "Bosses killed",
                 titles(com.sbcs.anim.HellionTimeline.Drop.values()));
         if (!com.sbcs.Maintenance.SERAPH) {
@@ -1052,6 +1098,14 @@ public final class MenuView {
     }
 
     /** Every drop's display name, rarest first as the enum lists them, the bust left out. */
+    private static String[] slayerTitles(com.sbcs.anim.SlayerTimeline.Source source) {
+        List<String> out = new ArrayList<>();
+        for (com.sbcs.anim.SlayerTimeline.Drop d : com.sbcs.anim.SlayerTimeline.Drop.values()) {
+            if (d.source == source && !out.contains(d.title)) out.add(d.title);
+        }
+        return out.toArray(new String[0]);
+    }
+
     private static String[] titles(Enum<?>[] drops) {
         List<String> out = new ArrayList<>();
         for (Enum<?> e : drops) {
