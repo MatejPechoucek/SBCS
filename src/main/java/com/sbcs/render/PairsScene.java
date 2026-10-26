@@ -78,10 +78,17 @@ public final class PairsScene {
         camera(e, u, w, h);
         grey = PairsTimeline.frozen(e, u);
         float a = master * tl.boxAlpha(i, u);
-        ChopScene.sceneAlpha = a;
         long r = PairsTimeline.reveal(e);
         float back = ease((u - PairsTimeline.arrive(e) + 500) / 600f);
         shade = 1f - 0.6f * back;
+        // The 3D never fades - its faces would show through each other - it shrinks away instead: at the end, before
+        // the next box, and (a box that got away, which stays on screen) under its showcase.
+        float out = Math.min(tl.boxAlpha(i, u), 1f - ease((t - (tl.total() - PairsTimeline.FADE)) / (float) PairsTimeline.FADE));
+        float sink = e == Ending.MISSED ? 1f - 0.85f * back : 1f;
+        float size0 = ChopScene.size;
+        ChopScene.size = size0 * Math.max(0.001f, out * sink);
+        ChopScene.sceneAlpha = ease(t / 200f);
+        fxFade = out;
 
         // A faint light behind the box in its cracks' colour, so it stands off the dimmed game.
         ChopScene.project(0f, 0f, 0f);
@@ -118,6 +125,8 @@ public final class PairsScene {
 
         shade = 1f;
         grey = 0f;
+        ChopScene.size = size0;
+        fxFade = 1f;
         ChopScene.sceneAlpha = a;
         showcase(c, layer, tl, i, e, u, w, h);
         queue(c, tl, i, u, w, h);
@@ -644,7 +653,11 @@ public final class PairsScene {
         }
     }
 
+    /** The pixel effects fade with the scene's end (the 3D shrinks instead). */
+    static float fxFade = 1f;
+
     static void square(CrystalVeins.Fill layer, float x, float y, float s, int argb) {
+        if (fxFade < 1f) argb = Math.round((argb >>> 24) * fxFade) << 24 | (argb & 0xFFFFFF);
         if ((argb >>> 24) < 3) return;
         layer.fill(Math.round(x / unit) * unit, Math.round(y / unit) * unit, s, s, argb);
     }
