@@ -86,7 +86,7 @@ public final class MenuView {
     /** Each animation's own colour: its card, its bar, its switches and sliders. */
     static final int SCATHA = 0xFFB27BE6, VANGUARD = 0xFF72C6F2, DIANA = 0xFFE4573F, FIN = 0xFF3FB0D0,
             WISP = 0xFFA9E4EE, LAVA = 0xFFFF8C2E, SLAYERS = 0xFFD04848, BLAZE = 0xFFFFA238, ZOMBIE = 0xFF6FBF4A, SPIDER = 0xFFC8423A, SERAPH = 0xFFA36BF5,
-            NUCLEUS = 0xFF55D8FF, OSSUARY = 0xFFD9C9A3, PAIRS = 0xFFC77DFF;
+            NUCLEUS = 0xFF55D8FF, OSSUARY = 0xFFD9C9A3, PAIRS = 0xFFC77DFF, WATER = 0xFF4FD6B4;
 
     // ------------------------------------------------------------------ state (kept while the game runs)
 
@@ -477,6 +477,7 @@ public final class MenuView {
                 fishingRows(rows, cfg);
                 ghostRows(rows, cfg);
                 lavaRows(rows, cfg);
+                waterRows(rows, cfg);
                 nucleusRows(rows, cfg);
                 pairsRows(rows, cfg);
                 dungeonRows(rows, cfg);
@@ -643,6 +644,36 @@ public final class MenuView {
         bustsRow(rows, cfg.lavaBusts, v -> cfg.lavaBusts = v, cfg);
         tryRows(rows, "lava", names(com.sbcs.anim.EruptionTimeline.Drop.values()),
                 n -> com.sbcs.anim.EruptionTimeline.Drop.valueOf(n).title);
+    }
+
+    /** The Try it rows of the Coil and the Totem: every drop on the creature that gives it ("TITANOBOA:SHED"). */
+    private static final List<String> WATER_TRY = List.of("TITANOBOA:BUST", "TITANOBOA:SCRIPTURES", "TITANOBOA:SHED", "TITANOBOA:SNAKE_EYES",
+            "TITANOBOA:AQUAMARINE", "WIKI_TIKI:BUST", "WIKI_TIKI:BUBBLE", "WIKI_TIKI:TIKI_MASK", "WIKI_TIKI:AQUAMARINE");
+
+    private void waterRows(List<Row> rows, PatternConfig cfg) {
+        if (!group(rows, "water", "Water Mythics - The Coil & The Totem", "Titanoboa, Wiki Tiki, the Aquamarine Dye", "lily_pad", WATER, cfg.waterAnimation,
+                () -> { cfg.waterAnimation = !cfg.waterAnimation; cfg.save(); })) return;
+        rows.add(new SectionRow("What plays it"));
+        rows.add(new NoticeRow("Every kill of your own Titanoboa or Wiki Tiki, the moment it dies - the colour it lands on is the drop. "
+                + "New: it may miss a kill until it has seen the real chat lines."));
+        rows.add(toggle("Titanoboa", cfg.waterTitanoboa, () -> cfg.waterTitanoboa = !cfg.waterTitanoboa, cfg));
+        rows.add(toggle("Wiki Tiki", cfg.waterTiki, () -> cfg.waterTiki = !cfg.waterTiki, cfg));
+        rows.add(toggle("Loot-shared kills", cfg.waterLootShare, () -> cfg.waterLootShare = !cfg.waterLootShare, cfg));
+        rows.add(new SectionRow("Hiding the drop"));
+        rows.add(new SliderRow("water_hide", "Hide the HUD below", cfg.waterHidePct, 0, 20, 1,
+                v -> cfg.waterHidePct = v, v -> v == 0 ? "Off" : v + "% HP"));
+        rows.add(new SectionRow("The endings"));
+        rows.add(toggle("RARE DROP! banner", cfg.waterBanner, () -> cfg.waterBanner = !cfg.waterBanner, cfg));
+        rows.add(toggle("Show the price", cfg.waterPrice, () -> cfg.waterPrice = !cfg.waterPrice, cfg));
+        rows.add(new SliderRow("water_volume", "Volume", cfg.waterVolume, 0, 150, 5, v -> cfg.waterVolume = v, v -> v + "%"));
+        speedRow(rows, "water_speed", cfg.waterSpeed, v -> cfg.waterSpeed = v);
+        bustsRow(rows, cfg.waterBusts, v -> cfg.waterBusts = v, cfg);
+        tryRows(rows, "water", WATER_TRY, n -> {
+            String[] p = n.split(":");
+            var d = com.sbcs.anim.WaterTimeline.Drop.valueOf(p[1]);
+            String who = com.sbcs.anim.WaterTimeline.Creature.valueOf(p[0]).title;
+            return d.win() ? d.title + (d.from == null ? " (" + who + ")" : "") : "Bust (" + who + ")";
+        });
     }
 
     /** The Vault's Try it outcomes: a bust, a rare roll, a Flawless gem, Divan's Alloy, the Jade Dye. */
@@ -926,6 +957,7 @@ public final class MenuView {
         soundSlider(rows, "snd_vanguard", "Vanguard Thaw (its endings)", VANGUARD, cfg.vanguardFinaleVolume, v -> cfg.vanguardFinaleVolume = v);
         soundSlider(rows, "snd_diana", "Diana - The Chopping Block", DIANA, cfg.dianaVolume, v -> cfg.dianaVolume = v);
         soundSlider(rows, "snd_lava", "Lava fishing - Eruption", LAVA, cfg.lavaVolume, v -> cfg.lavaVolume = v);
+        soundSlider(rows, "snd_water", "Water mythics - the Coil & the Totem", WATER, cfg.waterVolume, v -> cfg.waterVolume = v);
         soundSlider(rows, "snd_nucleus", "Crystal Nucleus - The Vault", NUCLEUS, cfg.nucleusVolume, v -> cfg.nucleusVolume = v);
         soundSlider(rows, "snd_pairs", "Superpairs - The Hunt", PAIRS, cfg.pairsVolume, v -> cfg.pairsVolume = v);
         soundSlider(rows, "snd_dungeon", "Dungeons - The Ossuary", OSSUARY, cfg.dungeonVolume, v -> cfg.dungeonVolume = v);
@@ -1082,6 +1114,8 @@ public final class MenuView {
         }
         sourceGroup(rows, st, "lava", "Eruption - lava fishing", "magma_cream", LAVA, "kill", "Rare creatures killed",
                 titles(com.sbcs.anim.EruptionTimeline.Drop.values()));
+        sourceGroup(rows, st, "water", "The Coil & The Totem - water mythics", "lily_pad", WATER, "kill", "Mythics killed",
+                titles(com.sbcs.anim.WaterTimeline.Drop.values()));
         sourceGroup(rows, st, "nucleus", "The Vault - Crystal Nucleus", "amethyst_shard", NUCLEUS, "bundle", "Bundles opened",
                 new String[]{"Quick Claw", "Fine Jasper Gemstone", "Flawless Ruby Gemstone", "Flawless Amethyst Gemstone",
                         "Flawless Jade Gemstone", "Flawless Amber Gemstone", "Flawless Sapphire Gemstone", "Flawless Topaz Gemstone",

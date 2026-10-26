@@ -1568,6 +1568,37 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
   (`SbcsStats.lavaKills`, `EruptionScene.bustNote`).
 - Not done: the Lord Jawbus Shard (no NEU item and no line known), the Enchanted Ink Sac (cheap). Taurus has `lavaTaurus`.
 
+## The Coil and the Totem (water mythics: Titanoboa, Wiki Tiki, 2026-10-26) - unverified in game
+
+Workstream D of the 0.4.0 plan (docs/ideas/03-titanoboa.md, 02-wiki-tiki.md). **Detection is wiki and theory: no real
+line or nametag has been seen.** DropRecorder keeps their lines as `fishing_line` and SlayerRecorder their nametags as
+`water_mob` (plus `water_model`, the armour stands near one) - check the first records and fix `WaterDrops` against them.
+
+- `detect/WaterDrops` (pure): a creature table (`ROWS`: name + its catch line's words), drop lines in the lava format
+  and the slayer's bracketed one, the dye by any drop line or a WOW! naming the player. The Laser Totems are never a
+  creature. `detect/FishingWatcher` is LavaWatcher's rules over that table: ours only from a catch line (or Feesh's
+  rewrite), someone else's only when its own win reaches us by loot share; HP 0 or a close vanish at <= 5% is the death;
+  a win within 3 s resolves it, else a bust. Every decision narrated as "Water:". `tools/WaterDetectTest` (45).
+- `anim/WaterTimeline` (pure): `Creature` (with its guaranteed drop, shown under a bust), `Drop` (level 0-4 is the
+  tell), `Ending`. The tell is a five-colour scale per creature (bust first, aquamarine last) running down the
+  snake's body / lighting the totem's faces and lasers; `REVEAL` 4800. Endings: BOOK (Scriptures), SHED (slides out of
+  its skin), EYES (Snake Eyes: the coil goes dark, two eyes open), BUBBLE (the lasers meet in the top face's mouth),
+  MASK (the top face peels off and turns), FLOOD - the Aquamarine Dye for both, "The Bayou Floods": time stops
+  (`phys`), the world greys, three heartbeats, aquamarine climbs the creature, the snake rears into a column / the
+  totem drowns under a geyser.
+- `render/WaterScene`: Eruption's architecture. The water is one CPU image (`floor`, a texel a unit, the tell's colour
+  reflected, foam where the body crosses the surface) and one affine blit; the creatures are SlayerScene boxes
+  rasterised by `ModelRaster` with `cutBelow` 0 (`heights` keeps each pixel's world y for the flood line). **The
+  creature is built before the floor** - built after, the foam read the last frame's crossings and a run's first frame
+  showed the previous run's (WaterTest found it). Its back-layer squares are held (`HELD`) and drawn after the floor.
+- `audio/WaterSound` (existing voices only), `gui/WaterScreen` (EruptionScreen's shape; heads from
+  `HeadSkins.WATER`, `water_heads.json`, NEU bestiary + items), config `water*`, menu card "Water Mythics", stats key
+  "water", `/sbcs test water <drop> [creature]`, Try it rows `CREATURE:DROP`.
+- `tools/WaterTest` (152: frame and sound honesty per creature on four seeds, levels, the dye's clock, beats, no
+  clipping, draw calls - worst 67 a frame), `tools/WaterPreview` (`-Dskins` for the real skins; textures.minecraft.net
+  is blocked in the cloud, so without them it paints stand-ins), `tools/WaterSoundtrack`.
+- Prices in the preview are guesses; the game asks the bazaar / Coflnet.
+
 ## The Ossuary (dungeon reward chests, 2026-10-22) - unverified in game
 
 Matej's ask: a roll for F1-F7 / M1-M7 reward chests, plan artifact claude.ai/artifact/3AS1UWyfaMuB4Hzo7Wuvk1. His calls:
@@ -2020,6 +2051,8 @@ render/art/ThawArt        ice (8 crack stages x 3 patterns), the Vanguard's skin
 render/model/ThawMeshes   the ice chunk, the posed Vanguard inside it, the pickaxe
 anim/EruptionTimeline     lava fishing's schedule; render/EruptionScene draws it, gui/EruptionScreen plays it
 detect/LavaWatcher        lava creatures' kills; detect/LavaDrops reads their lines
+anim/WaterTimeline        the water mythics' schedule; render/WaterScene draws it, gui/WaterScreen plays it
+detect/FishingWatcher     water mythics' kills; detect/WaterDrops reads their lines (wiki, unverified)
 ```
 
 `PatternConfig.animationMode` is still named `SCOPE` for the cleaver mode. Renaming

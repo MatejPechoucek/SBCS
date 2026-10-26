@@ -37,6 +37,13 @@ public final class SlayerRecorder {
      * skins - because Ragnarok's and the Fiery Scuttler's in-game models are not documented anywhere.
      */
     private static final String[] LAVA = {"Lord Jawbus", "Thunder", "Ragnarok", "Fiery Scuttler", "Plhlegblast", "Taurus"};
+    /**
+     * The water mythics (2026-10-26, for the Titanoboa's and the Wiki Tiki's cutscenes), recorded as {@code water_mob},
+     * with their surroundings as {@code water_model}: how many of the Titanoboa's segments carry a nametag, and how the
+     * Wiki Tiki's nametag reads while its Laser Totems make it invulnerable, are both unknown. The totems are recorded
+     * too, so they can be told apart from the Tiki. Any name at all, health or not: an immune phase may hide it.
+     */
+    private static final String[] WATER = {"Titanoboa", "Wiki Tiki", "Laser Totem"};
 
     private static final class Seen {
         String name = "";
@@ -82,7 +89,8 @@ public final class SlayerRecorder {
                 s.dy = stand.getY() - player.getY();
                 s.lastRecorded = now;
                 record(kind, "seen", stand.getId(), name, dist, stand.getY() - player.getY());
-                if (kind.equals("lava_mob")) recordModel(level, stand, name);
+                if (kind.equals("lava_mob")) recordModel(level, stand, name, "lava_model");
+                if (kind.equals("water_mob") && !name.contains("Laser Totem")) recordModel(level, stand, name, "water_model");
                 continue;
             }
             s.dist = dist;
@@ -103,8 +111,9 @@ public final class SlayerRecorder {
         }
     }
 
-    /** "lava_mob" for a lava creature's nametag (one with a health bar), "slayer_mob" for a slayer's, else null. */
+    /** "lava_mob" for a lava creature's nametag (one with a health bar), "water_mob" for a water mythic's, "slayer_mob" for a slayer's, else null. */
     private static String kindOf(String name) {
+        for (String w : WATER) if (name.contains(w)) return "water_mob";
         if (name.contains("\u2764")) for (String w : LAVA) if (name.contains(w)) return "lava_mob";
         for (String w : WATCH) if (name.contains(w)) return "slayer_mob";
         return null;
@@ -121,12 +130,14 @@ public final class SlayerRecorder {
         DropRecorder.record(kind, o);
     }
 
-    /** Every entity within a few blocks of a lava creature's nametag: its type, size, and any head it wears. */
-    private static void recordModel(ClientLevel level, ArmorStand tag, String name) {
+    /** Every entity within a few blocks of a sea creature's nametag: its type, size, and any head it wears. */
+    private static void recordModel(ClientLevel level, ArmorStand tag, String name, String kind) {
         JsonObject o = new JsonObject();
         o.addProperty("name", name);
         com.google.gson.JsonArray parts = new com.google.gson.JsonArray();
-        AABB near = tag.getBoundingBox().inflate(6, 10, 6);
+        // The Titanoboa "stretches as far as the eye can see": look further round a water mythic for its segments.
+        double reach = kind.equals("water_model") ? 16 : 6;
+        AABB near = tag.getBoundingBox().inflate(reach, 10, reach);
         for (net.minecraft.world.entity.Entity e : level.getEntities(tag, near)) {
             JsonObject p = new JsonObject();
             p.addProperty("type", String.valueOf(net.minecraft.world.entity.EntityType.getKey(e.getType())));
@@ -149,6 +160,6 @@ public final class SlayerRecorder {
             parts.add(p);
         }
         o.add("parts", parts);
-        DropRecorder.record("lava_model", o);
+        DropRecorder.record(kind, o);
     }
 }
