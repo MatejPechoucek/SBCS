@@ -1219,8 +1219,9 @@ public final class SeraphScene {
         if (na > 0.02f) c.name(x, below + 8f * ts, 1.6f * ts, ChopScene.alpha(na) | tl.drop().colour, tl.letters(t));
         float la = tl.lineAlpha(t) * ChopScene.sceneAlpha;
         if (la > 0.02f) {
-            if (tl.drop().oneIn > 0) {
-                c.text("1 in ~" + String.format("%,d", tl.drop().oneIn) + " tier IV bosses" + (nthNote == null ? "" : " \u00b7 " + nthNote), x, below + 22f * ts, ts, ChopScene.alpha(la) | 0xC8C8C8);
+            int oneIn = oddsFor(tl.drop(), bossTier);
+            if (oneIn > 0) {
+                c.text("1 in ~" + String.format("%,d", oneIn) + (bossTier == 3 ? " tier III bosses" : " tier IV bosses") + (nthNote == null ? "" : " \u00b7 " + nthNote), x, below + 22f * ts, ts, ChopScene.alpha(la) | 0xC8C8C8);
             }
             long price = tl.price();
             if (price > 0 && t >= tl.countStart()) {
@@ -1235,6 +1236,19 @@ public final class SeraphScene {
 
     /** The menu's banner switch, set by the screen each frame. */
     public static boolean showBanner = true;
+    /** The tier of the boss that dropped it (3 or 4), set by the screen each frame: a tier III has its own odds. */
+    public static int bossTier = 4;
+
+    /** The wiki's odds for the boss's tier: a tier III drops only the Summoning Eye (1 in 167.75) and the Dye. */
+    static int oddsFor(SeraphTimeline.Drop d, int tier) {
+        if (tier != 3) return d.oneIn;
+        return switch (d) {
+            case SUMMONING_EYE -> 168;
+            case BYZANTIUM_DYE -> 1_000_000;
+            default -> d.oneIn;
+        };
+    }
+
     /** "your 3rd" after the odds, set by the screen each frame; null for a test. */
     public static String nthNote;
     /** The drop line's own tier word and its colour, set by the screen each frame; null: Hypixel's top word. */

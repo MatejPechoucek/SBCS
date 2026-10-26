@@ -190,6 +190,7 @@ public class SeraphScreen extends Screen implements ChopScene.Canvas, Cutscene {
         }
         SeraphScene.bannerWord = tier;
         SeraphScene.nthNote = nth;
+        SeraphScene.bossTier = isTest() ? 4 : SbcsClient.seraphBossTier();
         ChopScene.calm = (SbcsClient.config != null && SbcsClient.config.calmEffects) || com.sbcs.Safety.slow();
         com.sbcs.render.Punch.set(t >= SeraphTimeline.REVEAL, tl.drop().win(), tl.price());
         SeraphScene.showBanner = SbcsClient.config == null || SbcsClient.config.seraphBanner;

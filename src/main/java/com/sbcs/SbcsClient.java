@@ -278,7 +278,7 @@ public class SbcsClient implements ClientModInitializer {
         };
     }
 
-    /** The player's own tier IV Voidgloom Seraph: its kill opens the Seraph's Glyph, its drop line fills it in. */
+    /** The player's own tier III or IV Voidgloom Seraph: its kill opens the Seraph's Glyph, its drop line fills it in. */
     private static final com.sbcs.detect.SeraphWatcher seraphWatcher = new com.sbcs.detect.SeraphWatcher(
             decisions, new com.sbcs.detect.SeraphWatcher.Listener() {
         @Override
@@ -334,9 +334,16 @@ public class SbcsClient implements ClientModInitializer {
         }
     });
 
+    /** The tier (3 or 4) of the player's last Seraph, for the odds its screen shows. */
+    public static int seraphBossTier() {
+        return seraphWatcher.tier;
+    }
+
     /** The 500k floor: a floored drop worth less, or of unknown worth, plays as a bust. */
     private static com.sbcs.anim.SeraphTimeline.Drop seraphFloor(com.sbcs.anim.SeraphTimeline.Drop d) {
         if (d != null && d.win() && underFloor(d.priceId)) return com.sbcs.anim.SeraphTimeline.Drop.BUST;
+        // The menu's tier setting: the drop line just read carries the tier word (CRAZY RARE, PRAY TO RNGESUS...).
+        if (d != null && d.win() && belowTier("seraph", com.sbcs.detect.HellionDrops.freshTier())) return com.sbcs.anim.SeraphTimeline.Drop.BUST;
         if (d == null || !com.sbcs.detect.SeraphDrops.floored(d)) return d;
         Double sell = com.sbcs.market.Bazaar.sell(d.priceId);
         Long bin = com.sbcs.market.LivePrice.cached(d.priceId);

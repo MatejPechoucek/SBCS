@@ -1388,6 +1388,19 @@ architecture.
   - `tools/SeraphDetectTest` (13 checks; `-Drecords= -Dself=` replays a file through the real watcher - compile
     against `build/classes/java/main`): the friend's file opens and resolves exactly their three kills.
 
+**Every drop its own ending, tier III, out of maintenance (2026-10-26, Matej: each drop themed on its item).**
+`render/SeraphEndings` holds the five new ones, on `SeraphTimeline.Ending`: Summoning Eye `ALTAR` (eight end portal frames
+rise round the beacon, eyes fly in one by one, the portal opens; camera tilts down), Etherwarp Merger `WARP` (four aimed
+teleports, pillar tops then the showcase), Enchant Rune `RUNE` (an enchanting table, the game's sga glyphs stream in and
+form the rune), Paragon Shard `SHARD` (the beacon core cracks, crystal shards spiral in and fuse), End Stone Idol `IDOL`
+("Set in Stone": the Seraph turns to end stone by gild, cracks and shatters; it never dies). The Upgrade keeps the
+jackpot, the Core the Eye, the Dye the Dragon. `Maintenance.SERAPH` is false; the Ledger chapter stays taped through
+`Maintenance.SERAPH_LEDGER` (no stamps yet). **Matej fights tier III**: `[Lv534]  Voidgloom Seraph III 0/50M❤` (current /
+max; tier IV shows /210M too now). `SeraphWatcher` takes III and IV (`tierOf` - "II" is inside "III"), the max from the
+nametag, and claims a boss from `SLAYER BOSS! The Voidgloom Seraph III spawned!` (16 blocks, -2 s .. +5 s) - none of his 17
+bosses on 2026-10-25 had a "Spawned by" tag recorded. The replay of that file opens all 16 kills. A tier III shows its own
+odds (`SeraphScene.oddsFor`: Eye 1 in 168, Dye 1 in 1,000,000). `seraphFloor` also applies `belowTier("seraph", ...)`.
+
 ## Eruption (lava fishing, the Crimson Isle's rare sea creatures) - 0.2.74
 
 The designer lava fishes themself. Their calls (2026-10-05): every rare creature's kill plays, **loot-shared
