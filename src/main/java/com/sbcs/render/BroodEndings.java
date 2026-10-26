@@ -491,8 +491,8 @@ public final class BroodEndings {
                 float[][] wa = SlayerScene.axes(yaw + side * 0.32f, pitch, roll + side * ang);
                 float[] base = at(o, ax, side * 1.0f * s, 2.3f * s, 0.6f * s);
                 float[] mid = at(base, wa, side * 1.2f * s, 0.15f * s, -3.0f * s);
-                SlayerScene.solid(mid[0], mid[1], mid[2], 1.25f * s, 0.12f * s, 3.4f * s, wa[0], wa[1], wa[2],
-                        SlayerScene.mixRgb(0xDCE8F4, 0x9A9080, digest), ChopScene.alpha(0.25f) | 0xFFFFFF, to);
+                SlayerScene.solid(mid[0], mid[1], mid[2], 1.0f * s, 0.06f * s, 3.8f * s, wa[0], wa[1], wa[2],
+                        SlayerScene.mixRgb(0xA8BCD0, 0x8A8070, digest), ChopScene.alpha(0.12f) | 0xFFFFFF, to);
             }
         }
     }
@@ -523,7 +523,7 @@ public final class BroodEndings {
 
     static void mosquitoModels(SlayerTimeline tl, long u) {
         if (u < 0) return;
-        float s = 1.25f;
+        float s = 2.0f;
         if (u < MQ_SNAP) {
             float[] p = mosquitoFlight(u);
             float drink = span(u, MQ_LAND + 150, MQ_SNAP - MQ_LAND - 300);
@@ -559,7 +559,7 @@ public final class BroodEndings {
         float[] c = scr(ABDOMEN, 0f, 0f, 14f);
         float d = digest(u);
         int rows = 12;
-        float level = -0.05f - 0.25f * d;
+        float level = -0.3f - 0.15f * d;
         int acidA = SlayerScene.mixRgb(0x76D02A, 0x9A9A2A, d * 0.6f), acidB = SlayerScene.mixRgb(0x4FA81E, 0x6E6A1E, d * 0.6f);
         // The wall and the dark inside, row by row of an ellipse (pixel steps); the acid's back over them.
         for (int i = 0; i < rows; i++) {
@@ -575,11 +575,11 @@ public final class BroodEndings {
         }
         // The mosquito: at the surface, then down into it.
         float sink = ease(d);
-        float[] mp = scr(c, rx * 0.06f * (float) Math.sin(u / 300.0), level * ry + 2.4f - 5.5f * sink, -2.2f);
+        float[] mp = scr(c, rx * 0.06f * (float) Math.sin(u / 300.0), level * ry + 5.5f - 10f * sink, -2.2f);
         int legs = 6 - (int) Math.min(6, Math.max(0, (u - (MQ_WINGS + 250)) / 170));
         boolean wings = u < MQ_WINGS;
         mosquito(mp, (float) Math.toRadians(70f + u * 0.02f), 0.25f * (float) Math.sin(u / 260.0), 0.35f * (float) Math.sin(u / 330.0),
-                0.95f, 0f, 1f - span(u, MQ_XRAY + 400, 1200), d, legs, wings, 0f, IN);
+                1.7f, 0f, 1f - span(u, MQ_XRAY + 400, 1200), d, legs, wings, 0f, IN);
         // Its wings, torn off, floating up and away; its legs, sinking.
         if (u >= MQ_WINGS && u < MQ_WINGS + 900) {
             float k = (u - MQ_WINGS) / 900f;
