@@ -740,6 +740,8 @@ public class SbcsClient implements ClientModInitializer {
             // The Ossuary: reward chests and Croesus pages read, a roll put over them. Read only - see DungeonRolls.
             if (live) Safety.run("dungeon", () -> com.sbcs.detect.dungeon.DungeonRolls.tick(client, decisions));
             else if (com.sbcs.detect.dungeon.DungeonRolls.active()) com.sbcs.detect.dungeon.DungeonRolls.stop();
+            // The Hunt: Superpairs tiles read, the rare ones boxed, revealed when the game is over. Read only.
+            if (live) Safety.run("superpairs", () -> com.sbcs.detect.superpairs.PairsWatcher.tick(client, decisions));
 
             if (live && config.dianaAnimation) Safety.run("diana", () -> dianaWatcher.tick(client.player, config.dianaHidePct));
             if (live && config.fishingAnnounce) Safety.run("shark", () -> sharkWatcher.tick(client.player));
@@ -768,6 +770,7 @@ public class SbcsClient implements ClientModInitializer {
                     try {
                         com.sbcs.detect.dungeon.DungeonRecorder.tick(client);
                         com.sbcs.detect.dungeon.DungeonRecorder.sidebarTick(client);
+                        com.sbcs.detect.superpairs.PairsRecorder.tick(client);
                     } catch (Exception e) {
                         LOGGER.warn("[SBCS] dungeon recorder", e);
                     }
@@ -1075,6 +1078,22 @@ public class SbcsClient implements ClientModInitializer {
                 }));
             }
 
+            LiteralArgumentBuilder<FabricClientCommandSource> pairsNode = ClientCommands.literal("superpairs")
+                    .executes(ctx -> options(ctx, "test superpairs",
+                            "fish", "Experiment the Fish (the box shatters)",
+                            "serum", "a Metaphysical Serum",
+                            "guardian", "a Legendary Guardian",
+                            "book", "a VII book (the box unfolds, the book opens)",
+                            "dye", "the Nadeshiko Dye (petals)",
+                            "missed", "a box whose pair was never found",
+                            "two", "two boxes in one game"));
+            for (String word : com.sbcs.anim.PairsTimeline.TEST_WORDS) {
+                pairsNode.then(ClientCommands.literal(word).executes(ctx -> {
+                    Minecraft.getInstance().execute(() -> openPairs(com.sbcs.anim.PairsTimeline.test(word, System.nanoTime()).boxes(), true));
+                    return 1;
+                }));
+            }
+
             // /sbcs test dungeon <floor> <outcome> [tier]: a made-up chest rolled on a screen of its own.
             LiteralArgumentBuilder<FabricClientCommandSource> dungeonNode = ClientCommands.literal("dungeon")
                     .executes(ctx -> options(ctx, "test dungeon <floor> <outcome> [tier]",
@@ -1116,6 +1135,7 @@ public class SbcsClient implements ClientModInitializer {
                             "lava", "Eruption, lava fishing",
                             "nucleus", "the Vault, a Crystal Nucleus bundle",
                             "dungeon", "the Ossuary, a dungeon reward chest",
+                            "superpairs", "the Hunt, Superpairs' rare tiles",
                             "ledger", "the Ledger: pop-ups, stamps, the book"))
                     .then(scathaNode)
                     .then(vanguardNode)
@@ -1126,6 +1146,7 @@ public class SbcsClient implements ClientModInitializer {
                     .then(lavaNode)
                     .then(nucleusNode)
                     .then(dungeonNode)
+                    .then(pairsNode)
                     .then(ledgerTestNode());
 
             dispatcher.register(ClientCommands.literal("sbcs")
@@ -1451,6 +1472,7 @@ public class SbcsClient implements ClientModInitializer {
                 case "lava" -> com.sbcs.anim.EruptionTimeline.Drop.valueOf(name).win();
                 case "nucleus" -> com.sbcs.anim.VaultTimeline.Prize.test(name).win();
                 case "dungeon" -> !name.endsWith(":bust");
+                case "superpairs" -> com.sbcs.anim.PairsTimeline.testWins(name);
                 default -> true;
             };
         } catch (IllegalArgumentException e) {
@@ -1464,6 +1486,7 @@ public class SbcsClient implements ClientModInitializer {
             case "blaze" -> openHellion(com.sbcs.anim.HellionTimeline.Drop.valueOf(name), true);
             case "zombie", "spider" -> openSlayer(com.sbcs.anim.SlayerTimeline.Drop.valueOf(name), true, null);
             case "nucleus" -> openVault(com.sbcs.anim.VaultTimeline.Prize.test(name), true);
+            case "superpairs" -> openPairs(com.sbcs.anim.PairsTimeline.test(name, System.nanoTime()).boxes(), true);
             case "dungeon" -> {
                 // "F7:jackpot" - a floor and an outcome, rolled on that floor's best chest (Bedrock from Floor V).
                 String[] p = name.split(":", 2);
@@ -1524,6 +1547,7 @@ public class SbcsClient implements ClientModInitializer {
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
         if (vaultActive()) return currentVault;
+        if (pairsActive()) return currentPairs;
         return null;
     }
 
@@ -1601,6 +1625,7 @@ public class SbcsClient implements ClientModInitializer {
             currentVault = null;
             announceNucleus();
         }
+        if (currentPairs != null && !currentPairs.isActive()) currentPairs = null;
     }
 
     /** The skip key (default Backspace): held this long, so a stray press cannot eat a reveal. */
@@ -1658,7 +1683,12 @@ public class SbcsClient implements ClientModInitializer {
 
     private static boolean isAnimationPlaying() {
         return animationManager.isPlaying() || (currentScope != null && currentScope.isActive()) || thawActive()
-                || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive();
+                || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive() || pairsActive();
+    }
+
+    /** Whether any cutscene is playing - the Hunt waits for it before revealing. */
+    public static boolean cutscenePlaying() {
+        return isAnimationPlaying();
     }
 
     /** "Eruption", lava fishing's animation, while it plays. */
@@ -1753,6 +1783,7 @@ public class SbcsClient implements ClientModInitializer {
         if (seraphActive()) return currentSeraph;
         if (eruptionActive()) return currentEruption;
         if (vaultActive()) return currentVault;
+        if (pairsActive()) return currentPairs;
         return thawActive() ? currentThaw : null;
     }
 
@@ -1766,7 +1797,7 @@ public class SbcsClient implements ClientModInitializer {
      * still running.
      */
     public static boolean cutsceneOwnsScreen() {
-        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive();
+        return (currentScope != null && currentScope.isActive()) || thawActive() || chopActive() || hellionActive() || slayerActive() || seraphActive() || eruptionActive() || vaultActive() || pairsActive();
     }
 
     /**
@@ -1976,7 +2007,8 @@ public class SbcsClient implements ClientModInitializer {
      * pre-kill hide, or the profit window.
      */
     public static boolean chatHeld() {
-        return isAnimationPlaying() || shouldHidePreKill() || profitShowing() || nucleusWatcher.parsing();
+        return isAnimationPlaying() || shouldHidePreKill() || profitShowing() || nucleusWatcher.parsing()
+                || com.sbcs.detect.superpairs.PairsWatcher.holdsChat();
     }
 
     /** A Nucleus bundle has been read: recorded for now, so the Vault can be built against real hauls. */
@@ -2058,6 +2090,21 @@ public class SbcsClient implements ClientModInitializer {
         }
         com.sbcs.gui.VaultScreen screen = new com.sbcs.gui.VaultScreen(prize, test);
         currentVault = screen;
+        com.sbcs.render.CutsceneHud.show(screen);
+    }
+
+    /** "The Hunt", Superpairs' reveal, while it plays. */
+    private static com.sbcs.gui.PairsScreen currentPairs;
+
+    private static boolean pairsActive() {
+        return currentPairs != null && currentPairs.isActive();
+    }
+
+    /** Opens the Hunt's reveal in the HUD (CutsceneHud): the boxes of one game, in the order they play. */
+    public static void openPairs(java.util.List<com.sbcs.anim.PairsTimeline.Box> boxes, boolean test) {
+        if (boxes == null || boxes.isEmpty() || !mayOpen("superpairs", test)) return;
+        com.sbcs.gui.PairsScreen screen = new com.sbcs.gui.PairsScreen(boxes, test);
+        currentPairs = screen;
         com.sbcs.render.CutsceneHud.show(screen);
     }
 
@@ -2496,6 +2543,7 @@ public class SbcsClient implements ClientModInitializer {
         if (s instanceof com.sbcs.gui.SeraphScreen) return "seraph";
         if (s instanceof com.sbcs.gui.EruptionScreen) return "lava";
         if (s instanceof com.sbcs.gui.VaultScreen) return "nucleus";
+        if (s instanceof com.sbcs.gui.PairsScreen) return "superpairs";
         if (s instanceof com.sbcs.gui.ThawScreen) return "vanguard";
         return "scatha";
     }
@@ -2556,6 +2604,7 @@ public class SbcsClient implements ClientModInitializer {
         quietly(com.sbcs.render.GhostPopup::stop);
         quietly(com.sbcs.render.StampPopup::stop);
         quietly(com.sbcs.detect.dungeon.DungeonRolls::stop);
+        quietly(com.sbcs.detect.superpairs.PairsWatcher::stop);
         quietly(com.sbcs.audio.SbcsAudio::silence);
         com.sbcs.render.CutsceneHud.clear();
         currentChop = null;
@@ -2564,6 +2613,7 @@ public class SbcsClient implements ClientModInitializer {
         currentSeraph = null;
         currentEruption = null;
         currentVault = null;
+        currentPairs = null;
         quietly(SbcsClient::announceNucleus);
         currentScope = null;
         currentThaw = null;

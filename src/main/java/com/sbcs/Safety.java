@@ -92,6 +92,7 @@ public final class Safety {
             case "shark" -> "Fin";
             case "ghost" -> "Wisp";
             case "nucleus" -> "The Vault";
+            case "superpairs" -> "The Hunt";
             case "ledger" -> "The Ledger's pop-up";
             default -> "SBCS (" + key + ")";
         };
@@ -186,7 +187,7 @@ public final class Safety {
 
     /** The optional hooks (mixins with require = 0): their feature is lost, not the game, if one cannot apply. */
     public static final String[] OPTIONAL_HOOKS = {"dropped items", "item pickups", "HUD hidden for other mods",
-            "dungeon chest cover", "dungeon roll drawing"};
+            "dungeon chest cover", "dungeon roll drawing", "superpairs tile cover", "superpairs hunt drawing"};
     private static final boolean[] hooked = new boolean[OPTIONAL_HOOKS.length];
 
     /** An optional mixin's handler ran, so it is in. On hot paths (every entity, every frame): one array read. */

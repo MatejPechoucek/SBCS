@@ -20,7 +20,8 @@
 		"HudInvoker",
 		"ContainerCoverMixin",
 		"ChestBackgroundMixin",
-		"GuiOssuaryMixin"
+		"GuiOssuaryMixin",
+		"PairsCoverMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
