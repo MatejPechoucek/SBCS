@@ -190,7 +190,9 @@ public final class HellionWatcher {
                 log.note("§aBlaze: quest complete - your Demonlord died out of sight; " + (known.win() ? known.title : "bust"));
                 listener.killKnown(known, bestLine);
             } else if (!killedThisQuest && bestDrop != null && bestDrop.win() && now - bestAt <= DROP_WAIT_MS
-                    && quest.boss(now) == SlayerQuest.Boss.INFERNO) {
+                    && (quest.boss(now) == SlayerQuest.Boss.INFERNO || (quest.boss(now) == null && bestDrop != Drop.PARAGON))) {
+                // A Demonlord quest, or no quest seen and a drop no other boss gives (the Paragon Shard drops from
+                // every slayer, so it needs the quest - the Revenant's Paragon that played the blaze, 2026-10-25).
                 // Never claimed (it spawned too far off, or without a line), but the drop line is our own - a slayer
                 // drop in brackets only ever names the player's own loot. The win still plays.
                 log.note("§aBlaze: quest complete with " + bestDrop.title + " - your Demonlord was never claimed; playing it");

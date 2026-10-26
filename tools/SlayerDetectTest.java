@@ -85,6 +85,19 @@ public final class SlayerDetectTest {
         check("your dye plays (" + played + ")", played.equals(List.of("MATCHA_DYE|null")));
         played.clear();
 
+        // ---- Hellion: a Paragon with no quest seen is not the blaze's; one in a Revenant quest neither (the bug)
+        HellionWatcher hw = new HellionWatcher(new DecisionLog(), hl);
+        hw.onChatLine("  SLAYER QUEST STARTED!", 0);
+        hw.onChatLine("RARE DROP! (Paragon Shard) (+166% Magic Find)", 60000);
+        hw.onChatLine("  SLAYER QUEST COMPLETE!", 60250);
+        check("Hellion: a Paragon with no quest seen plays nothing (" + blaze + ")", blaze.isEmpty());
+        hw = new HellionWatcher(new DecisionLog(), hl);
+        hw.onChatLine("  SLAYER QUEST STARTED!", 0);
+        hw.onChatLine("SLAYER BOSS! The Revenant Horror IV spawned!", 20000);
+        hw.onChatLine("RARE DROP! (Paragon Shard) (+166% Magic Find)", 21500);
+        hw.onChatLine("  SLAYER QUEST COMPLETE!", 21750);
+        check("Hellion: the Revenant's Paragon plays nothing (" + blaze + ")", blaze.isEmpty());
+
         // ---- the replay: Matej's real lines, through the Revenant/Tarantula watcher and Hellion's
         List<String> lines = Files.readAllLines(Path.of("tools/fixtures/slayer_lines.txt"), StandardCharsets.UTF_8);
         w = new SlayerDropWatcher(new DecisionLog(), l);
