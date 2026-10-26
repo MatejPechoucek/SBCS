@@ -289,6 +289,22 @@ public class PatternConfig {
     public int nucleusSpeed = 100;
 
     /**
+     * "The Hunt": Superpairs. Every reward from the rare row up is covered by a black box in the Experimentation
+     * Table's menu (pairsCover) and revealed by the cutscene once the game is over. Unverified in game.
+     */
+    public boolean pairsAnimation = true;
+    /** The black boxes over rare tiles in the menu: off shows the items as Hypixel does. */
+    public boolean pairsCover = true;
+    /** A box that never found its pair is opened at the end too, grey ("Got away"); off keeps it secret. */
+    public boolean pairsShowMissed = true;
+    public boolean pairsBanner = true;
+    public boolean pairsPrice = true;
+    /** The Hunt's sounds (the reveal and the heartbeat in the menu), 0-150%. */
+    public int pairsVolume = 100;
+    /** How fast the reveal plays, in percent (50-200). */
+    public int pairsSpeed = 100;
+
+    /**
      * "The Ossuary": dungeon reward chests rolled before they are seen. Only the chests whose tier bit is set in
      * {@code dungeonTiers} roll (ChestTier.bit(): Obsidian and Bedrock by default, Matej's call).
      */
@@ -483,6 +499,8 @@ public class PatternConfig {
         nucleusBusts = clamp(nucleusBusts, 0, 2);
         dungeonBusts = clamp(dungeonBusts, 0, 2);
         dungeonVolume = clamp(dungeonVolume, 0, 150);
+        pairsVolume = clamp(pairsVolume, 0, 150);
+        pairsSpeed = clamp(pairsSpeed, 50, 200);
         dungeonSpeed = clamp(dungeonSpeed, 50, 200);
         dungeonCroesus = clamp(dungeonCroesus, 0, 2);
         dungeonTiers &= (1 << com.sbcs.detect.dungeon.ChestTier.values().length) - 1;

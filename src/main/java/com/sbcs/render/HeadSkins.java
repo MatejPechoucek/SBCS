@@ -53,6 +53,8 @@ public final class HeadSkins {
      * own head drop from NEU (Bonzo's Mask, the Wither helmets...) and Sadan the bestiary's Terracotta.
      */
     public static final HeadSkins DUNGEON = new HeadSkins("/assets/sbcs/dungeon_heads.json", "dungeon_head_");
+    /** Superpairs' head rewards (the Nadeshiko Dye, the Metaphysical Serum, the Guardian pet), by NEU id. */
+    public static final HeadSkins PAIRS = new HeadSkins("/assets/sbcs/superpairs_heads.json", "pairs_head_");
 
     private final String resource, bankPrefix;
     private Map<String, String> blobs;
@@ -101,6 +103,7 @@ public final class HeadSkins {
             case "lava" -> LAVA;
             case "nucleus" -> NUCLEUS;
             case "dungeon" -> DUNGEON;
+            case "superpairs" -> PAIRS;
             default -> null;
         };
     }

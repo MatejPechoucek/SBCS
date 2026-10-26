@@ -528,6 +528,11 @@ public final class SbcsAudio {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.nucleusVolume);
     }
 
+    /** The Hunt's cues (Superpairs), on its own volume. */
+    public static void playPairs(Voice[] voices) {
+        playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.pairsVolume);
+    }
+
     public static void playDungeon(Voice[] voices) {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.dungeonVolume);
     }
