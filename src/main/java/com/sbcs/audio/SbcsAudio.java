@@ -517,6 +517,11 @@ public final class SbcsAudio {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.lavaVolume);
     }
 
+    /** The Scatha pet's reveal cues ({@link PetTierSound}), on the cutscene's own volume like the rest of it. */
+    public static void playScatha(Voice[] voices) {
+        for (Voice v : voices) play(v);
+    }
+
     /** The Vault's cues (the Crystal Nucleus), on its own volume. */
     public static void playNucleus(Voice[] voices) {
         playSlayer(voices, SbcsClient.config == null ? 100 : SbcsClient.config.nucleusVolume);

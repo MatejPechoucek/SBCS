@@ -71,6 +71,11 @@ public final class HotbarDropWatcher {
     public static final long KILL_WINDOW_MS = 2000;
     private static final String ID_BLOCK_BRAN = "DWARVEN_OS_BLOCK_BRAN";
     private static final String ID_PET = "PET";
+    /**
+     * 4x Worm Membrane comes with every Scatha kill since 2026-10-06 (the wiki). It is not a drop the cutscene
+     * shows, so it is never cached - only narrated as ignored, so a log after a kill shows it was seen and set aside.
+     */
+    private static final String ID_MEMBRANE = "WORM_MEMBRANE";
     private static final String PET_TYPE_SCATHA = "SCATHA";
 
     /** Best-to-worst, so the strongest new pet wins if several appear at once (as Scatha-Pro does). */
@@ -98,6 +103,7 @@ public final class HotbarDropWatcher {
 
     private Map<String, Integer> previousPetCounts = null; // rarity (as SkyBlock stores it, e.g. "LEGENDARY") -> count
     private int previousBlockBrans = -1;
+    private int previousMembranes = -1;
 
     private final List<CachedDrop> cachedDrops = new ArrayList<>();
 
@@ -131,6 +137,7 @@ public final class HotbarDropWatcher {
         // ---- 1. scan the inventory -------------------------------------------
         Map<String, Integer> currentPetCounts = new HashMap<>();
         int currentBlockBrans = 0;
+        int currentMembranes = 0;
 
         Inventory inventory = player.getInventory();
         NonNullList<ItemStack> items = inventory.getNonEquipmentItems();
@@ -146,6 +153,8 @@ public final class HotbarDropWatcher {
             }
             if (ID_BLOCK_BRAN.equals(id)) {
                 currentBlockBrans += stack.getCount();
+            } else if (ID_MEMBRANE.equals(id)) {
+                currentMembranes += stack.getCount();
             } else if (ID_PET.equals(id)) {
                 String petInfoRaw = data.getString("petInfo").orElse(null);
                 if (petInfoRaw != null) {
@@ -186,7 +195,13 @@ public final class HotbarDropWatcher {
             }
         }
 
+        if (previousMembranes >= 0 && currentMembranes > previousMembranes) {
+            log.note("§7Worm Membrane appeared §8(" + previousMembranes + " → " + currentMembranes
+                    + ") - ignored: every Scatha kill gives it, so it is not the drop");
+        }
+
         previousBlockBrans = currentBlockBrans;
+        previousMembranes = currentMembranes;
         previousPetCounts = currentPetCounts;
 
         // ---- 3. drop anything that went unclaimed for a whole window ----------
