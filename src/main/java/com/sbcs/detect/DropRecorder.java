@@ -105,6 +105,17 @@ public final class DropRecorder {
                     + "|wood chest|gold chest|diamond chest|emerald chest|obsidian chest|bedrock chest|essence"
                     + "|\\[BOSS\\]|necron|maxor|storm|goldor|livid|sadan|thorn|professor|bonzo|scarf");
 
+    /**
+     * Farming (2026-10-26, for docs/ideas/05 - not built yet): pests and their drops, the vacuum, rare crops, the
+     * Garden's visitors and the two dyes. The drop lines are unseen; this is how they will be.
+     */
+    private static final Pattern FARMING = Pattern.compile(
+            "(?i)\\bpests?\\b|vacuum|garden|plot|\\brat\\b|\\bslug\\b|\\bmite\\b|beetle|locust|cricket|mosquito|\\bmoth\\b"
+                    + "|earthworm|firefly|dragonfly|mantis|field mouse|atmospheric filter|pesterminator|sunder|chirping stereo"
+                    + "|clipped wings|wriggling larvae|fire in a bottle|vermin vaporizer|mantid claw|squeaky mousemat"
+                    + "|dung dye|wild strawberry|RARE CROP|cropie|squash|fermento|helianthus|overbloom|visitor"
+                    + "|OFFER ACCEPTED|PET DROP|RARE DROP!|WOW!");
+
     private static boolean enabled() {
         return SbcsClient.config == null || SbcsClient.config.recordDrops;
     }
@@ -140,6 +151,11 @@ public final class DropRecorder {
             JsonObject o = new JsonObject();
             o.addProperty("line", text);
             record("dungeon_line", o);
+        }
+        if (enabled() && FARMING.matcher(text).find()) {
+            JsonObject o = new JsonObject();
+            o.addProperty("line", text);
+            record("farming_line", o);
         }
         // The Fishing Festival's lines, for the same reason: SharkDrops was written before a real
         // Megalodon or tooth line had been seen.
