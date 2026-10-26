@@ -152,7 +152,40 @@ public final class SeraphTest {
         check("the dye holds longest of any ending", dr.total() - dr.arrive() >= ey.total() - ey.arrive()
                 && dr.total() - dr.arrive() >= jp.total() - jp.arrive());
         check("the core and the dye have their own endings", Drop.JUDGEMENT_CORE.ending == Ending.EYE && Drop.BYZANTIUM_DYE.ending == Ending.DRAGON);
-        check("the upgrade and the idol get the jackpot", Drop.ARTIFACT_UPGRADE.ending == Ending.JACKPOT && Drop.END_STONE_IDOL.ending == Ending.JACKPOT);
+        check("the upgrade gets the jackpot", Drop.ARTIFACT_UPGRADE.ending == Ending.JACKPOT);
+        // The item endings (2026-10-26): each drop's animation is about the item.
+        check("every item has its own ending", Drop.SUMMONING_EYE.ending == Ending.ALTAR && Drop.ETHERWARP_MERGER.ending == Ending.WARP
+                && Drop.ENCHANT_RUNE.ending == Ending.RUNE && Drop.PARAGON.ending == Ending.SHARD && Drop.END_STONE_IDOL.ending == Ending.IDOL);
+        boolean ownEnding = true;
+        for (Drop d : Drop.values()) if (d.win() && d.ending == Ending.PLAIN) ownEnding = false;
+        check("no win is left on the plain ending", ownEnding);
+        SeraphTimeline al = new SeraphTimeline(Drop.SUMMONING_EYE, 1);
+        check("the Summoning: frames, seven eyes, the drop's eye, the portal, the lift, in order",
+                SeraphTimeline.A_FRAMES < SeraphTimeline.A_EYES && SeraphTimeline.A_EYES + 6 * SeraphTimeline.A_EYE_STEP < SeraphTimeline.A_SEAT
+                        && SeraphTimeline.A_SEAT < SeraphTimeline.A_SEATED && SeraphTimeline.A_SEATED <= SeraphTimeline.A_OPEN
+                        && SeraphTimeline.A_OPEN < SeraphTimeline.A_LIFT && SeraphTimeline.A_LIFT < al.arrive());
+        check("the eighth frame waits empty until the drop's eye sets in",
+                !al.altarEye(SeraphTimeline.A_SEAT, SeraphTimeline.A_FRAMES_N - 1) && al.altarEye(SeraphTimeline.A_SEATED, SeraphTimeline.A_FRAMES_N - 1)
+                        && al.altarEye(SeraphTimeline.A_SEAT, SeraphTimeline.A_FRAMES_N - 2));
+        check("the frames are down again by the showcase", al.altarFrame(al.arrive() + 900, 0) < 0.01f && al.altarFrame(SeraphTimeline.A_OPEN, 7) > 0.99f);
+        SeraphTimeline wp = new SeraphTimeline(Drop.ETHERWARP_MERGER, 1);
+        boolean warps = true;
+        for (int k = 1; k < SeraphTimeline.W_JUMPS; k++) if (SeraphTimeline.warpAt(k) <= SeraphTimeline.warpAt(k - 1)) warps = false;
+        check("Etherwarp: every warp lands before the showcase, in turn", warps && SeraphTimeline.warpAt(SeraphTimeline.W_JUMPS - 1) < wp.arrive());
+        check("Etherwarp: each target is lit before it lands", wp.warpAim(SeraphTimeline.warpAt(0) - 50, 0) > 0.9f && wp.warpAim(SeraphTimeline.W_FROM - 1, 0) == 0f);
+        SeraphTimeline ru = new SeraphTimeline(Drop.ENCHANT_RUNE, 1);
+        check("the Runecraft: table up, glyphs stream, then the rune is written",
+                ru.runeTable(SeraphTimeline.R_STREAM) > 0.99f && ru.runeStream(SeraphTimeline.R_STREAM_END) > 0.99f
+                        && ru.runeForm(SeraphTimeline.R_FORM - 1) == 0f && SeraphTimeline.R_FORM < ru.arrive());
+        SeraphTimeline sh = new SeraphTimeline(Drop.PARAGON, 1);
+        check("Paragon: the crystals stand until they burst, and the shards fuse before the showcase",
+                !sh.crystalsGone(SeraphTimeline.S_BURST - 1) && sh.crystalsGone(SeraphTimeline.S_BURST)
+                        && sh.shardPull(SeraphTimeline.S_FUSE) >= 1f && SeraphTimeline.S_FUSE < sh.arrive() && sh.crystalsBlow(sh.arrive()) < 0f);
+        SeraphTimeline id = new SeraphTimeline(Drop.END_STONE_IDOL, 1);
+        check("Set in Stone: the Seraph never falls, is stone to the top before it cracks, and is gone at the shatter",
+                id.death(id.arrive()) < 0f && id.stone(SeraphTimeline.I_CRACK) >= 1f && id.seraphShown(SeraphTimeline.I_SHATTER - 1)
+                        && !id.seraphShown(SeraphTimeline.I_SHATTER) && SeraphTimeline.I_SHATTER < id.arrive());
+        check("the idol gets the banner and the long hold", id.banner() && id.total() - id.arrive() >= 5000);
         SeraphTimeline sk = new SeraphTimeline(Drop.VOID_SKIN, 1);
         check("the skin's head comes off after it starts to fall and lands before the spread",
                 SeraphTimeline.HEAD_OFF > SeraphTimeline.DEATH && SeraphTimeline.HEAD_LANDS < SeraphTimeline.SKIN_DONE && sk.arrive() > SeraphTimeline.SKIN_DONE);

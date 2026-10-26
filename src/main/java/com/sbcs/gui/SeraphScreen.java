@@ -167,6 +167,13 @@ public class SeraphScreen extends Screen implements ChopScene.Canvas, Cutscene {
             TextureBank.adopt(SeraphScene.ADOPT[i], Identifier.withDefaultNamespace(SeraphScene.ADOPT_PATH[i]),
                     SeraphScene.ADOPT_SIZE[i][0], SeraphScene.ADOPT_SIZE[i][1]);
         }
+        // The enchanting table's glyphs, the game's own particles, for the Enchant Rune's.
+        if (tl.ending() == SeraphTimeline.Ending.RUNE) {
+            for (int k = 0; k < 26; k++) {
+                TextureBank.adopt(com.sbcs.render.art.ChopArt.glyphTex(k),
+                        Identifier.withDefaultNamespace("textures/particle/sga_" + (char) ('a' + k) + ".png"), 8, 8);
+            }
+        }
         if (tl.ending() == SeraphTimeline.Ending.DRAGON) {
             // The real Ender Dragon: the game's own model posed by its own code (DragonRig), rasterised on the
             // CPU with a depth buffer (ModelRaster), so its textures are read as pixels - through the resource

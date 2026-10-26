@@ -38,6 +38,11 @@ public final class SeraphPreview {
         tex.put(SeraphScene.TEX_WHITE, white);
         tex.put(ChopArt.TEX_GLOW, ChopArt.glow());
         tex.put(ChopArt.TEX_SHEET, ChopArt.sheet());
+        // The enchanting table's glyphs (the Enchant Rune's ending), the game's own sga_a..sga_z.
+        for (int k = 0; k < 26; k++) {
+            BufferedImage gl = read(van, "sga_" + (char) ('a' + k) + ".png");
+            if (gl != null) tex.put(ChopArt.glyphTex(k), gl);
+        }
         // The real dragon, posed by the game's own model (the client jar is on this tool's classpath).
         tex.put(SeraphScene.TEX_DRAGON, argb(ImageIO.read(new File(van, "dragon.png"))));
         tex.put(SeraphScene.TEX_DRAGON_EYES, argb(ImageIO.read(new File(van, "dragon_eyes.png"))));
