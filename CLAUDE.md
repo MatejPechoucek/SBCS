@@ -861,6 +861,11 @@ so the words clear the bottom; the Dye's `showScale` is 1.3 (at 1.45 with the 13
 dependencies) and the release notes; the project description is the README. The Stats rework the designer asked for next
 became the Ledger (below).
 
+**GitHub Releases** (`.github/workflows/release.yml`): a commit to main that changes `mod_version`, a pushed tag
+`v<mod_version>`, or running the workflow by hand builds the jar and attaches it to a release `v<version>`, notes from
+that version's `### Changelog` block here in `docs/modrinth.md` (else GitHub's generated notes), `-alpha`/`-beta` as
+pre-releases. A version already released is skipped. The local build's auto-bump is never committed by CI.
+
 ## The SBCS Ledger (2026-10-16)
 
 The designer's achievement system: local only, a new "Ledger" tab beside Stats, "like an openable book ... with stamps,
