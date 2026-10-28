@@ -144,6 +144,7 @@ public final class HeadSkins {
      * point of the supplier is that its answer changes when the download lands.
      */
     public String texture(String name) {
+        if (Offline.hooks != null) return Offline.hooks.headTexture(this, name);
         Supplier<PlayerSkin> lookup = lookup(name);
         if (lookup == null) return null;
         try {

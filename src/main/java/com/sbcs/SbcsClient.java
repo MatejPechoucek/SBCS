@@ -659,103 +659,7 @@ public class SbcsClient implements ClientModInitializer {
                 "key.sbcs.skip", com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM, org.lwjgl.glfw.GLFW.GLFW_KEY_BACKSPACE,
                 net.minecraft.client.KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD_ID, "main"))));
 
-        // Placeholders only. The Scatha's real texture belongs to Hypixel and lives on the
-        // mob itself, so ScathaSkins lifts it off a live worm the first time one is seen and
-        // keeps it; these are what gets drawn until then. Registering only declares them -
-        // each is drawn and uploaded the first time it is actually blitted.
-        TextureBank.register(ScathaSkins.PLACEHOLDER_BODY, ScathaArt::placeholderBody);
-        TextureBank.register(ScathaSkins.PLACEHOLDER_HEAD, ScathaArt::placeholderHead);
-
-        // Props for the cutscene, all drawn in Java for the same reason as the skins.
-        // The crystals share one greyscale facet sheet and get their colour from the
-        // per-model tint, so a new gem costs a constant rather than an image.
-        // The cavern and the two gemstone outcrops. These replace the PNGs that
-        // tools/gen_cave.py and gen_gems.py used to produce - see CaveArt for why.
-        TextureBank.register(TEX_CAVE, CaveArt::backdrop);
-        TextureBank.register(TEX_GEM_L, () -> CaveArt.gems(false));
-        TextureBank.register(TEX_GEM_R, () -> CaveArt.gems(true));
-        TextureBank.register(TEX_ROCK_L, () -> CaveArt.rock(false));
-        TextureBank.register(TEX_ROCK_R, () -> CaveArt.rock(true));
-        TextureBank.register(TEX_GLOW_L, () -> CaveArt.rockGlow(false));
-        TextureBank.register(TEX_GLOW_R, () -> CaveArt.rockGlow(true));
-        TextureBank.register(TEX_SPARKLE, CaveArt::sparkle);
-        TextureBank.register(TEX_BLOOM, CaveArt::gemBloom);
-        TextureBank.register(TEX_VIGNETTE, CaveArt::vignette);
-
-        // The menu's title icon: the mod's own icon at its native 32 x 32 (it is 8x pixel art; halving is exact).
-        TextureBank.register(SbcsMenuScreen.TEX_ICON, () -> {
-            try (java.io.InputStream in = SbcsClient.class.getResourceAsStream("/assets/sbcs/icon.png")) {
-                return com.sbcs.gui.menu.MenuIcon.scaled(in == null ? null : javax.imageio.ImageIO.read(in), com.sbcs.gui.menu.MenuView.ICON_SIZE);
-            } catch (Exception e) {
-                return com.sbcs.gui.menu.MenuIcon.scaled(null, com.sbcs.gui.menu.MenuView.ICON_SIZE);
-            }
-        });
-        TextureBank.register(PropArt.TEX_CRYSTAL, PropArt::crystalFacets);
-        TextureBank.register(PropArt.TEX_GEM_GLOW, PropArt::gemGlow);
-        TextureBank.register(PropArt.TEX_CLEAVER, PropArt::cleaver);
-        TextureBank.register(PropArt.TEX_STONE, PropArt::stone);
-
-        // The Thaw. One ice sheet per crack pattern per stage - drawn lazily like everything
-        // else here, so the twenty-four of them cost nothing until a corpse is opened.
-        for (int v = 0; v < com.sbcs.render.art.ThawArt.VARIANTS; v++) {
-            for (int st = 0; st < com.sbcs.render.art.ThawArt.STAGES; st++) {
-                final int variant = v, stage = st;
-                TextureBank.register(com.sbcs.render.art.ThawArt.iceName(variant, stage),
-                        () -> com.sbcs.render.art.ThawArt.ice(variant, stage));
-            }
-        }
-        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_CORPSE, com.sbcs.render.art.ThawArt::corpse);
-        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_PICK, com.sbcs.render.art.ThawArt::pick);
-        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_RAY, com.sbcs.render.art.ThawArt::ray);
-        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_SHARD, com.sbcs.render.art.ThawArt::shard);
-        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_AURA, com.sbcs.render.art.ThawArt::aura);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_SHEET, com.sbcs.render.art.ChopArt::sheet);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_GLOW, com.sbcs.render.art.ChopArt::glow);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_RAYS, com.sbcs.render.art.ChopArt::rays);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_RING, com.sbcs.render.art.ChopArt::ring);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_SPLAT, com.sbcs.render.art.ChopArt::splat);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_DROP, com.sbcs.render.art.ChopArt::drop);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_VIGNETTE, com.sbcs.render.art.ChopArt::vignette);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_YARN, com.sbcs.render.art.ChopArt::yarn);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_WING, com.sbcs.render.art.ChopArt::wing);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_PIXDROP, com.sbcs.render.art.ChopArt::pixDrop);
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_PIXSPLAT, com.sbcs.render.art.ChopArt::pixSplat);
-        // The glint, from the game's own texture, read here at runtime - never bundled.
-        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_GLINT, () -> {
-            try (java.io.InputStream in = Minecraft.getInstance().getResourceManager()
-                    .open(net.minecraft.resources.Identifier.withDefaultNamespace("textures/misc/enchanted_glint_item.png"))) {
-                return com.sbcs.render.art.ChopArt.glint(javax.imageio.ImageIO.read(in));
-            } catch (Exception e) {
-                LOGGER.warn("[SBCS] could not read the game's glint texture; drawing one instead", e);
-                return com.sbcs.render.art.ChopArt.glint(null);
-            }
-        });
-        // Hellion's fire: the game's own animated strip, read at runtime (a resource pack's if there is
-        // one) - adopting it by name gives only its first frame. Never bundled.
-        // Eruption's lava: the game's animated strip, read at runtime (a pack's too), normalised to 20 frames of 16.
-        TextureBank.register(com.sbcs.render.EruptionScene.TEX_MAGMA, () -> com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/magma.png"), 3));
-        TextureBank.register(com.sbcs.render.EruptionScene.TEX_CRACKS, () -> com.sbcs.render.art.LavaArt.crackMask(
-                com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/magma.png"), 3)));
-        TextureBank.register(com.sbcs.render.EruptionScene.TEX_LAVA_GREY, () -> com.sbcs.render.art.LavaArt.greyLava(
-                com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/lava_still.png"), 20)));
-        TextureBank.register(com.sbcs.render.EruptionScene.TEX_LAVA, () -> com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/lava_still.png"), 20));
-        TextureBank.register(com.sbcs.render.HellionScene.TEX_FIRE, () -> com.sbcs.render.art.HellionArt.fireStrip(readGameTexture("textures/block/fire_0.png")));
-        TextureBank.register(com.sbcs.render.HellionScene.TEX_FIRE_GREY, () -> com.sbcs.render.art.HellionArt.greyFire(
-                com.sbcs.render.art.HellionArt.fireStrip(readGameTexture("textures/block/fire_0.png"))));
-        TextureBank.register(com.sbcs.render.SeraphScene.TEX_WHITE, () -> {
-            java.awt.image.BufferedImage white = new java.awt.image.BufferedImage(4, 4, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-            for (int y = 0; y < 4; y++) for (int x = 0; x < 4; x++) white.setRGB(x, y, 0xFFFFFFFF);
-            return white;
-        });
-        TextureBank.register(com.sbcs.render.VanguardItems.TEX_GLACITE_POWDER,
-                com.sbcs.render.art.ThawArt::glacitePowder);
-        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_COIN, com.sbcs.render.art.ThawArt::coin);
-        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_DRIP, com.sbcs.render.art.ThawArt::drip);
-        for (int v = 0; v < com.sbcs.render.art.ThawArt.SPLATS; v++) {
-            final int variant = v;
-            TextureBank.register(com.sbcs.render.art.ThawArt.splatName(variant),
-                    () -> com.sbcs.render.art.ThawArt.splat(variant));
-        }
+        registerTextures();
 
         // The cutscenes are not HUD elements any more: mixin/GuiFadeMixin draws them itself, on
         // a stratum of their own, once the HUD pass and its fade are over (drawOwnHud). Inside
@@ -2872,6 +2776,110 @@ public class SbcsClient implements ClientModInitializer {
             case GUILLOTINE -> animationManager.start(result);
             case SCOPE -> openScope(client, result, true, test);
             case NONE -> { }
+        }
+    }
+
+    /**
+     * Declares every texture the mod draws itself (nothing is drawn or uploaded until first used). Public so the
+     * offline previews (tools/GuiPreview) can declare the same set.
+     */
+    public static void registerTextures() {
+        // Placeholders only. The Scatha's real texture belongs to Hypixel and lives on the
+        // mob itself, so ScathaSkins lifts it off a live worm the first time one is seen and
+        // keeps it; these are what gets drawn until then. Registering only declares them -
+        // each is drawn and uploaded the first time it is actually blitted.
+        TextureBank.register(ScathaSkins.PLACEHOLDER_BODY, ScathaArt::placeholderBody);
+        TextureBank.register(ScathaSkins.PLACEHOLDER_HEAD, ScathaArt::placeholderHead);
+
+        // Props for the cutscene, all drawn in Java for the same reason as the skins.
+        // The crystals share one greyscale facet sheet and get their colour from the
+        // per-model tint, so a new gem costs a constant rather than an image.
+        // The cavern and the two gemstone outcrops. These replace the PNGs that
+        // tools/gen_cave.py and gen_gems.py used to produce - see CaveArt for why.
+        TextureBank.register(TEX_CAVE, CaveArt::backdrop);
+        TextureBank.register(TEX_GEM_L, () -> CaveArt.gems(false));
+        TextureBank.register(TEX_GEM_R, () -> CaveArt.gems(true));
+        TextureBank.register(TEX_ROCK_L, () -> CaveArt.rock(false));
+        TextureBank.register(TEX_ROCK_R, () -> CaveArt.rock(true));
+        TextureBank.register(TEX_GLOW_L, () -> CaveArt.rockGlow(false));
+        TextureBank.register(TEX_GLOW_R, () -> CaveArt.rockGlow(true));
+        TextureBank.register(TEX_SPARKLE, CaveArt::sparkle);
+        TextureBank.register(TEX_BLOOM, CaveArt::gemBloom);
+        TextureBank.register(TEX_VIGNETTE, CaveArt::vignette);
+
+        // The menu's title icon: the mod's own icon at its native 32 x 32 (it is 8x pixel art; halving is exact).
+        TextureBank.register(SbcsMenuScreen.TEX_ICON, () -> {
+            try (java.io.InputStream in = SbcsClient.class.getResourceAsStream("/assets/sbcs/icon.png")) {
+                return com.sbcs.gui.menu.MenuIcon.scaled(in == null ? null : javax.imageio.ImageIO.read(in), com.sbcs.gui.menu.MenuView.ICON_SIZE);
+            } catch (Exception e) {
+                return com.sbcs.gui.menu.MenuIcon.scaled(null, com.sbcs.gui.menu.MenuView.ICON_SIZE);
+            }
+        });
+        TextureBank.register(PropArt.TEX_CRYSTAL, PropArt::crystalFacets);
+        TextureBank.register(PropArt.TEX_GEM_GLOW, PropArt::gemGlow);
+        TextureBank.register(PropArt.TEX_CLEAVER, PropArt::cleaver);
+        TextureBank.register(PropArt.TEX_STONE, PropArt::stone);
+
+        // The Thaw. One ice sheet per crack pattern per stage - drawn lazily like everything
+        // else here, so the twenty-four of them cost nothing until a corpse is opened.
+        for (int v = 0; v < com.sbcs.render.art.ThawArt.VARIANTS; v++) {
+            for (int st = 0; st < com.sbcs.render.art.ThawArt.STAGES; st++) {
+                final int variant = v, stage = st;
+                TextureBank.register(com.sbcs.render.art.ThawArt.iceName(variant, stage),
+                        () -> com.sbcs.render.art.ThawArt.ice(variant, stage));
+            }
+        }
+        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_CORPSE, com.sbcs.render.art.ThawArt::corpse);
+        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_PICK, com.sbcs.render.art.ThawArt::pick);
+        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_RAY, com.sbcs.render.art.ThawArt::ray);
+        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_SHARD, com.sbcs.render.art.ThawArt::shard);
+        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_AURA, com.sbcs.render.art.ThawArt::aura);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_SHEET, com.sbcs.render.art.ChopArt::sheet);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_GLOW, com.sbcs.render.art.ChopArt::glow);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_RAYS, com.sbcs.render.art.ChopArt::rays);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_RING, com.sbcs.render.art.ChopArt::ring);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_SPLAT, com.sbcs.render.art.ChopArt::splat);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_DROP, com.sbcs.render.art.ChopArt::drop);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_VIGNETTE, com.sbcs.render.art.ChopArt::vignette);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_YARN, com.sbcs.render.art.ChopArt::yarn);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_WING, com.sbcs.render.art.ChopArt::wing);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_PIXDROP, com.sbcs.render.art.ChopArt::pixDrop);
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_PIXSPLAT, com.sbcs.render.art.ChopArt::pixSplat);
+        // The glint, from the game's own texture, read here at runtime - never bundled.
+        TextureBank.register(com.sbcs.render.art.ChopArt.TEX_GLINT, () -> {
+            try (java.io.InputStream in = Minecraft.getInstance().getResourceManager()
+                    .open(net.minecraft.resources.Identifier.withDefaultNamespace("textures/misc/enchanted_glint_item.png"))) {
+                return com.sbcs.render.art.ChopArt.glint(javax.imageio.ImageIO.read(in));
+            } catch (Exception e) {
+                LOGGER.warn("[SBCS] could not read the game's glint texture; drawing one instead", e);
+                return com.sbcs.render.art.ChopArt.glint(null);
+            }
+        });
+        // Hellion's fire: the game's own animated strip, read at runtime (a resource pack's if there is
+        // one) - adopting it by name gives only its first frame. Never bundled.
+        // Eruption's lava: the game's animated strip, read at runtime (a pack's too), normalised to 20 frames of 16.
+        TextureBank.register(com.sbcs.render.EruptionScene.TEX_MAGMA, () -> com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/magma.png"), 3));
+        TextureBank.register(com.sbcs.render.EruptionScene.TEX_CRACKS, () -> com.sbcs.render.art.LavaArt.crackMask(
+                com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/magma.png"), 3)));
+        TextureBank.register(com.sbcs.render.EruptionScene.TEX_LAVA_GREY, () -> com.sbcs.render.art.LavaArt.greyLava(
+                com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/lava_still.png"), 20)));
+        TextureBank.register(com.sbcs.render.EruptionScene.TEX_LAVA, () -> com.sbcs.render.art.LavaArt.strip(readGameTexture("textures/block/lava_still.png"), 20));
+        TextureBank.register(com.sbcs.render.HellionScene.TEX_FIRE, () -> com.sbcs.render.art.HellionArt.fireStrip(readGameTexture("textures/block/fire_0.png")));
+        TextureBank.register(com.sbcs.render.HellionScene.TEX_FIRE_GREY, () -> com.sbcs.render.art.HellionArt.greyFire(
+                com.sbcs.render.art.HellionArt.fireStrip(readGameTexture("textures/block/fire_0.png"))));
+        TextureBank.register(com.sbcs.render.SeraphScene.TEX_WHITE, () -> {
+            java.awt.image.BufferedImage white = new java.awt.image.BufferedImage(4, 4, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            for (int y = 0; y < 4; y++) for (int x = 0; x < 4; x++) white.setRGB(x, y, 0xFFFFFFFF);
+            return white;
+        });
+        TextureBank.register(com.sbcs.render.VanguardItems.TEX_GLACITE_POWDER,
+                com.sbcs.render.art.ThawArt::glacitePowder);
+        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_COIN, com.sbcs.render.art.ThawArt::coin);
+        TextureBank.register(com.sbcs.render.art.ThawArt.TEX_DRIP, com.sbcs.render.art.ThawArt::drip);
+        for (int v = 0; v < com.sbcs.render.art.ThawArt.SPLATS; v++) {
+            final int variant = v;
+            TextureBank.register(com.sbcs.render.art.ThawArt.splatName(variant),
+                    () -> com.sbcs.render.art.ThawArt.splat(variant));
         }
     }
 }

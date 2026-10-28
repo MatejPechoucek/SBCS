@@ -40,7 +40,11 @@ public final class PixelLayer implements ThawFrost.Fill, CrystalVeins.Fill {
     public void begin(int w, int h, int unit) {
         this.unit = Math.max(1, unit);
         int nw = (w + this.unit - 1) / this.unit, nh = (h + this.unit - 1) / this.unit;
-        if (nw != gw || nh != gh || texture == null) {
+        if (Offline.hooks != null && (nw != gw || nh != gh)) {
+            gw = nw;
+            gh = nh;
+            buf = new int[gw * gh];
+        } else if (Offline.hooks == null && (nw != gw || nh != gh || texture == null)) {
             gw = nw;
             gh = nh;
             // No close here: registering under the same id closes the old texture itself (26.2's
@@ -73,6 +77,10 @@ public final class PixelLayer implements ThawFrost.Fill, CrystalVeins.Fill {
 
     /** Uploads the frame and draws it over the whole screen. */
     public void end(GuiGraphicsExtractor g) {
+        if (drawn && Offline.hooks != null) {
+            Offline.hooks.layer(g, buf, gw, gh, unit);
+            return;
+        }
         if (!drawn || texture == null) return;
         for (int y = 0; y < gh; y++) {
             for (int x = 0; x < gw; x++) {
