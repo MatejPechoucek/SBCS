@@ -11,6 +11,12 @@ name: Release
 # The notes are the "### Changelog" block of that version's section in docs/modrinth.md, or
 # GitHub's generated notes when there is none. Every version is a full release, -alpha and -beta
 # too (every SBCS version is one for now, and a pre-release never shows as the repo's latest).
+#
+# Every release is then copied, jar and notes, to the public repo MatejPechoucek/sbcs-releases,
+# so it can be shared without making this one public. That needs the secret RELEASES_TOKEN: a
+# fine-grained token with Contents read and write on sbcs-releases only. Without it the copy is
+# skipped with a warning. A version already there is only made its latest; running the workflow
+# by hand copies the current version over if it is missing.
 on:
   push:
     branches: [main]
@@ -111,3 +117,27 @@ jobs:
           if [ "${{ steps.notes.outputs.found }}" = true ]; then args+=(--notes-file notes.md); else args+=(--generate-notes); fi
           args+=(--latest)
           gh release create "$TAG" "${{ steps.jar.outputs.path }}" "${args[@]}"
+
+      - name: Copy the release to the public repo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLIC_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          PUBLIC_REPO: MatejPechoucek/sbcs-releases
+          TAG: ${{ steps.v.outputs.tag }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          if [ -z "$PUBLIC_TOKEN" ]; then
+            echo "::warning::No RELEASES_TOKEN secret - $TAG was not copied to $PUBLIC_REPO"
+            exit 0
+          fi
+          if GH_TOKEN="$PUBLIC_TOKEN" gh release view "$TAG" --repo "$PUBLIC_REPO" >/dev/null 2>&1; then
+            echo "$TAG is already in $PUBLIC_REPO - making it the latest"
+            GH_TOKEN="$PUBLIC_TOKEN" gh release edit "$TAG" --repo "$PUBLIC_REPO" --prerelease=false --latest
+            exit 0
+          fi
+          mkdir -p public
+          gh release download "$TAG" --pattern "sbcs-$VERSION.jar" --dir public
+          gh release view "$TAG" --json body --jq .body > public/notes.md
+          # The public repo has none of this repo's commits, so the tag goes on its own main.
+          GH_TOKEN="$PUBLIC_TOKEN" gh release create "$TAG" "public/sbcs-$VERSION.jar" \
+            --repo "$PUBLIC_REPO" --title "SBCS $VERSION" --notes-file public/notes.md --latest
