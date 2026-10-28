@@ -712,10 +712,16 @@ public final class MenuView {
         if (!group(rows, "superpairs", "Superpairs - The Hunt", "Rare tiles boxed while you play, opened after", "experience_bottle", PAIRS,
                 cfg.pairsAnimation, () -> { cfg.pairsAnimation = !cfg.pairsAnimation; cfg.save(); })) return;
         rows.add(new NoticeRow("Every tile from the rare row up (VII books, the Nadeshiko Dye, Experiment the Fish, the Serum, "
-                + "a Legendary Guardian) shows as a lettered black box. Find its pair, and the box is opened for you once the game is over."));
+                + "a Legendary Guardian) worth the floor below shows as a lettered black box. Find its pair, and the box is opened for you once the game is over."));
         rows.add(new SectionRow("Hiding the drop"));
         rows.add(toggle("Box the rare tiles", cfg.pairsCover, () -> cfg.pairsCover = !cfg.pairsCover, cfg));
         rows.add(new NoticeRow("The black box and no tooltip over it. Nothing is clicked for you - the game plays as always."));
+        long[] boxMin = PatternConfig.PAIRS_BOX_MIN;
+        rows.add(new SliderRow("pairs_box_min", "Box tiles worth at least", cfg.pairsBoxMin, 0, boxMin.length - 1, 1,
+                v -> cfg.pairsBoxMin = v, v -> v == 0 ? "Any" : coins(boxMin[v])));
+        rows.add(new NoticeRow("A cheaper rare tile is left as it is. A tile whose price is not known yet is boxed."));
+        rows.add(toggle("Rare drop panel", cfg.pairsPanel, () -> cfg.pairsPanel = !cfg.pairsPanel, cfg));
+        rows.add(new NoticeRow("A small panel beside the menu that tells you a rare reward is on the board, and whether you found it."));
         rows.add(toggle("Open boxes that got away", cfg.pairsShowMissed, () -> cfg.pairsShowMissed = !cfg.pairsShowMissed, cfg));
         rows.add(new NoticeRow("A box whose pair you never found still opens, grey, so you learn what it was."));
         rows.add(new SectionRow("The endings"));

@@ -20,6 +20,11 @@ public final class PairsHunt {
         void fill(float x, float y, float w, float h, int argb);
 
         void text(String text, float cx, float cy, float scale, int argb);
+
+        /** A line's width at scale 1, for left-aligned text; the default is the game font's usual 6 a character. */
+        default float width(String text) {
+            return text.length() * 6f;
+        }
     }
 
     static final int GOLD = 0xE8C46A, BLACK = 0xFF0A080E, RIM = 0xFF2C2338, EMBER_A = 0xFFB070FF, EMBER_B = 0xFFE8C46A;
@@ -115,6 +120,83 @@ public final class PairsHunt {
         for (float[] t : new float[][]{{m.x0(), m.y0()}, {m.x1(), m.y1()}}) {
             p.fill(t[0] - 2, t[1] - 2, 20, 20, Math.round(160 * flash) << 24 | 0xFFF2C8);
         }
+    }
+
+    /**
+     * One rare reward in the panel: a box ({@code mark} its letter, {@code title} null - the panel never names what is
+     * under a box) or a tile left uncovered under the price floor ({@code mark} 0, its title, colour and worth, -1 not
+     * known). {@code revealed} once the board has been turned over, when an unfound one has got away.
+     */
+    public record Line(char mark, String title, int colour, long worth, boolean found, boolean revealed) {}
+
+    static final int PANEL_BG = 0xE0100C16, PANEL_RIM = 0xFF5A4520, GREY = 0xFFA8A0B0, GREEN = 0xFF55FF55, RED = 0xFFFF5555;
+
+    /**
+     * The panel beside the menu: "RARE DROP!" and a line per rare reward on the board, with whether its pair has been
+     * found. It sits to the right of the menu (past the clicks' pips), or to its left if the screen is too narrow, and
+     * flashes for a moment when a new one turns up ({@code newestAt}).
+     */
+    public static void panel(Paint p, int w, int h, float mx, float my, float mw, float mh, List<Line> lines,
+                             long newestAt, long now) {
+        if (lines.isEmpty()) return;
+        String head = "RARE DROP!", sub = lines.size() == 1 ? "on the board" : lines.size() + " on the board";
+        float inner = Math.max(p.width(head), p.width(sub));
+        for (Line l : lines) {
+            inner = Math.max(inner, 12 + p.width(name(l)));
+            inner = Math.max(inner, 12 + p.width(status(l)));
+        }
+        float pw = inner + 8, ph = 30 + lines.size() * 22;
+        // Right of the menu, past the clicks' pips; else its left; on a screen too narrow for either, the right edge.
+        float x = mx + mw + 14;
+        if (x + pw > w - 4) x = mx - 14 - pw >= 4 ? mx - 14 - pw : Math.max(4, w - 4 - pw);
+        float y = Math.max(4, Math.min(my, h - 4 - ph));
+        long since = now - newestAt;
+        float flash = since >= 0 && since < 1200 ? (float) Math.exp(-since / 300.0) : 0f;
+
+        p.fill(x - 1, y - 1, pw + 2, ph + 2, PANEL_RIM);
+        p.fill(x, y, pw, ph, PANEL_BG);
+        p.fill(x, y, pw, 1, 0xFFE8C46A);
+        if (flash > 0) p.fill(x, y, pw, ph, Math.round(90 * flash) << 24 | 0xFFF2C8);
+        // The header blinks gold and white while it is new, then stays gold.
+        int headCol = flash > 0.3f && ((since / 120) & 1) == 0 ? 0xFFFFFFFF : 0xFF000000 | GOLD;
+        p.text(head, x + pw / 2f, y + 8, 1f, headCol);
+        p.text(sub, x + pw / 2f, y + 18, 1f, GREY);
+
+        float ly = y + 30;
+        for (Line l : lines) {
+            float lx = x + 4;
+            if (l.mark() != 0) {
+                p.fill(lx, ly, 10, 10, RIM);
+                p.fill(lx + 1, ly + 1, 8, 8, BLACK);
+                p.text(String.valueOf(l.mark()), lx + 5, ly + 5.5f, 1f, 0xFF000000 | GOLD);
+            } else {
+                p.fill(lx + 2, ly + 2, 6, 6, 0xFF000000 | l.colour());
+            }
+            left(p, name(l), lx + 12, ly + 5.5f, l.mark() != 0 ? 0xFFE0D8E8 : 0xFF000000 | l.colour());
+            int col = l.found() ? GREEN : l.revealed() ? RED : (((now / 400) & 1) == 0 ? 0xFFE8C46A : 0xFFB8963A);
+            left(p, status(l), lx + 12, ly + 15.5f, col);
+            ly += 22;
+        }
+    }
+
+    static String name(Line l) {
+        return l.mark() != 0 ? "Hidden reward" : l.title();
+    }
+
+    /** "Find its pair!", "Found!" or "Got away", after the worth of a tile left uncovered. */
+    static String status(Line l) {
+        String s = l.found() ? "Found!" : l.revealed() ? "Got away" : "Find its pair!";
+        return l.mark() == 0 && l.worth() > 0 ? coins(l.worth()) + " - " + s : s;
+    }
+
+    static void left(Paint p, String text, float x, float cy, int argb) {
+        p.text(text, x + p.width(text) / 2f, cy, 1f, argb);
+    }
+
+    static String coins(long c) {
+        if (c >= 1_000_000) return String.format(java.util.Locale.ROOT, "%.1fM", c / 1e6).replace(".0M", "M");
+        if (c >= 1_000) return Math.round(c / 1000.0) + "k";
+        return String.valueOf(c);
     }
 
     static float rnd(int x, int y) {

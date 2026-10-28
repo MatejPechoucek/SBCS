@@ -316,6 +316,15 @@ public class PatternConfig {
     public boolean pairsAnimation = true;
     /** The black boxes over rare tiles in the menu: off shows the items as Hypixel does. */
     public boolean pairsCover = true;
+    /**
+     * Only rare tiles worth at least this get a box ({@link #PAIRS_BOX_MIN} index; 0 every one). A cheaper one is
+     * shown as Hypixel draws it and only named in the panel. Matej's default, 2026-10-28: 400k.
+     */
+    public int pairsBoxMin = PAIRS_BOX_MIN_DEFAULT;
+    public static final long[] PAIRS_BOX_MIN = {0, 100_000, 250_000, 400_000, 500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000};
+    public static final int PAIRS_BOX_MIN_DEFAULT = 3;
+    /** The panel beside the Superpairs menu that says a rare reward is on the board. */
+    public boolean pairsPanel = true;
     /** A box that never found its pair is opened at the end too, grey ("Got away"); off keeps it secret. */
     public boolean pairsShowMissed = true;
     public boolean pairsBanner = true;
@@ -526,6 +535,7 @@ public class PatternConfig {
         dungeonVolume = clamp(dungeonVolume, 0, 150);
         pairsVolume = clamp(pairsVolume, 0, 150);
         pairsSpeed = clamp(pairsSpeed, 50, 200);
+        pairsBoxMin = clamp(pairsBoxMin, 0, PAIRS_BOX_MIN.length - 1);
         dungeonSpeed = clamp(dungeonSpeed, 50, 200);
         dungeonCroesus = clamp(dungeonCroesus, 0, 2);
         dungeonTiers &= (1 << com.sbcs.detect.dungeon.ChestTier.values().length) - 1;

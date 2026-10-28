@@ -111,19 +111,38 @@ public final class PairsWatcher {
 
     private static void start(String stake, Screen screen, long now, DecisionLog log) {
         reset();
-        game = new PairsGame(stake, now);
+        game = new PairsGame(stake, now).hiding(PairsWatcher::hides);
         gameOn = screen;
         lastMenuAt = now;
+        PatternConfig c = SbcsClient.config;
+        if (c != null && c.livePrices) {
+            // The floor needs each rare reward's worth before its first tile turns; a VII book's comes from the bazaar.
+            com.sbcs.market.Bazaar.request();
+            for (String id : new String[]{PairsReward.SERUM_ID, PairsReward.FISH_ID, PairsReward.DYE_ID, "PET_GUARDIAN"}) {
+                com.sbcs.market.LivePrice.request(id);
+            }
+        }
         log.note("§7The Hunt: a Superpairs game (" + stake + ") - watching its tiles");
     }
 
     private static void narrate(PairsGame.Event e, DecisionLog log, long now) {
         switch (e.kind()) {
             case BOX -> {
-                log.note("§dThe Hunt: box " + e.box().mark + " over slot " + e.slot() + " - " + e.box().reward.tier()
-                        + " (" + e.box().reward.key() + ")");
+                PairsGame.Box b = e.box();
+                long w = worth(b.reward);
+                String worth = w < 0 ? "worth unknown" : "worth " + w;
+                if (b.hidden) {
+                    log.note("§dThe Hunt: box " + b.mark + " over slot " + e.slot() + " - " + b.reward.tier()
+                            + " (" + b.reward.key() + ", " + worth + ")");
+                } else {
+                    log.note("§7The Hunt: " + b.reward.key() + " in slot " + e.slot() + " left uncovered - " + worth
+                            + ", under the " + floor() + " floor");
+                }
+                announcedAt = now;
                 SbcsAudio.playPairs(PairsVoices.boxLand(now));
             }
+            case UNMATCH -> log.note("§eThe Hunt: " + e.box().reward.key()
+                    + " looked matched, but the rewards page does not list it - not won");
             case MATCH -> {
                 log.note("§aThe Hunt: box " + e.box().mark + " matched"
                         + (e.slot() < 0 ? " (the rewards menu lists it)" : " in slots " + e.slot() + " and " + e.other()));
@@ -153,7 +172,8 @@ public final class PairsWatcher {
         List<String> won = new ArrayList<>();
         for (PairsGame.Box b : seen) {
             if (b.matched) won.add(b.reward.title());
-            if (b.matched || c.pairsShowMissed) show.add(new PairsTimeline.Box(b.mark, b.reward, b.matched));
+            // Only a box is revealed: a reward under the floor was never hidden.
+            if (b.hidden && (b.matched || c.pairsShowMissed)) show.add(new PairsTimeline.Box(b.mark, b.reward, b.matched));
         }
         // Stats: one run per game, its first find as the drop, the rest tallied on their own.
         SbcsStats st = SbcsStats.get();
@@ -164,7 +184,7 @@ public final class PairsWatcher {
             return;
         }
         if (show.isEmpty()) {
-            log.note("§8The Hunt: " + seen.size() + " box(es), none matched, and missed boxes are not shown");
+            log.note("§8The Hunt: " + seen.size() + " rare tile(s) (" + won.size() + " found), nothing boxed to open");
             return;
         }
         if (won.isEmpty() && SbcsClient.bustStyle(com.sbcs.gui.PairsScreen.SOURCE) == 2) {
@@ -237,13 +257,50 @@ public final class PairsWatcher {
         if (readings.size() > 512) readings.clear();
         PairsReward r = readings.computeIfAbsent(stack, PairsWatcher::read);
         PairsGame.Box b = game.box(r, System.currentTimeMillis());
-        return b == null ? 0 : b.mark;
+        return b == null || !b.hidden ? 0 : b.mark;
     }
 
-    /** Drawn after the screen: embers and the clicks round the menu while a box waits, a crack between a found pair. */
+    // ================================================================== the price floor
+
+    /** The floor in coins (0: every rare tile is boxed). */
+    static long floor() {
+        PatternConfig c = SbcsClient.config;
+        if (c == null) return PatternConfig.PAIRS_BOX_MIN[PatternConfig.PAIRS_BOX_MIN_DEFAULT];
+        return PatternConfig.PAIRS_BOX_MIN[Math.max(0, Math.min(c.pairsBoxMin, PatternConfig.PAIRS_BOX_MIN.length - 1))];
+    }
+
+    /** What a reward fetches: the bazaar's instant sell, else the lowest BIN; -1 unknown. */
+    static long worth(PairsReward r) {
+        String id = r.priceId();
+        if (id == null) return -1;
+        Double sell = com.sbcs.market.Bazaar.sell(id);
+        if (sell != null && sell > 0) return Math.round(sell);
+        Long bin = com.sbcs.market.LivePrice.cached(id);
+        return bin != null && bin > 0 ? bin : -1;
+    }
+
+    /** Whether a rare reward gets a box: cover on, and worth the floor or more - or of unknown worth, to be safe. */
+    static boolean hides(PairsReward r) {
+        PatternConfig c = SbcsClient.config;
+        if (c != null && !c.pairsCover) return false;
+        long floor = floor();
+        if (floor <= 0) return true;
+        long w = worth(r);
+        return w < 0 || w >= floor;
+    }
+
+    /** When the newest rare tile was first seen, for the panel's flash. */
+    private static long announcedAt;
+
+    /**
+     * Drawn after the screen: embers and the clicks round the menu while a box waits, a crack between a found pair, and
+     * the panel to the menu's right that says a rare reward is on the board.
+     */
     public static void drawOver(GuiGraphicsExtractor g) {
         Minecraft mc = Minecraft.getInstance();
-        if (game == null || mc.gui.screen() != gameOn || !on() || !(gameOn instanceof AbstractContainerScreen<?> menu)) return;
+        PatternConfig c = SbcsClient.config;
+        if (game == null || c == null || !c.pairsAnimation || !com.sbcs.Safety.on("superpairs")) return;
+        if (mc.gui.screen() != gameOn || !(gameOn instanceof AbstractContainerScreen<?> menu)) return;
         if (rectOf != menu) return;
         int[] rect = PairsWatcher.rect;
         int w = mc.getWindow().getGuiScaledWidth(), h = mc.getWindow().getGuiScaledHeight();
@@ -256,8 +313,20 @@ public final class PairsWatcher {
             ms.add(new PairsHunt.Match(rect[0] + a.x, rect[1] + a.y, rect[0] + b.x, rect[1] + b.y, m[2]));
         }
         g.nextStratum();
-        PairsHunt.overlay(paint(g), w, h, rect[0], rect[1], rect[2], rect[3], game.hunting(), game.turnsHunting(),
-                game.clicksLeft(), game.clicksMax(), ms, now);
+        PairsHunt.Paint p = paint(g);
+        if (c.pairsCover) {
+            PairsHunt.overlay(p, w, h, rect[0], rect[1], rect[2], rect[3], game.hunting(), game.turnsHunting(),
+                    game.clicksLeft(), game.clicksMax(), ms, now);
+        }
+        if (c.pairsPanel && !game.boxes().isEmpty()) {
+            List<PairsHunt.Line> lines = new ArrayList<>();
+            for (PairsGame.Box b : game.boxes()) {
+                long worth = b.hidden ? -1 : worth(b.reward);
+                lines.add(new PairsHunt.Line(b.hidden ? b.mark : 0, b.hidden ? null : b.reward.title(),
+                        b.reward.colour(), worth, b.matched, game.revealed()));
+            }
+            PairsHunt.panel(p, w, h, rect[0], rect[1], rect[2], rect[3], lines, announcedAt, now);
+        }
     }
 
     private static Object rectOf;
@@ -279,6 +348,11 @@ public final class PairsWatcher {
             public void fill(float x, float y, float w, float h, int argb) {
                 int x0 = Math.round(x), y0 = Math.round(y);
                 g.fill(x0, y0, x0 + Math.max(1, Math.round(w)), y0 + Math.max(1, Math.round(h)), argb);
+            }
+
+            @Override
+            public float width(String text) {
+                return font.width(text);
             }
 
             @Override

@@ -1754,6 +1754,18 @@ every other tile are the game's. Spec: `docs/ideas/06-superpairs.md`.
   over the menu's rect. The overlay is drawn from `GuiOssuaryMixin` (`Safety.hook(6)`). Chat is held from the first box
   until the reveal is over (`holdsChat`). `gui/PairsScreen`, `SbcsClient.openPairs`, menu card "Superpairs - The Hunt",
   `/sbcs test superpairs fish|serum|guardian|book|dye|missed|two`. Config `pairs*`.
+- **The price floor and the panel (2026-10-28, Matej: "a simple thing to the right of the GUI ... default minimum price to
+  box 400k")**: a rare tile is boxed only if worth `pairsBoxMin` or more (`PatternConfig.PAIRS_BOX_MIN`, default 400k;
+  bazaar instant sell, else lowest BIN, asked for when the game starts; unknown worth is boxed). Decided once, when the
+  tile is first seen (`PairsGame.Box.hidden`), so a late price never uncovers one; only hidden boxes are lettered,
+  hunted and revealed. `PairsHunt.panel` (`pairsPanel`) sits right of the menu past the pips: "RARE DROP!", a line per
+  rare tile - "Hidden reward" for a box (never named), name and worth for an uncovered one - and Find its pair / Found! /
+  Got away. **Matej's first real game (`tools/fixtures/superpairs_game.jsonl`) settled two things**: with no clicks
+  left Hypixel turns the whole board over, which 0.4.0 read as a match and so reported an unfound Serum as won -
+  `PairsGame.revealed` (more than 4 slots changing at 0 clicks) stops matching after it; and the rewards page lists
+  what was won in the Superpairs item's lore after "Rewards:" ("+ Titanic Experience Bottle"), which now settles every
+  box both ways (`rewardsListed`, an `UNMATCH` event). Face-down tiles are cyan stained glass; the title is
+  "Superpairs (Metaphysical)", the clicks "Remaining Clicks: N" on slot 4, the page "Superpairs Rewards".
 - **Theory until Matej's records** (`detect/superpairs/PairsRecorder`, `superpairs_menu`, every flip with "Drop records"
   on, each tile also stamped with what the Hunt read it as): the title "Superpairs (Stake)", a rewards page's title, how a
   revealed tile's name and lore look, how a matched pair stays shown, "Clicks Remaining". Another mod's Superpairs solver

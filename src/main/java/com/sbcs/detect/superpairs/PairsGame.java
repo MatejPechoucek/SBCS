@@ -33,10 +33,13 @@ public final class PairsGame {
     /** Two changes closer than this are one turn (a flip and its pair turning back are one). */
     static final long TURN_GAP_MS = 250;
 
-    /** A covered reward's box. */
+    /** A rare reward on the board: boxed ({@link #hidden}) or shown as Hypixel draws it, under the price floor. */
     public static final class Box {
         public final PairsReward reward;
+        /** Its letter; only hidden boxes are lettered (0 for one that is shown). */
         public final char mark;
+        /** Covered by a black box: decided once, when it is first seen, so a late price never uncovers it. */
+        public final boolean hidden;
         public final long firstSeen;
         /** The slots it has been seen in this game (both, once matched). */
         public final TreeSet<Integer> slots = new TreeSet<>();
@@ -48,9 +51,10 @@ public final class PairsGame {
         /** Turns played when the hunt for it began. */
         final int turnsAtStart;
 
-        Box(PairsReward reward, char mark, long firstSeen, int turnsAtStart) {
+        Box(PairsReward reward, char mark, boolean hidden, long firstSeen, int turnsAtStart) {
             this.reward = reward;
             this.mark = mark;
+            this.hidden = hidden;
             this.firstSeen = firstSeen;
             this.turnsAtStart = turnsAtStart;
         }
@@ -58,7 +62,7 @@ public final class PairsGame {
 
     /** What changed in one update, for the DecisionLog and the hunt's sounds. */
     public record Event(Kind kind, Box box, int slot, int other) {
-        public enum Kind { BOX, MATCH, TURN }
+        public enum Kind { BOX, MATCH, TURN, UNMATCH }
     }
 
     private final Map<String, Box> boxes = new LinkedHashMap<>();
@@ -67,6 +71,13 @@ public final class PairsGame {
     private int turns;
     private long lastTurnAt = Long.MIN_VALUE / 2;
     private Integer clicksLeft, clicksMax;
+    /**
+     * The board turned over whole: with no clicks left Hypixel shows every tile, so two of a pair face up then is not a
+     * match (0.4.0 called a Serum found that way). Seen in Matej's records, 2026-10-28.
+     */
+    private boolean revealed;
+    /** Which rare rewards get a black box: those at or over the price floor, or of unknown worth. */
+    private java.util.function.Predicate<PairsReward> hide = r -> true;
     private final String stake;
     public final long startedAt;
 
@@ -77,13 +88,24 @@ public final class PairsGame {
 
     public String stake() { return stake; }
 
-    /** The box for this reward, lettered now if it is new. Null for a reward that is not covered. */
+    public PairsGame hiding(java.util.function.Predicate<PairsReward> hide) {
+        this.hide = hide;
+        return this;
+    }
+
+    /** Whether the board has been turned over whole (no clicks left). */
+    public boolean revealed() { return revealed; }
+
+    /** The box for this reward, made now if it is new. Null for a reward that is not rare. */
     public Box box(PairsReward r, long now) {
         if (r == null || !r.covered()) return null;
         Box b = boxes.get(r.key());
         if (b == null) {
-            char mark = (char) ('A' + Math.min(25, boxes.size()));
-            b = new Box(r, mark, now, turns);
+            boolean hidden = hide.test(r);
+            int lettered = 0;
+            for (Box x : boxes.values()) if (x.hidden) lettered++;
+            char mark = hidden ? (char) ('A' + Math.min(25, lettered)) : 0;
+            b = new Box(r, mark, hidden, now, turns);
             boxes.put(r.key(), b);
         }
         return b;
@@ -102,16 +124,16 @@ public final class PairsGame {
     public Integer clicksLeft() { return clicksLeft; }
     public Integer clicksMax() { return clicksMax; }
 
-    /** Whether any box is still waiting for its pair. */
+    /** Whether any hidden box is still waiting for its pair. */
     public boolean hunting() {
-        for (Box b : boxes.values()) if (!b.matched) return true;
+        for (Box b : boxes.values()) if (b.hidden && !b.matched) return true;
         return false;
     }
 
     /** Turns since the oldest unmatched box appeared: the hunt's pulse. */
     public int turnsHunting() {
         int best = 0;
-        for (Box b : boxes.values()) if (!b.matched) best = Math.max(best, turns - b.turnsAtStart);
+        for (Box b : boxes.values()) if (b.hidden && !b.matched) best = Math.max(best, turns - b.turnsAtStart);
         return best;
     }
 
@@ -137,8 +159,14 @@ public final class PairsGame {
             faceUp.computeIfAbsent(r.key(), k -> new ArrayList<>()).add(s.slot());
         }
         if (!rewardsMenu) {
+            Integer before = clicksLeft;
+            readClicks(slots);
             // Turns: the grid changed since last tick.
             if (primed) {
+                int flipped = 0;
+                for (Map.Entry<Integer, String> e : sig.entrySet()) if (!e.getValue().equals(lastSig.get(e.getKey()))) flipped++;
+                // A click turns one tile (plus the clicks and the timer); the end turns the rest over at once.
+                if (flipped > 4 && (Integer.valueOf(0).equals(clicksLeft) || Integer.valueOf(0).equals(before))) revealed = true;
                 boolean changed = !sig.equals(lastSig);
                 if (changed && now - lastTurnAt >= TURN_GAP_MS) {
                     turns++;
@@ -149,11 +177,28 @@ public final class PairsGame {
             primed = true;
             lastSig.clear();
             lastSig.putAll(sig);
-            readClicks(slots);
+        }
+        List<String> listed = rewardsMenu ? rewardsListed(slots) : null;
+        if (listed != null) {
+            // The rewards page names everything won: it settles every box, both ways.
+            for (Box b : boxes.values()) {
+                boolean won = false;
+                String t = b.reward.title().toLowerCase(Locale.ROOT);
+                for (String l : listed) if (l.contains(t)) won = true;
+                if (won && !b.matched) {
+                    b.matched = true;
+                    b.matchedAt = now;
+                    out.add(new Event(Event.Kind.MATCH, b, -1, -1));
+                } else if (!won && b.matched) {
+                    b.matched = false;
+                    out.add(new Event(Event.Kind.UNMATCH, b, -1, -1));
+                }
+            }
+            return out;
         }
         for (Map.Entry<String, List<Integer>> e : faceUp.entrySet()) {
             Box b = boxes.get(e.getKey());
-            if (b.matched) continue;
+            if (b.matched || revealed && !rewardsMenu) continue;
             if (rewardsMenu || e.getValue().size() >= 2) {
                 b.matched = true;
                 b.matchedAt = now;
@@ -192,6 +237,26 @@ public final class PairsGame {
         if (title == null) return false;
         String t = title.toLowerCase(Locale.ROOT);
         return t.contains("superpairs") || isRewards(title);
+    }
+
+    /**
+     * The rewards page's own list: the lines after "Rewards:" in the Superpairs item's lore ("+ Titanic Experience
+     * Bottle"), lower case. Null when the page has no such list. Read from Matej's records, 2026-10-28.
+     */
+    static List<String> rewardsListed(List<SlotView> slots) {
+        for (SlotView s : slots) {
+            List<String> lore = s.lore();
+            int at = -1;
+            for (int i = 0; i < lore.size(); i++) if (lore.get(i).trim().equalsIgnoreCase("Rewards:")) at = i;
+            if (at < 0) continue;
+            List<String> out = new ArrayList<>();
+            for (int i = at + 1; i < lore.size(); i++) {
+                String l = lore.get(i).trim();
+                if (l.startsWith("+")) out.add(l.toLowerCase(Locale.ROOT));
+            }
+            return out;
+        }
+        return null;
     }
 
     /** Clicks left, from any slot's name or lore ("Clicks Remaining: 7", "7 clicks left") - theory. */
