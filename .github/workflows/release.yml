@@ -6,10 +6,11 @@ name: Release
 # - push a tag v<mod_version> (e.g. v0.4.0-alpha) - the tag must match gradle.properties;
 # - push to main a commit that changes mod_version in gradle.properties - the tag is made here;
 # - run it by hand (Actions > Release > Run workflow) to release the version on main now.
-# A version that already has a release is left alone, so re-running is safe.
+# A version that already has a release is not rebuilt; it is only made a full, latest release.
 #
 # The notes are the "### Changelog" block of that version's section in docs/modrinth.md, or
-# GitHub's generated notes when there is none. -alpha and -beta versions are pre-releases.
+# GitHub's generated notes when there is none. Every version is a full release, -alpha and -beta
+# too (every SBCS version is one for now, and a pre-release never shows as the repo's latest).
 on:
   push:
     branches: [main]
@@ -54,11 +55,10 @@ jobs:
             fi
           fi
           if gh release view "$tag" >/dev/null 2>&1; then
-            echo "$tag is already released"
+            echo "$tag is already released - making sure it is a full, latest release"
+            gh release edit "$tag" --prerelease=false --latest
             go=false
           fi
-          case "$version" in *-*) pre=true ;; *) pre=false ;; esac
-          echo "pre=$pre" >> "$GITHUB_OUTPUT"
           echo "go=$go" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v4
@@ -109,5 +109,5 @@ jobs:
         run: |
           args=(--title "SBCS $VERSION" --target "$GITHUB_SHA")
           if [ "${{ steps.notes.outputs.found }}" = true ]; then args+=(--notes-file notes.md); else args+=(--generate-notes); fi
-          if [ "${{ steps.v.outputs.pre }}" = true ]; then args+=(--prerelease); fi
+          args+=(--latest)
           gh release create "$TAG" "${{ steps.jar.outputs.path }}" "${args[@]}"

@@ -863,8 +863,9 @@ became the Ledger (below).
 
 **GitHub Releases** (`.github/workflows/release.yml`): a commit to main that changes `mod_version`, a pushed tag
 `v<mod_version>`, or running the workflow by hand builds the jar and attaches it to a release `v<version>`, notes from
-that version's `### Changelog` block here in `docs/modrinth.md` (else GitHub's generated notes), `-alpha`/`-beta` as
-pre-releases. A version already released is skipped. The local build's auto-bump is never committed by CI.
+that version's `### Changelog` block here in `docs/modrinth.md` (else GitHub's generated notes). Alpha and beta are
+full releases too (Matej, 2026-10-28: a pre-release never shows in the sidebar). A version already released is only
+made the latest. The local build's auto-bump is never committed by CI.
 
 ## The SBCS Ledger (2026-10-16)
 
