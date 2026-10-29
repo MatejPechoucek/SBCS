@@ -195,6 +195,61 @@ public final class PairsTest {
         c.update(List.of(clicks), rewards(clicks), false, 0);
         check("the clicks left are read", c.clicksLeft() != null && c.clicksLeft() == 7);
 
+        // ---- Matej's real game (2026-10-28, Metaphysical): a Serum turned up, its pair never did
+        List<List<SlotView>> real = new ArrayList<>();
+        List<Boolean> realRewards = new ArrayList<>();
+        try {
+            for (String line : java.nio.file.Files.readAllLines(java.nio.file.Path.of("tools/fixtures/superpairs_game.jsonl"))) {
+                com.google.gson.JsonObject o = com.google.gson.JsonParser.parseString(line).getAsJsonObject();
+                List<SlotView> v = new ArrayList<>();
+                for (com.google.gson.JsonElement e : o.getAsJsonArray("items")) {
+                    com.google.gson.JsonObject it = e.getAsJsonObject();
+                    List<String> lore = new ArrayList<>();
+                    for (com.google.gson.JsonElement l : it.getAsJsonArray("lore")) lore.add(l.getAsString());
+                    String id = null;
+                    if (it.has("data")) {
+                        java.util.regex.Matcher m = java.util.regex.Pattern.compile("id:\"([A-Z_;0-9]+)\"").matcher(it.get("data").getAsString());
+                        if (m.find()) id = m.group(1);
+                    }
+                    v.add(new SlotView(it.get("slot").getAsInt(), it.get("name").getAsString(), it.get("item").getAsString(),
+                            id, null, null, null, lore, 1, null));
+                }
+                real.add(v);
+                realRewards.add(PairsGame.isRewards(o.get("title").getAsString()) && PairsGame.gameStake(o.get("title").getAsString()) == null);
+            }
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+        for (boolean floored : new boolean[]{false, true}) {
+            // Floored: the Serum (~47k) is under the 400k floor and left uncovered; otherwise everything rare is boxed.
+            PairsGame r = new PairsGame("Metaphysical", 0).hiding(x -> !floored || !x.key().equals(PairsReward.SERUM_ID));
+            String how = floored ? " (Serum under the floor)" : " (every rare tile boxed)";
+            boolean matchedBeforeRewards = false, unmatchEvent = false;
+            for (int i = 0; i < real.size(); i++) {
+                List<SlotView> v = real.get(i);
+                for (PairsGame.Event e : r.update(v, rewards(v.toArray(new SlotView[0])), realRewards.get(i), 500L * i)) {
+                    if (e.kind() == PairsGame.Event.Kind.UNMATCH) unmatchEvent = true;
+                }
+                if (!realRewards.get(i)) for (PairsGame.Box b : r.boxes()) matchedBeforeRewards |= b.matched;
+            }
+            check("the real game has one rare tile, the Serum" + how, r.boxes().size() == 1
+                    && r.boxes().get(0).reward.key().equals(PairsReward.SERUM_ID));
+            PairsGame.Box serum = r.boxes().get(0);
+            check("the board turned over at the end is noticed" + how, r.revealed());
+            check("the end's full board is not a match" + how, !matchedBeforeRewards && !unmatchEvent);
+            check("the rewards page does not list the Serum, so it got away" + how, !serum.matched);
+            check(floored ? "a tile under the floor gets no box or letter" : "a boxed Serum is box A",
+                    floored ? !serum.hidden && serum.mark == 0 : serum.hidden && serum.mark == 'A');
+            check(floored ? "an unboxed tile is no hunt" : "a boxed tile left unfound is still a hunt", floored != r.hunting());
+        }
+        PairsGame listed = new PairsGame("Metaphysical", 0);
+        SlotView fishTile = new SlotView(20, "Experiment the Fish", "minecraft:pufferfish", "EXPERIMENT_THE_FISH", null, null, null, List.of(), 1, null);
+        listed.update(List.of(fishTile), rewards(fishTile), false, 0);
+        SlotView page = new SlotView(13, "Superpairs", "minecraft:player_head", null, null, null, null,
+                List.of("Experiment over", "", "Rewards:", "+429,000 Enchanting Exp (Pairs)", "+ Experiment the Fish", "", "Click to claim rewards!"), 1, null);
+        listed.update(List.of(page), rewards(page), true, 900);
+        check("a reward the rewards page lists is won", listed.boxes().get(0).matched);
+
         // ---- the beats
         check("the build-up takes 3.5-4 s", PairsTimeline.REVEAL >= 3500 && PairsTimeline.REVEAL <= 4000);
         check("the colour steps end before the reveal", PairsTimeline.HANG < PairsTimeline.REVEAL && PairsTimeline.STEPS.length >= 6);
@@ -262,6 +317,27 @@ public final class PairsTest {
         PairsHunt.overlay(p, 640, 360, 232, 90, 176, 180, true, 6, 5, 12, List.of(), 3000);
         check("the hunt's embers never land on the menu", !fills.isEmpty() && fills.stream().noneMatch(f ->
                 f[0] + f[2] > 232 && f[0] < 408 && f[1] + f[3] > 90 && f[1] < 270));
+
+        // The rare-drop panel: drawn beside the menu, never over it, and never names what is under a box.
+        fills.clear();
+        List<String> texts = new ArrayList<>();
+        PairsHunt.Paint q = new PairsHunt.Paint() {
+            public void fill(float x, float y, float w, float h, int argb) { fills.add(new float[]{x, y, w, h}); }
+            public void text(String text, float cx, float cy, float scale, int argb) { texts.add(text); }
+        };
+        for (int sw : new int[]{640, 480}) {
+            fills.clear();
+            texts.clear();
+            float mx = (sw - 176) / 2f;
+            PairsHunt.panel(q, sw, 240, mx, 30, 176, 180, List.of(new PairsHunt.Line('A', null, 0xFF55FF, -1, false, false),
+                    new PairsHunt.Line((char) 0, "Metaphysical Serum", 0xAA00AA, 47_047, false, true)), 0, 500);
+            check("the panel draws at " + sw + " wide", !fills.isEmpty() && texts.contains("RARE DROP!"));
+            check("the panel stays off the menu at " + sw + " wide", fills.stream().noneMatch(f ->
+                    f[0] + f[2] > mx && f[0] < mx + 176 && f[1] + f[3] > 30 && f[1] < 210));
+            check("the panel stays on screen at " + sw + " wide", fills.stream().allMatch(f -> f[0] >= 0 && f[0] + f[2] <= sw));
+            check("the panel names the uncovered Serum and its price", texts.contains("Metaphysical Serum") && texts.contains("47k - Got away"));
+            check("the panel never names a box's reward", texts.stream().noneMatch(t -> t.contains("Dye")));
+        }
 
         System.out.println(passed + " passed, " + failed + " failed");
         if (failed > 0) System.exit(1);
