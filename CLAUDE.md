@@ -1715,9 +1715,12 @@ or vault". Never call anything "Butcher": the mod is SBCS.
 - `tools/VaultTest` (164: frame and sound honesty for every prize on five seeds, the tells, the clocks, the Meltdown's
   order), `tools/VaultPreview` (ChopPreview's canvas; `-Dvanilla` a folder of the block textures plus quartz and
   gold_ingot). Menu card "Crystal Nucleus - The Vault", stats key "nucleus", `/sbcs test nucleus <word>`.
-- **The bundle is a dropped item** ("Player Head", Matej's first run, 2026-10-22): it lands about 515 106 534 and is
-  only seen once the player walks up to it. `BundleSpotter.DROP` is that spot, searched 20 blocks round, closest
-  candidate first; an armour stand's cover is where its held head would be drawn, not its empty box.
+- **The bundle is a cluster of armour stands** at about 512.5 105.5 551 (Matej's run, 2026-10-28): invisible stands
+  holding items and wearing the loot's labels ("+800 HOTM Exp", "Oil Barrel"), x 510.5..514.5, z 548.5..553.5, there in
+  the same tick as the loot message (so `before` is ignored for them). `BundleSpotter.DROP` is its middle; the cover is
+  the union of every such stand's box within `CLUSTER_XZ` 3.5, and the bundle is picked up when they have all gone.
+  The first run's "dropped Player Head" at 515 106 534 was not the bundle - the 20-block search followed a stray head 20
+  blocks off on 2026-10-28 and drew the box at 524 528 / 532 524. Single-entity candidates are now searched 8 blocks round.
 - **Polish (2026-10-22, Matej: the amethyst crystal was clipped by the locks; "more pause for the good drops")**: the
   sockets are on a ring of 5 (`SOCKET_R`; at 6 the upper-left one sat under the bolts), the bolts are slimmer and sit
   across the door's edge (`BOLT_X`, `BOLT_HX`, `BOLT_TRAVEL`), the crystals fly in from the front (`flightPos`) with a

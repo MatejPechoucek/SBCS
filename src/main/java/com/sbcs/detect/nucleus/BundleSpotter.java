@@ -34,20 +34,31 @@ public final class BundleSpotter {
     /** Skyblocker's "Nucleus" waypoint (NucleusWaypoints, 2026-10-22): the middle of the Nucleus. */
     public static final Vec3 VAULT = new Vec3(513.5, 106, 524.5);
     /**
-     * Where the bundle lands. Matej's first run (2026-10-22) recorded it: a dropped item, "Player Head", at
-     * 515.2 108.5 533.3, falling to 513.8 106.0 534.1 - first seen 114 s after the message, when Matej
-     * walked up to it (Matej remembered "around 513, 106, 551").
+     * Where the bundle is. Matej's run on 2026-10-28 (0.4.0-alpha) recorded it as a cluster of invisible armour
+     * stands, there in the same tick as the loot message, holding items and carrying the loot's own labels
+     * ("+800 HOTM Exp", "Oil Barrel"): x 510.5..514.5, y 105.5, z 548.5..553.5. Matej: "the center was ~513 ~550",
+     * which is where he remembered it on his first run too.
+     *
+     * That first run (2026-10-22) followed a dropped "Player Head" at 515 108 533 and called it the bundle - it was
+     * not, and today the same rule followed another head 20 blocks off at 532 111 524 and drew the box there.
      */
-    public static final Vec3 DROP = new Vec3(514, 106, 534);
+    public static final Vec3 DROP = new Vec3(512.5, 105.5, 551);
+    /** The cluster's half extent round {@link #DROP}: its stands are at most 2.5 blocks out; a block to spare. */
+    private static final double CLUSTER_XZ = 3.5;
     /** The Crystal Nucleus zone, from Skyblocker's WishingCompassSolver. */
     public static final AABB NUCLEUS = new AABB(462, 63, 461, 564, 181, 565);
 
     private static final long ARMED_MS = 5 * 60_000;
-    /** Wide on purpose (Matej: "make a bigger box if necessary"); the closest candidate wins. */
-    private static final double SEARCH = 20;
+    /**
+     * How far round the spot a single entity can be the bundle. It was 20 (Matej: "make a bigger box if
+     * necessary"), which took in a stray head by the Topaz statue; the cluster sits well inside 8.
+     */
+    private static final double SEARCH = 8;
 
     private static long armedAt;
     private static Vec3 spot;
+    /** The cluster's stands seen so far: the bundle is picked up when all of them have gone. */
+    private static final Set<Integer> cluster = new HashSet<>();
     /** The followed entity's box in the world, or null while only the vault spot is known. */
     private static AABB box;
     private static int followed = -1;
@@ -68,6 +79,7 @@ public final class BundleSpotter {
         followedName = "";
         recorded.clear();
         before.clear();
+        cluster.clear();
         ClientLevel level = Minecraft.getInstance().level;
         if (player != null && level != null) {
             for (Entity e : level.getEntities(player, AABB.ofSize(DROP, SEARCH * 2, SEARCH * 2, SEARCH * 2))) {
@@ -100,6 +112,7 @@ public final class BundleSpotter {
         box = null;
         followed = -1;
         recorded.clear();
+        cluster.clear();
     }
 
     /** Where the bundle is now, or null when nothing is waiting. */
@@ -133,10 +146,22 @@ public final class BundleSpotter {
         int bestScore = 0;
         double bestDist = Double.MAX_VALUE;
         boolean followedHere = false;
+        AABB clusterBox = null;
+        int clusterHere = 0;
         for (Entity e : level.getEntities(player, near)) {
             if (e instanceof net.minecraft.world.entity.player.Player) continue;
             if (e.getId() == followed) followedHere = true;
             if (recorded.add(e.getId())) record(e);
+            // The cluster arrives in the same tick as the message, so being there "before" says nothing about it.
+            if (inCluster(e)) {
+                AABB b = coverOf(e);
+                clusterBox = clusterBox == null ? b : clusterBox.minmax(b);
+                clusterHere++;
+                if (cluster.add(e.getId()) && cluster.size() == 1 && log != null) {
+                    log.note("§7Nucleus: the bundle's stands are up at " + pos(e.position()));
+                }
+                continue;
+            }
             int score = score(e);
             if (score < 4 && before.contains(e.getId())) score = 0;
             double dist = e.position().distanceToSqr(DROP);
@@ -145,6 +170,19 @@ public final class BundleSpotter {
                 bestDist = dist;
                 best = e;
             }
+        }
+        if (clusterHere > 0) {
+            // The cluster is the bundle: one box over all of it, ahead of any single entity but one named as the bundle.
+            if (bestScore < 5) {
+                spot = clusterBox.getCenter();
+                box = clusterBox;
+                followed = -1;
+                followedScore = 0;
+                return;
+            }
+        } else if (!cluster.isEmpty()) {
+            disarm("the bundle's stands went - picked up", log, player);
+            return;
         }
         // The bundle itself (a named loot item or a dropped head) going is the pickup. Anything weaker that was only
         // followed for want of better - some other item on the floor - going is not: the box goes back to waiting
@@ -186,6 +224,20 @@ public final class BundleSpotter {
             return new AABB(p.x - r, p.y, p.z - r, p.x + r, p.y + 2.3 * s, p.z + r);
         }
         return e.getBoundingBox();
+    }
+
+    /** An invisible armour stand of the bundle's cluster: by the vault, holding an item or wearing a label. */
+    private static boolean inCluster(Entity e) {
+        if (!(e instanceof net.minecraft.world.entity.decoration.ArmorStand stand) || !stand.isInvisible()) return false;
+        Vec3 p = stand.position();
+        if (Math.abs(p.x - DROP.x) > CLUSTER_XZ || Math.abs(p.z - DROP.z) > CLUSTER_XZ) return false;
+        if (Math.abs(p.y - DROP.y) > 2) return false;
+        if (stand.getCustomName() != null) return true;
+        for (net.minecraft.world.entity.EquipmentSlot slot : net.minecraft.world.entity.EquipmentSlot.values()) {
+            net.minecraft.world.item.ItemStack it = stand.getItemBySlot(slot);
+            if (it != null && !it.isEmpty()) return true;
+        }
+        return false;
     }
 
     /** Whether any of a living entity's slots holds a player head - the bundle is one, held in a hand. */
