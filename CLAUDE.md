@@ -1688,9 +1688,7 @@ or vault". Never call anything "Butcher": the mod is SBCS.
   `Pick it up near the Nucleus Vault!`. Every bundle carries one Fine gem of each of seven colours (Jasper too), so a Fine
   Jasper is a win only as a second one (`NucleusHaul.tierOf`). Weights sum to 307,212 (the wiki prints 311,212 - a typo);
   the Jade Dye is a separate 1 in 500,000. `tools/NucleusTest` (33).
-- **The cover**: `BundleSpotter` arms at the header, records every new entity near the vault as `nucleus_bundle` (the
-  bundle's entity type is **not known yet - check the first records**), follows the best candidate, and disarms on
-  pickup / leaving / 5 min. `render/BundleCover` draws a black box over it on `LevelRenderEvents.COLLECT_SUBMITS`
+- **The cover**: `BundleSpotter` arms at the header and covers a fixed box (below) until the Vault is done. `render/BundleCover` draws a black box over it on `LevelRenderEvents.COLLECT_SUBMITS`
   (`RenderTypes.debugQuads()`, camera-relative). Config `nucleusCover`.
 - **Chat**: the loot lines are hidden while `nucleusAnimation` is on; `chatHeld()` includes `nucleusWatcher.parsing()`, so
   SkyHanni's profit line is held with everything else; `announceNucleus` puts one summary line back once the Vault closes
@@ -1715,12 +1713,13 @@ or vault". Never call anything "Butcher": the mod is SBCS.
 - `tools/VaultTest` (164: frame and sound honesty for every prize on five seeds, the tells, the clocks, the Meltdown's
   order), `tools/VaultPreview` (ChopPreview's canvas; `-Dvanilla` a folder of the block textures plus quartz and
   gold_ingot). Menu card "Crystal Nucleus - The Vault", stats key "nucleus", `/sbcs test nucleus <word>`.
-- **The bundle is a cluster of armour stands** at about 512.5 105.5 551 (Matej's run, 2026-10-28): invisible stands
-  holding items and wearing the loot's labels ("+800 HOTM Exp", "Oil Barrel"), x 510.5..514.5, z 548.5..553.5, there in
-  the same tick as the loot message (so `before` is ignored for them). `BundleSpotter.DROP` is its middle; the cover is
-  the union of every such stand's box within `CLUSTER_XZ` 3.5, and the bundle is picked up when they have all gone.
-  The first run's "dropped Player Head" at 515 106 534 was not the bundle - the 20-block search followed a stray head 20
-  blocks off on 2026-10-28 and drew the box at 524 528 / 532 524. Single-entity candidates are now searched 8 blocks round.
+- **The cover is a fixed box (2026-10-29, Matej: "It should never try to find any armor stands, it should just
+  always be that box. it doesnt matter if its too big")**: `BundleSpotter.BOX`, 10 x 3 x 10 centred on his "513 106 551"
+  (x 508..518, y 104.5..107.5, z 546..556), drawn as is, from the loot message (the fifth crystal) until the Vault is
+  done - `announceNucleus`, which every end of a real bundle's wait goes through, disarms it; with the animation off it
+  is never shown. Leaving the Nucleus and 5 min are fallbacks. The loot is a cluster
+  of invisible stands at x 510.5..514.5, y 105.5, z 548.5..553.5 (2026-10-28 records); following entities picked the
+  wrong one twice (a dropped head at 515 108 533, a head stand at 524 109 528), so nothing is followed any more.
 - **Polish (2026-10-22, Matej: the amethyst crystal was clipped by the locks; "more pause for the good drops")**: the
   sockets are on a ring of 5 (`SOCKET_R`; at 6 the upper-left one sat under the bolts), the bolts are slimmer and sit
   across the door's edge (`BOLT_X`, `BOLT_HX`, `BOLT_TRAVEL`), the crystals fly in from the front (`flightPos`) with a

@@ -2062,7 +2062,11 @@ public class SbcsClient implements ClientModInitializer {
         rec.add("decisions", com.sbcs.detect.DropRecorder.decisions(10));
         com.sbcs.detect.DropRecorder.record("nucleus_haul", rec);
 
-        if (config == null || !config.nucleusAnimation) return;
+        if (config == null || !config.nucleusAnimation) {
+            // No animation to wait for: the loot was never hidden, so neither is the bundle.
+            com.sbcs.detect.nucleus.BundleSpotter.disarm("no Vault animation", decisions, Minecraft.getInstance().player);
+            return;
+        }
         com.sbcs.anim.VaultTimeline.Prize prize = com.sbcs.anim.VaultTimeline.Prize.of(haul);
         decisions.note("§aThe Vault: " + (prize.win() ? prize.title() + " §8(" + prize.ending().name().toLowerCase(java.util.Locale.ROOT) + ")" : "§7no rare roll"));
         pendingNucleus = haul;
@@ -2095,6 +2099,9 @@ public class SbcsClient implements ClientModInitializer {
         com.sbcs.detect.nucleus.NucleusHaul haul = pendingNucleus;
         pendingNucleus = null;
         Minecraft client = Minecraft.getInstance();
+        // Every end of a real bundle's wait comes through here - the Vault played out, skipped, stopped or never
+        // opened - so the black box goes with it.
+        if (haul != null) com.sbcs.detect.nucleus.BundleSpotter.disarm("the Vault is done", decisions, client.player);
         if (haul == null || client.player == null) return;
         StringBuilder line = new StringBuilder("§6[SBCS] §7Crystal Nucleus bundle:");
         for (com.sbcs.detect.nucleus.NucleusHaul.Drop drop : haul.revealOrder()) {

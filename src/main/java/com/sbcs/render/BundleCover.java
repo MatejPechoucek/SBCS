@@ -13,22 +13,18 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The black box over the Crystal Loot Bundle (Matej, 2026-10-22: "covering the loot on the ground
  * so the user doesnt see it before" the reveal). The haul is printed the moment the fifth crystal
- * goes in, and the bundle lands by the vault in the same moment; until it is picked up it sits under
- * a solid black cube a little larger than itself.
+ * goes in, and the bundle lands by the vault in the same moment; until the Vault animation is done it
+ * sits under a solid black box, drawn exactly as {@link BundleSpotter#cover()} gives it.
  *
  * Drawn in the world, through the game's own {@code debugQuads} render type (26.2, read with javap:
  * POSITION_COLOR quads, depth-tested, no culling). Depth-tested on purpose: it is hidden behind walls
  * like any block, so it shows the player nothing they could not already see.
  *
- * Only once {@link BundleSpotter} is following the bundle entity itself - never over a guessed spot.
+ * Always {@link BundleSpotter#BOX}, a fixed box by the vault (Matej, 2026-10-29), while one is waiting.
  */
 public final class BundleCover {
     private BundleCover() {}
 
-    /** How far the box stands off the bundle on every side, in blocks. */
-    private static final double MARGIN = 0.35;
-    /** Small bundles (a dropped item) still get a box that reads as one. */
-    private static final double MIN_SIZE = 1.2;
     private static final int BLACK = 0xFF000000;
 
     public static void register() {
@@ -39,7 +35,7 @@ public final class BundleCover {
         if (com.sbcs.SbcsClient.config != null && !com.sbcs.SbcsClient.config.nucleusCover) return;
         AABB target = BundleSpotter.cover();
         if (target == null) return;
-        AABB b = grow(target);
+        AABB b = target;
         Vec3 cam = ctx.levelState().cameraRenderState.pos;
         PoseStack pose = ctx.poseStack();
         pose.pushPose();
@@ -48,15 +44,6 @@ public final class BundleCover {
         ctx.submitNodeCollector().submitCustomGeometry(pose, RenderTypes.debugQuads(),
                 (p, vc) -> cube(p, vc, w, h, d));
         pose.popPose();
-    }
-
-    /** The bundle's box grown by the margin, and to the minimum size about its own centre. */
-    private static AABB grow(AABB a) {
-        AABB b = a.inflate(MARGIN);
-        double cx = (b.minX + b.maxX) / 2, cz = (b.minZ + b.maxZ) / 2;
-        double hx = Math.max(MIN_SIZE, b.maxX - b.minX) / 2, hz = Math.max(MIN_SIZE, b.maxZ - b.minZ) / 2;
-        double y0 = Math.max(a.minY - 0.02, b.minY), y1 = Math.max(b.maxY, y0 + MIN_SIZE);
-        return new AABB(cx - hx, y0, cz - hz, cx + hx, y1, cz + hz);
     }
 
     private static void cube(PoseStack.Pose p, VertexConsumer vc, float w, float h, float d) {
