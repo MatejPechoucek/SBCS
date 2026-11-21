@@ -11,6 +11,11 @@
 
 ---
 
+> **Note:** this repository is a public copy of a private development repository. Its git history was
+> rewritten before publishing (other players' usernames in test data were replaced with placeholders), so
+> commit hashes and some historical file contents differ from the original. Pull requests and issues from
+> before publishing are not included.
+
 You've killed the boss. Something dropped. Hypixel would like to tell you what, immediately, in chat,
 with a little *ding*.
 
@@ -103,7 +108,7 @@ any mod, using it is at your own risk.
 
 **A cutscene played when it shouldn't have (or didn't when it should).**
 Run `/sbcs log` right after. It explains every kill it accepted or refused and why. Paste that into an
-[issue](https://github.com/MatejPechoucek/SkyBlockCutScenes/issues) and it's usually a quick fix.
+[issue](https://github.com/MatejPechoucek/SBCS/issues) and it's usually a quick fix.
 
 **Can I make the busts shorter?**
 Yes. Every source has a *Busts* setting: the whole cutscene, a short one, or none at all (wins only). There's also a

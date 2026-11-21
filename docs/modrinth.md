@@ -17,8 +17,8 @@ Everything the Modrinth project page and the first version upload ask for, ready
 | Client side | Required |
 | Server side | Unsupported |
 | License | MIT |
-| Source code | https://github.com/MatejPechoucek/SkyBlockCutScenes |
-| Issue tracker | https://github.com/MatejPechoucek/SkyBlockCutScenes/issues |
+| Source code | https://github.com/MatejPechoucek/SBCS |
+| Issue tracker | https://github.com/MatejPechoucek/SBCS/issues |
 
 **Description:** paste `README.md`, minus the centred icon block at the top (Modrinth shows the project icon
 already, and the image's path only works on GitHub). The "Building from source" section can go too.

@@ -8,8 +8,8 @@
 		"qMighty"
 	],
 	"contact": {
-		"sources": "https://github.com/MatejPechoucek/SkyBlockCutScenes",
-		"issues": "https://github.com/MatejPechoucek/SkyBlockCutScenes/issues"
+		"sources": "https://github.com/MatejPechoucek/SBCS",
+		"issues": "https://github.com/MatejPechoucek/SBCS/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/sbcs/icon.png",
