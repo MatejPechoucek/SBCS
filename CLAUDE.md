@@ -857,7 +857,7 @@ so the words clear the bottom; the Dye's `showScale` is 1.3 (at 1.45 with the 13
 
 ## Release (2026-10-15)
 
-0.3.3-alpha is the first build published to Modrinth. `docs/modrinth.md` holds the page's fields (summary, categories,
+Builds are released on GitHub Releases; Modrinth publishing is planned and nothing has been published there yet. `docs/modrinth.md` holds the future page's fields (summary, categories,
 dependencies) and the release notes; the project description is the README. The Stats rework the designer asked for next
 became the Ledger (below).
 
@@ -1419,7 +1419,7 @@ architecture.
   once a second) and when gone. With `slayer_line` (widened to loot share, glyph, hitshield, quest
   complete...), that is what the friend's records must contain.
 - **Detection (0.2.78)** - `detect/SeraphWatcher` + `detect/SeraphDrops`, from a friend's records (2026-10-05,
-  0.2.69; the recorder is Friend1, not the designer - three of their own tier IV kills among other players' bosses):
+  0.2.69; the recorder is a friend, not the designer - three of their own tier IV kills among other players' bosses):
   - **Ownership is the boss's own "Spawned by: <player>" nametag**, an armour stand two entity ids after the boss's,
     seen the same tick (the Demonlord never showed one). No "SLAYER BOSS!" line exists for the Seraph. The player's
     name is `player.getGameProfile().name()`.
@@ -1513,7 +1513,7 @@ Carmine Dye**; the Carmine Dye gets the grandest ending ("Kuudra Rises"). Big wi
     **Feesh's rewrite** ("A Thunder has spawned!"; Feesh hides the original, which is why our chat listeners
     run in an early phase, 0.2.72). **Nothing else makes a creature ours (0.2.82).** 0.2.74-0.2.80 also took any
     creature that armed the hide, any a loot share line named, and any CHARM: in the designer's lava party
-    (2026-10-05, Friend1, Friend2, Friend3, Friend4...) nearly every bust that opened was a party member's
+    (2026-10-05, with several party members) nearly every bust that opened was a party member's
     Jawbus, Thunder or Scuttler, and their one charm was on someone else's Thunder.
   - Someone else's creature plays **only when its own win comes to us**: its death, a loot share line within 2 s,
     and a rare drop that creature can give (either order). A charm on ours is our kill; on anyone else's it is

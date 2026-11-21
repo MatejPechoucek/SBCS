@@ -1,5 +1,8 @@
 # Publishing on Modrinth
 
+> **Not published yet.** This is prepared for a future Modrinth listing; nothing has been published on Modrinth.
+> Builds are released on GitHub Releases.
+
 Everything the Modrinth project page and the first version upload ask for, ready to paste.
 
 ## Project
@@ -25,7 +28,7 @@ the menu. The Thaw's Dye, Diana's Relic and Hellion's High Class dice are the sh
 
 ## Version 0.4.0-alpha
 
-Released 2026-10-26: all six 0.4.0 workstreams merged (PRs #10-#16).
+Released on GitHub 2026-10-26: all six 0.4.0 workstreams merged (PRs #10-#16).
 
 | Field | Value |
 | --- | --- |
