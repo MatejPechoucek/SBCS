@@ -457,7 +457,7 @@ public final class ThawArt {
      *
      * White, and tinted at draw time - the same strip is the gold burst for a legendary and
      * the pink one for the Dye. Written pixel by pixel on a transparent ground, never
-     * blurred, for the reason CLAUDE.md gives: blurring an RGBA image drags the black of the
+     * blurred, for the reason docs/design/rendering.md gives: blurring an RGBA image drags the black of the
      * transparent pixels into the soft edge and turns a glow grey.
      */
     public static BufferedImage ray() {

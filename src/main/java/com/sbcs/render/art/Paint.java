@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage;
  * <h2>Why the textures are drawn in Java and not shipped as PNGs</h2>
  *
  * Every texture this mod used to have was produced by a script in tools/ and committed as
- * a PNG. That arrangement has a standing hazard, written up in CLAUDE.md: values duplicated
+ * a PNG. That arrangement has a standing hazard, written up in docs/design/rendering.md: values duplicated
  * between a script and the Java that positions its output have to be moved together, and
  * editing the PNG instead of the script silently loses the change on the next regeneration.
  *

@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
  * <h2>Why this is Java and not a script in tools/</h2>
  *
  * These used to be PNGs produced by {@code gen_cave.py} and {@code gen_gems.py}, which
- * carried the hazard CLAUDE.md records: the torch positions existed twice - once in the
+ * carried the hazard docs/design/rendering.md records: the torch positions existed twice - once in the
  * script that painted the glow, once in the Java that animates flicker and embers over it
  * - and moving one without the other left the effects hanging in mid-air. The sparkle
  * anchors were worse: the script printed them and they were pasted across by hand.
@@ -711,7 +711,7 @@ public final class CaveArt {
      * Drawn over the whole screen and faded up as the run goes on, so the picture
      * closes in on the worm chop by chop. Written per pixel for the usual reason: a
      * stack of translucent ellipses leaves visible rings, and blurring an RGBA image
-     * would drag black out of the transparent centre (see the notes in CLAUDE.md).
+     * would drag black out of the transparent centre (see docs/design/rendering.md).
      *
      * The falloff is measured on an ellipse in SCREEN fractions rather than on a circle,
      * so the corners darken evenly whatever the aspect ratio - on a 21:9 monitor a

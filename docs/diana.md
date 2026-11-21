@@ -261,7 +261,7 @@ one is not, propose one and show me before it is load-bearing.
    `screenshots/`. I will run it once per outcome and hand you the PNGs. That is the
    ground truth; the previewer is how you get close to it.
 
-Re-read the Art section of `CLAUDE.md` first. The mistakes that have already cost this
+Re-read `docs/design/rendering.md` (Generated art) first. The mistakes that have already cost this
 project a rebuild each: blurring RGBA instead of alpha only, applying glow uniformly
 instead of through a light map with a steep falloff, skipping the RGB bleed before a
 downscale, and repainting one frame of a set that shares a pivot.

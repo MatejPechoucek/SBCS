@@ -699,7 +699,7 @@ public class ChopScreen extends Screen implements ChopScene.Canvas, Cutscene {
     }
 
     private void outlined(Component text, int fullWidth, float cx, float cy, float scale, int argb) {
-        // The font treats alpha below 4 as opaque (CLAUDE.md), so a fade stops short of it.
+        // The font treats alpha below 4 as opaque (docs/design/rendering.md), so a fade stops short of it.
         if ((argb >>> 24) < 6) return;
         plate(cx, cy, scale, fullWidth, argb);
         int alpha = argb >>> 24;

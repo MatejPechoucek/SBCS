@@ -77,7 +77,7 @@ public final class PropArt {
         int s = 64;
         BufferedImage img = Paint.image(s, s);
         // Radial falloff written directly: a blurred shape would drag black in from the
-        // transparent surround, which is the trap CLAUDE.md records for the cave art.
+        // transparent surround, which is the trap docs/design/rendering.md records for the cave art.
         float c = s / 2f;
         for (int y = 0; y < s; y++) {
             for (int x = 0; x < s; x++) {

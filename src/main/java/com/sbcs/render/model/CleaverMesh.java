@@ -8,7 +8,7 @@ package com.sbcs.render.model;
  * The cleaver used to be fourteen pre-rendered PNGs, one per frame of the swing, because
  * the GUI layer was believed to be unable to rotate anything. It can (see
  * {@link ModelProjection}), so the blade is now a model and the swing is just an angle.
- * That removes the whole linked-set problem CLAUDE.md warns about - all fourteen frames
+ * That removes the whole linked-set problem docs/design/rendering.md warns about - all fourteen frames
  * shared one pivot, so repainting any single frame broke the arc - and it means the blade
  * can be lit, tinted and depth-sorted against the worm like everything else.
  *

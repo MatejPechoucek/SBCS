@@ -20,7 +20,7 @@ import java.util.Properties;
  *
  * <h2>The problem this solves</h2>
  *
- * CLAUDE.md's warning about {@code tools/} is the whole reason this exists: "edit the
+ * The warning in docs/design/rendering.md about {@code tools/} is the whole reason this exists: "edit the
  * script and re-run it rather than touching the PNG, or the next regeneration wipes the
  * change." That is a fine rule for whoever is writing the mod and a useless one for
  * whoever is playing it - they have no script, and the art is drawn in Java where they

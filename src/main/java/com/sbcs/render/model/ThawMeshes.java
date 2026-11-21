@@ -30,7 +30,7 @@ import java.util.List;
  *
  * <h2>Which way is the front</h2>
  *
- * The camera sits at +Z (see CLAUDE.md), so the face the player looks at is the +Z one, and
+ * The camera sits at +Z (see docs/design/rendering.md), so the face the player looks at is the +Z one, and
  * the Vanguard faces +Z too. Faces are written as corner, the edge the texture's u runs
  * along, the edge its v runs down, and the outward normal, with {@code v = u x n}: the front
  * is u along +X and v down -Y, which keeps every texture the right way round.

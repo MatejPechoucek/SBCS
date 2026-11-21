@@ -47,7 +47,7 @@ public class GuiRenderStateFadeMixin {
         ci.cancel();
         GuiTextRenderStateAccessor t = (GuiTextRenderStateAccessor) (Object) state;
         int colour = HudFade.scale(t.sbcs$color());
-        // The font draws alpha below 4 fully opaque (CLAUDE.md) - stop before that.
+        // The font draws alpha below 4 fully opaque (docs/design/rendering.md) - stop before that.
         if (((colour >>> 24) & 0xFF) < 5) return;
         GuiTextRenderState faded = new GuiTextRenderState(t.sbcs$font(), t.sbcs$text(), state.pose,
                 t.sbcs$x(), t.sbcs$y(), colour, HudFade.scale(t.sbcs$backgroundColor()),

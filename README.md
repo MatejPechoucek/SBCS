@@ -143,7 +143,7 @@ belongs to Hypixel, so it's taken from the first live worm you meet. Put `head.p
 ```
 
 The jar ends up in `build/libs/`. Gradle fetches a JDK 25 toolchain the first time if it can't find one. Technical
-notes for contributors are in [`CLAUDE.md`](CLAUDE.md).
+notes for contributors are in [`CLAUDE.md`](CLAUDE.md), with per-feature reference in [`docs/design/`](docs/design/).
 
 ## Credits
 

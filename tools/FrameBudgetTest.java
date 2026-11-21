@@ -16,7 +16,7 @@ import java.util.Locale;
 /**
  * How much each cutscene asks of the GUI, frame by frame, for every ending: the GUI calls a frame (every quad,
  * sprite, line, fill, item and text is one render state in game) and the CPU time the scene code takes. The
- * Seraph's Dragon once reached 80,000 calls a frame and "killed frames just like the scatha did" (CLAUDE.md, 0.2.67);
+ * Seraph's Dragon once reached 80,000 calls a frame and "killed frames just like the scatha did" (docs/design/seraph.md);
  * since then each new ending was counted by hand once. This counts them all, every run, and fails on any frame over
  * {@link #CALL_BUDGET}. Pixel-layer squares are counted apart: they go into one image, not one call each.
  * (Eruption has its own count in EruptionTest.) The Revenant's and Tarantula's need the client jar on the classpath:
